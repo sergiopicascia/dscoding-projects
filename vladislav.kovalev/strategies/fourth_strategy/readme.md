@@ -1,0 +1,1 @@
+AVAILABILITY: places in hotels are distributed in order of room availability, starting with the most roomy hotel and subordinately in order of reservation and preference until places or clients are exhausted. 

@@ -1,0 +1,18 @@
+import numpy as np
+import pandas as pd
+
+
+#Read the TSV file through pandas
+data = pd.read_table("C:\\Users\\valer\Downloads\\archive\\title.ratings.tsv\\data.tsv", sep='\t', header=0)
+
+df = pd.DataFrame({
+    "Title ID" : data["titleId"],
+    "Order" : data["ordering"],
+    "Title" : data["title"],
+    "Region" : data["region"], 
+    "Language" : data["language"], 
+    "Types" : data["types"], 
+    "Attributes" : data["attributes"], 
+    "Is Original Title?" : data["isOriginalTitle"],
+})
+print(df)

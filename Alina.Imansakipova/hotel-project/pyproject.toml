@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "hotel-project"
+version = "0.1.0"
+description = ""
+authors = ["alinetteiman <137801196+alinetteiman@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+jupyter = "^1.0.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

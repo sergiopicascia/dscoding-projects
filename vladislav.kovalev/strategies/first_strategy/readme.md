@@ -1,0 +1,1 @@
+RANDOM: customers are randomly distributed to the rooms until the seats or customers are exhausted; 

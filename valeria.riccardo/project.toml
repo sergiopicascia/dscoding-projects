@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "project"
+version = "0.1.0"
+description = "Quiz project"
+authors = ["Valeria Riccardo <valeria.riccardo@studenti.unimi.it>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11.5"
+jupyter = "^1.0.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

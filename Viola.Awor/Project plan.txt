@@ -1,0 +1,47 @@
+Python exam project
+
+The dataset reports the temperature recorded in major cities around the world since 1750. Using this data,
+ the project will need to provide an effective graphical visualization of the change in temperatures over time, 
+ highlighting the cities where the largest temperature ranges were recorded during different historical periods.
+ For visualization of the data on a map, see geopandas.
+The program will also suggest, depending on the period considered, the best route to follow for a traveler
+ who intends to move from Beijing to Los Angeles by moving step by step to the warmest city among the 3 closest to him.
+
+Phase 1: Data Exploration and Cleaning.
+1. Download dataset
+2. Data Cleaning:
+
+3. Handle missing values, outliers, and inconsistencies in the dataset.
+Convert date columns to a standardized format.
+4. Exploratory Data Analysis (EDA):
+
+5. Conduct initial statistical analysis to understand the overall trends.
+6. Visualize temperature changes over time globally.
+
+Phase 2: City Temperature Analysis
+1. Identifying Cities with Largest Temperature Ranges:
+
+2. Calculate temperature ranges for each city during different historical periods.
+3. Identify cities with the largest temperature variations.
+4. Visualization Tools:
+5. Utilize Matplotlib and Seaborn for line plots and bar charts to showcase temperature ranges.
+Use Geopandas to create maps highlighting cities with significant temperature variations.
+
+Phase 3: Travel Recommendations
+1. Optimal Route Calculation:
+
+2. Implement an algorithm to find the warmest city among the three closest to the traveler's current location.
+3. Consider different historical periods for temperature analysis.
+4. Visualization of Travel Recommendations:
+
+Use Matplotlib and Seaborn for visualizing the optimal travel route on a world map.
+Display temperature trends along the suggested route.
+
+Phase 4: User Interface (Optional)
+1. Development of a Simple User Interface:
+2. Create a basic interface to allow users to input their current location and desired destination.
+3. Display historical temperature trends and recommended travel routes.
+Phase 5: Documentation and Reporting
+Code Documentation:
+
+Document code thoroughly, including comments and explanations for each function and module.

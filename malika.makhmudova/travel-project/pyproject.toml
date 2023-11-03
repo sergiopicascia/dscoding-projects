@@ -1,0 +1,13 @@
+[tool.poetry]
+name = "travel-project"
+version = "0.1.0"
+description = ""
+authors = ["Malika Makhmudova <malika.makhmudova@studenti.unimi.it>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

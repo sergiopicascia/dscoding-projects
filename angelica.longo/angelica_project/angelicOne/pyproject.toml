@@ -1,0 +1,22 @@
+[tool.poetry]
+<<<<<<<< HEAD:angelica.longo/angelica_project/angelicOne/pyproject.toml
+name = "angelicone"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+========
+name = "progetto-dse"
+version = "0.1.0"
+description = ""
+authors = ["Sara Peri <sara.peri218@gmail.com>"]
+>>>>>>>> 44f030bea6225214f87bbf2856e75ab6b80ad937:sara.peri/progetto_dse/pyproject.toml
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

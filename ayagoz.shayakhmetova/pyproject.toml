@@ -1,13 +1,16 @@
 [tool.poetry]
 name = "cisi-project"
 version = "0.1.0"
-description = "python project"
-authors = ["Ayagoz Shayakhmetova <sh.ayagoz@gmail.com>"]
+description = ""
+authors = ["zogaya <103639432+zogaya@users.noreply.github.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
 
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.26.0"
 
 [build-system]
 requires = ["poetry-core"]

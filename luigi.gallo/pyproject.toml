@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "quizproject"
+version = "0.1.0"
+description = "Quiz using Imdb database"
+authors = ["Luigi Gallo <luigi.gallo1@studenti.unimi.it>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

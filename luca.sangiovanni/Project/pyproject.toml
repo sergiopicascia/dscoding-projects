@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "project"
+version = "0.1.0"
+description = "Project for the DS coding class"
+authors = ["lucasangio01 <luca.sangiovanni.2001@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+geopandas = "^0.14.0"
+plotly-express = "^0.4.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

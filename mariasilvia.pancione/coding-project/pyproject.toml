@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "coding-project"
+version = "0.1.0"
+description = ""
+authors = ["mariasilviapancione <mariasilvia.pancione@studenti.unimi.it>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
