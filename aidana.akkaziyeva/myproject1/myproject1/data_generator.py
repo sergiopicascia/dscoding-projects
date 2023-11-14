@@ -2,8 +2,34 @@ import pandas as pd
 import random
 
 netflix_data = pd.read_csv('netflix_data.csv')
-#print(netflix_data.head())
 
+
+
+
+#dividing into two groups (tv shows, movies)
+TV_Shows = []
+Movies = []
+for i in range(len(netflix_data)):
+    type = netflix_data.loc[i, 'type'] 
+    if type == 'TV Show':
+        TV_Shows.append(netflix_data.loc[i, 'title'])
+    elif type == 'Movie':
+        Movies.append(netflix_data.loc[i, 'title'])
+    else:
+        pass 
+
+
+"""""
+def generate_movie_length_question(Movies):
+    show = random.sample(Movies, 4)
+    
+    length = netflix_data.loc(netflix_data['title']==show, 'duration').values[0]
+    
+    question = f"Which movie is the longest?"
+    correct_answer =
+    return question, correct_answer, incorrect_answers
+
+"""
 
 
 def generate_dir_question(netflix_data):
@@ -59,6 +85,8 @@ def present_genre_question (question, correct_answer, incorrect_answers):
     for i, answer in enumerate(all_answers, 1):
         print(f"{i}. {answer}")      #{}placeholders for variables in a string
 
+
+#
 
 
 

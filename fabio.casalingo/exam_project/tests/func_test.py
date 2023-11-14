@@ -1,6 +1,6 @@
 import pandas as pd
 from geopy.distance import great_circle as gc
-import exam_project.self_made_functions as func
+from geopy.distance import great_circle as gc
 
 '''
 il piano è quello di far si che partendo da A si calcolino le 3 città più vicine 
@@ -9,19 +9,48 @@ questo non risolve il problema di andare da londra a londra ma è interessante d
 '''
 
 def distance_between_two_cities(start_city,end_city):
-    srt_city = dataset[dataset['city'] == start_city]
-    des_city = dataset[dataset['city'] == end_city]
-    id_des_city = int(des_city['id'].iloc[0])
-    end_city_coords = (dataset.loc[dataset['id'] == id_des_city, 'lat'].values[0], dataset.loc[dataset['id'] == des_city, 'lng'].values[0])
-    closest_cities[1] = srt_city #potrebbe esssere un problema in caso controllare
-    while closest_cities[1]['id'] != id_des_city:
-        close_city = func.three_close_city(closest_cities[1])
-        first = close_city.iloc[0]
-        second = close_city.iloc[1]
-        third = close_city.iloc[2]
 
-        close_city['Distance from end'] = close_city.apply(lambda row: gc(end_city_coords, (row['lat'], row['lng'])).kilometers, axis=1)
-        sorted_closed_city = close_city.sort_values(by='Distance from destination: ')
-        closest_cities = sorted_closed_city.iloc[1]
+
+    # Load the dataset
+    dataset = pd.read_excel('C:/Uni/Coding/python/worldcities.xlsx')
+
+    s = dataset[dataset['id'] == 1380382862]
+    start_city = int(s['id'].iloc[0])
+    e = dataset[dataset['id'] == 1036074917]
+    end_city = int(e['id'].iloc[0])
+
+    # Find the coordinates of the start and end cities
+    start_coords = dataset[(dataset['id'] == start_city)][['lat', 'lng']].values[0]
+    end_coords = dataset[(dataset['id'] == end_city)][['lat', 'lng']].values[0]
+
+    visited_cities = []
+    city = start_city
+    visited_cities.append(city)
+    while city != end_city:
+        i = 20
+        j = 0
+        while city in visited_cities:
+            un_city = func.n_close_city(city)[j: i]
+            un_city['Distance to destination'] = un_city.apply(
+                lambda row: gc((row['lat'], row['lng']), end_coords).kilometers, axis=1)
+            # print('Un_City', un_city['city'])
+            j = i
+            for x in range(i):
+                closest_city = un_city.sort_values(by='Distance to destination').iloc[x]
+                # print("CLOSEST: ",closest_city['city'])
+                if closest_city['id'] not in visited_cities:
+                    city = closest_city['id']
+                    name = closest_city['city']
+                    j = 0
+                    break
+            # print(un_city)
+            # print(city)
+            # if closest_city['city'] not in visited_cities:
+            # else:
+            # print(closest_city['city'])
+            # 245
+            i += 1
+        print(name)
+        visited_cities.append(city)
 
     return closest_cities

@@ -1,9 +1,19 @@
+"""
+Data structure for data in CINI format.
+"""
 import os
 import re
 import pandas as pd
 
-
 class CISIData:
+    """
+    Data structure consisting in three pandas dataframes containing data in CINI format.
+    
+    Parameters
+    ----------
+    path: str
+        A path pointing to the folder in which the files are stored.
+    """
     def __init__(self, path):
         self.path = os.path.join(path, "")
 
@@ -14,6 +24,9 @@ class CISIData:
 
     @property
     def documents(self):
+        """
+        A dataframe containing data about the documents.
+        """
         data = self._import_data(self.path + "CISI.ALL")
         raw_docs = [
             re.split(r"\.I\n|\.T\n|\.A\n|\.W\n|\.X\n|\n.T +\n|\n.A +\n|\n.W +\n", d)
@@ -41,6 +54,9 @@ class CISIData:
 
     @property
     def queries(self):
+        """
+        A dataframe containing data about the queries.
+        """
         data = self._import_data(self.path + "CISI.QRY")
         raw_q = [
             re.split(r"\.I |\.T |\.A |\.W |\.X |\.B ", q.replace("\n", " "))
@@ -74,6 +90,9 @@ class CISIData:
 
     @property
     def relations(self):
+        """
+        A dataframe containing data about the relations between documents and queries.
+        """
         data = self._import_data(self.path + "CISI.REL")
         raw_rels = [line.split("\t")[0].strip() for line in data.splitlines()]
         rels = [re.split(r"\s+", line) for line in raw_rels]

@@ -10,6 +10,7 @@ python = ">=3.11,<3.13"
 numpy = "^1.26.1"
 pandas = "^2.1.1"
 geopy = "^2.4.0"
+folium = "^0.14.0"
 
 
 [build-system]
