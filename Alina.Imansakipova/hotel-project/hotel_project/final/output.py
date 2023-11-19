@@ -1,9 +1,8 @@
 import pandas as pd
-import numpy as np
 
 def allocation_analysis(allocation):
     print('Customers accomodated:', allocation['guest_id'].count())
-    #it should be the same :)
+    #it should be the same :) maybe recalculate it just to compare ?
     print('Number of rooms occupied:', allocation['guest_id'].count())
     print('Number of different hotels occupied:', allocation['hotel_id'].nunique())
     print('Average satisfaction:', round(allocation['satisfaction_percentage'].mean(),2))

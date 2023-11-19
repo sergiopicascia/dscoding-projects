@@ -21,20 +21,11 @@ The project is structured as follows:
 - **main-jupyter.ipynb**: Jupyter Notebook version of `main.py`.
 
 - **UDFs.py**: Script containing two classes:
-  - `TextPreprocessor`: class for preprocessing text data.
-  - `TextClassifier`: class for text classification using pre-trained models.
+  - `TextPreprocessor`: class for preprocessing text data,
+  - `AppTextClassifier`: class for text classification using pre-trained models.
 
 - **app.py**: Script for the Humor Detection App.
 
 ## Humor Detection App
 
-The Humor Detection App allows users to interactively predict the humor in a given text. Users can choose between different classifiers (Logistic Regression or Multinomial Naive Bayes) and vectorizers (Count Vectorizer or TF-IDF Vectorizer). The app leverages machine learning models trained on a dataset of 200,000 observations to provide predictions.  
-
-For reference, here are some sample texts with corresponding labels:
-
-(H) Why don't Calculus majors throw house parties? Because you should never drink and derive.  
-(H) What did the shark say when he ate the clownfish? This tastes a little funny.  
-(NH) There were some heated exchanges on Ukraine and China, but strict moderation limited direct clashes.  
-(NH) Brazilian authorities made two arrests and carried out raids in key cities, including Sao Paulo and Brasilia.  
-
-Feel free to explore the app and experiment with different texts and configurations!
+The Humor Detection App allows users to interactively predict the humor in a given text. Users can choose between different classifiers (Logistic Regression or Multinomial Naive Bayes) and vectorizers (Count Vectorizer or TF-IDF Vectorizer). The app leverages machine learning models trained on a dataset of 200,000 observations to provide predictions.

@@ -109,39 +109,33 @@ class Quiz:
 
     def display_histogram(self, player_name):
         player_scores = {name: score for name, score in self.game_scores}
-        plt.figure(figsize=(10, 6), dpi=80)
-
-        # Extract player names and scores
         names = list(player_scores.keys())
         scores = list(player_scores.values())
 
-        # Get indices to sort scores in descending order
         sorted_indices = np.argsort(scores)[::-1]
-
-        # Rearrange names and scores based on sorted indices
         names = [names[i] for i in sorted_indices]
         scores = [scores[i] for i in sorted_indices]
 
-        # Plotting player scores
-        bars = plt.bar(names, scores, color='#202060')
+        fig, ax = plt.subplots(figsize=(10, 6), dpi=80)
 
-        # Highlight the current player's score in a different color and add data label
+        bars = ax.bar(names, scores, color='#202060')
+
         if player_name in player_scores:
             index = names.index(player_name)
             bars[index].set_color('#5bc8af')
-            plt.text(index, scores[index], str(scores[index]), ha='center', va='bottom', fontname='Quicksand', fontsize=10)
+            ax.text(index, scores[index], str(scores[index]), ha='center', va='bottom', fontname='Quicksand', fontsize=10)
 
-        plt.xlabel('Players', fontname='Quicksand', fontsize=12)
-        plt.ylabel('Scores', fontname='Quicksand', fontsize=12)
-        plt.title('Players\' Scores Distribution', fontname='Quicksand', fontsize=16)
-        plt.xticks(rotation=45, fontname='Quicksand', fontsize=10)  # Rotate x-axis labels for readability
+        ax.set_xlabel('Players', fontname='Quicksand', fontsize=12)
+        ax.set_ylabel('Scores', fontname='Quicksand', fontsize=12)
+        ax.set_title('Players\' Scores Distribution', fontname='Quicksand', fontsize=16)
+        plt.xticks(rotation=45, fontname='Quicksand', fontsize=10)
         plt.yticks(fontname='Quicksand', fontsize=10)
-        plt.grid(axis='y')  # Show grid lines only for y-axis
+        ax.grid(axis='y')
         plt.tight_layout()
-        plt.show()
+
+        st.pyplot(fig)
 
     def quiz_game(self):
-        difficulty_levels = ['easy', 'medium', 'hard']
         total_score = 0
         used_questions = []
 
@@ -156,10 +150,6 @@ class Quiz:
                 st.write("----------------------------")
 
                 user_difficulty = difficulty_level.lower()
-
-                while user_difficulty not in difficulty_levels:
-                    st.write("Invalid difficulty level. Please choose from: easy, medium, hard")
-                    user_difficulty = st.selectbox("Choose a difficulty level:", difficulty_levels).lower()
 
                 question_generators = [
                     {'generator': self.generate_question, 'params': ('When was this movie released? ==> ', 'year')},
@@ -180,28 +170,38 @@ class Quiz:
 
                         if question_info is not None and question_info['question'] not in used_questions:
                             used_questions.append(question_info['question'])
+                        
                             break
 
                     st.write(question_info['question'])
 
                     for letter, option in question_info['options'].items():
                         st.write(f"{letter}. {option}")
-
-                    # Provide a unique key for st.radio
-                    radio_key = f"radio_{i}"  # Use a unique identifier for each iteration
-                    user_choice = st.radio("Choose your answer:", list(question_info['options'].keys()), key=radio_key, index= None)
                     
-                    is_correct = user_choice == question_info['correct_answer']
-                    score = self.calculate_score(question_info['difficulty_level'], is_correct)
-                    total_score += score
 
-                    if is_correct:
-                        st.write("Correct!")
-                    else:
-                        st.write(f"Wrong! The correct answer is: {question_info['correct_answer']}")
+                    # Providing a unique key for st.radio
+                    radio_key = f"radio_{i}"  # Using a unique identifier for each iteration
+                    user_choice = st.radio("Choose your answer:", list(question_info['options'].keys()), key=radio_key, index=None, horizontal=True)
 
-                    st.write(f"Your score for this question: {score}")
                     st.write("----------------------------")
+                    
+                    # Convert correct answer to letter format
+                    correct_answer_index = list(question_info['options'].keys()).index(question_info['correct_answer'])
+                    correct_answer_letter = chr(ord('A') + correct_answer_index)
+
+                    if user_choice is not None:
+                        is_correct = user_choice == correct_answer_letter
+
+                        if is_correct:
+                            st.write("Correct!")
+                        else:
+                            st.write(f"Wrong! The correct answer is: {question_info['correct_answer']}")
+
+                        score = self.calculate_score(question_info['difficulty_level'], is_correct)
+                        total_score += score
+
+                        st.write(f"Your score for this question: {score}")
+                        st.write("----------------------------")
 
                 game_score = (player_name, total_score)
                 self.load_scores('game_scores.json')  # Load existing scores
@@ -217,10 +217,12 @@ class Quiz:
                 if not player_exists:
                     self.game_scores.append(game_score)
 
-                st.write(f"Total score: {total_score}")
+                st.subheader(f"Total score: {total_score}")
+                st.write("----------------------------")
                 st.write(f"Here's how you performed, {player_name}:")
                 self.display_histogram(player_name)
 
-                self.save_scores('game_scores.json') 
+                self.save_scores('game_scores.json')
 
                 return self.game_scores
+
