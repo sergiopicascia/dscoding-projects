@@ -1,6 +1,7 @@
 import pandas as pd
 import streamlit as st
 
+
 from random_allocation_class import RandomHotelAllocator
 from availability_allocation_class import HotelAvailabilityAllocator
 from preferences_allocation_class import HotelPreferenceAllocator
@@ -37,6 +38,7 @@ def main():
 
     # Display the result
     st.dataframe(final_allocation)
+
 
 if __name__ == "__main__":
     main()

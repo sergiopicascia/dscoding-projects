@@ -1,5 +1,4 @@
 import pandas as pd
-import streamlit as st
 
 from output import allocation_analysis
 from vizualization import visualize_allocation
@@ -13,7 +12,7 @@ def main():
     guestdata = pd.read_excel(r"/Users/menimalina/Desktop/uni_due/coding/python/python-project/hotels/guests.xlsx").set_index('guest')
     preferencesdata = pd.read_excel(r"/Users/menimalina/Desktop/uni_due/coding/python/python-project/hotels/preferences.xlsx").drop_duplicates(subset=['guest', 'hotel'])
 
-    
+
     print('Start calculate random allocation')
     r_allocator = RandomHotelAllocator(hotelsdata.copy(), guestdata, preferencesdata)
     random_allocation = r_allocator.get_random_allocation()
