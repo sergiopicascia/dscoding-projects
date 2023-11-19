@@ -1,9 +1,0 @@
-# Weather
-
-The dataset reports the temperature recorded in the world since 1750. Using this data, the project will need to provide an effective graphical visualization of the change in temperatures over time.
-Use streamline run stream.py to run the web app.
-In the first page the user can choose a dataset and see general statistics and map about temperature and range of temperature during the years.
-
-In the second page the user select a city and see data about it: location, temperature over the years, prediction, temperature during the months, temperature in a selected year.
-
-

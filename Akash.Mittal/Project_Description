@@ -1,0 +1,6 @@
+The Aim of this Project is to compare two data classification algorithm by classifying a dataset of zoo-animals into 7 different classes by considering their different traits (properties/ features). 
+The project is cretated as part of a Lab Project for Data Science Course.
+
+The project demonstrates the use of github for version control, usage of pandas, and numpy for data manipulation and computing. Further, matplotlib is used  for data visualization.
+
+The project also demonstrates the use of two Machine Learning algorithms for data-classification.

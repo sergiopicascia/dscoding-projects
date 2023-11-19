@@ -30,7 +30,7 @@ def distance_between_two_cities(start_city,end_city):
         i = 20
         j = 0
         while city in visited_cities:
-            un_city = func.three_close_city(city)[j: i]
+            un_city = func.n_close_city(city)[j: i]
             un_city['Distance to destination'] = un_city.apply(
                 lambda row: gc((row['lat'], row['lng']), end_coords).kilometers, axis=1)
             # print('Un_City', un_city['city'])

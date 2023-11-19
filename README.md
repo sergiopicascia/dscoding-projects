@@ -23,8 +23,10 @@ This repository will collect Python projects of the students attending the Codin
 6. Nov 3, 16:30-18:30 - *Data Visualization*
 7. Nov 10, 16:30-18:30 - *Dashboard*
 8. Nov 17, 16:30-18:30 - *Case Study*
-9. Nov 24, 16:30-18:30 - *Project Evaluation - I*
-10. Dec 1, 16:30-18:30 - *Project Evaluation - II*
+9. ~~Nov 24, 16:30-18:30~~ Nov 27, 12:30-15:30 - *Project Evaluation - I*
+10. ~~Dec 1, 16:30-18:30~~ Nov 29, 9:30-12:30 - *Project Evaluation - II*
+
+The **deadline** for submitting your projects is Nov 23, 23:59. Any changes committed after this date will NOT be considered for the final evaluation.
 
 **NOTE**: this is a tentative outline and and may be subject to changes.
 

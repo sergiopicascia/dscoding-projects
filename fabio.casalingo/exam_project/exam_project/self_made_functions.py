@@ -1,5 +1,4 @@
 import random
-
 import pandas as pd
 from geopy.distance import great_circle as gc
 import folium
