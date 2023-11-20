@@ -3,9 +3,11 @@ import random
 import streamlit as st
 
 
+
 class questions:
     def __init__(self, data):
         self.data = data
+
     
         
     def generate_dir_question(self):
@@ -50,6 +52,10 @@ class questions:
         random.shuffle(options)
         return question, correct_opt, options
     
+    
+    
+
+
 
 
 
