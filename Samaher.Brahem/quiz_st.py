@@ -140,11 +140,15 @@ class Quiz:
         used_questions = []
 
         st.title("✨ The Quiz ✨")
-        player_name = st.text_input("What do you want us to call you?")
+        player_name = st.text_input("What do you want us to call you?", key="player_name")
+        st.session_state.player_name
+
 
         if player_name:
-            difficulty_level = st.radio("Choose a difficulty level:", ('Easy', 'Medium', 'Hard'), index=None)
-            start = st.button("Start Quiz")
+            difficulty_level = st.radio("Choose a difficulty level:", ('Easy', 'Medium', 'Hard'), key="difficulty")
+            st.session_state.difficulty
+            start = st.button("Start Quiz",key="start")
+            st.session_state.start
             if difficulty_level and start:
                 st.write(f"Alright, {player_name}! Get ready to play!")
                 st.write("----------------------------")
@@ -181,8 +185,8 @@ class Quiz:
 
                     # Providing a unique key for st.radio
                     radio_key = f"radio_{i}"  # Using a unique identifier for each iteration
-                    user_choice = st.radio("Choose your answer:", list(question_info['options'].keys()), key=radio_key, horizontal=True)
-
+                    user_choice = st.radio("Choose your answer:", list(question_info['options'].keys()), key=radio_key, index=None, horizontal=True)
+                    st.session_state[radio_key]
                     st.write("----------------------------")
                     
                     # Convert correct answer to letter format
