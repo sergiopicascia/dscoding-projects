@@ -25,7 +25,6 @@ class DataManager:
 
     def close_connection(self):
         try:
-            self.conn.commit()  # Commit changes before closing
             self.cursor.close()
             self.conn.close()
         except psycopg2.Error as e:

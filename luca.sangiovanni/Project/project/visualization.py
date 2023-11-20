@@ -3,22 +3,14 @@ import pandas as pd
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import plotly.express as px
+import streamlit as st
 from countryinfo import CountryInfo
-
-
-path = "C:\\Users\sangi\Desktop\Info progetto python\Datasets"
-tempByCity = pd.read_csv(path + "\GlobalLandTemperaturesByCity.csv").dropna().reset_index(drop=True)
-tempByMajorCity = pd.read_csv(path + "\GlobalLandTemperaturesByMajorCity.csv").dropna().reset_index(drop = True).drop(["Latitude", "Longitude"], axis=1)
-cities = pd.read_csv(path + "\cities.csv", index_col=0)
-majorCities = pd.read_csv(path + "\majorCities.csv", index_col=0)
-
-months = {"01": 'January', '02': 'February', '03': 'March', '04': 'April', '05': 'May', '06': 'June', '07': 'July',
-          '08': 'August', '09': 'September', '10': 'October', '11': 'November', '12': 'December'}
+from project.utils import Data
 
 
 class CityCountry:
 
-    numCities = cities.drop(["Latitude", "Longitude"], axis=1).groupby("Country").count().sort_values(by="City",
+    numCities = Data.cities.drop(["Latitude", "Longitude"], axis=1).groupby("Country").count().sort_values(by="City",
                                                                                                       ascending=
                                                                                                       False)
 
@@ -35,7 +27,7 @@ class CityCountry:
         plt.title("Number of cities in the dataset, by country\n")
 
     def byCountry_Map(self, nation):
-        byCountry = cities[cities.Country == nation]
+        byCountry = Data.cities[Data.cities["Country"] == nation]
         number = str(byCountry["City"].count())
         if number == "1":
             mapTitle = str("There is " + number + " city in " + nation)
@@ -63,23 +55,23 @@ class BigCities:
 class Temperatures:
 
     def tempJanAug(self, city_name):
-        temp = tempByCity[tempByCity["City"] == city_name]
+        temp = Data.tempByCity[Data.tempByCity["City"] == city_name]
         tempJan = temp[temp["dt"].str.contains("5-01-01")]
         tempAug = temp[temp["dt"].str.contains("5-08-01")]
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(17, 8))
-        fig.suptitle("Temperatures in " + city_name + " during the years\n")
+        fig.suptitle("Temperatures in " + city_name + " during the years\n", fontsize=18)
         ax1.plot(tempJan["dt"], tempJan["AverageTemperature"], color="b")
         ax2.plot(tempAug["dt"], tempAug["AverageTemperature"], color="r")
-        ax1.set_title("1st of January")
-        ax2.set_title("1st of August")
-        ax1.set_xticks(tempJan.dt, tempJan.dt.str[:4], rotation=50)
-        ax2.set_xticks(tempAug.dt, tempAug.dt.str[:4], rotation=50)
-        fig.supylabel("Temperatures (°C)")
+        ax1.set_title("1st of January\n", fontsize=14)
+        ax2.set_title("1st of August\n", fontsize=14)
+        ax1.set_xticks(tempJan.dt, tempJan.dt.str[:4], fontsize=12)
+        ax2.set_xticks(tempAug.dt, tempAug.dt.str[:4], fontsize=12)
+        fig.supylabel("Temperatures (°C)", fontsize=14)
         plt.subplots_adjust(bottom=0.15, top=0.85, hspace=0.8)
         plt.show()
 
     def tempMonths(self, city_name):
-        temp = tempByCity[tempByCity["City"] == city_name]
+        temp = Data.tempByCity[Data.tempByCity["City"] == city_name]
         t1900 = temp[temp["dt"].str.contains("1900")]
         t2012 = temp[temp["dt"].str.contains("2012")]
         fig = plt.figure(figsize=(15, 6))
@@ -90,18 +82,21 @@ class Temperatures:
         ax2.plot(t2012["dt"], t2012["AverageTemperature"], label="2012", color="DarkBlue")
         ax1.tick_params(left=False, labelleft=False, bottom=False,
                         labelbottom=False)  # I hide the labels and values of ax1, so that they don't overlap with ax2
-        plt.xticks(t2012["dt"], months.values(), rotation=40)
-        plt.title("Temperatures in " + city_name + " in 1900 and 2012\n")
-        plt.ylabel("Temperatures (°C)\n")
+        plt.xticks(t2012["dt"], Data.months.values(), rotation=50, fontsize=12)
+        plt.yticks(fontsize=12)
+        plt.title("Temperatures in " + city_name + " in 1900 and 2012\n", fontsize=18)
+        plt.ylabel("Temperatures (°C)\n", fontsize=14)
         fig.legend()
+        plt.grid(True)
         plt.show()
 
-    def bubbleMap(self, year_month):
-        titleText = "Average temperature in " + months[year_month[-2:]] + " " + year_month[:4]
-        tempMonthYear = tempByMajorCity[tempByMajorCity["dt"] == year_month + "-01"]
+    def bubbleMap(self, selected_date):
+        titleText = "Average temperature in " + Data.months[selected_date[-2:]] + " " + selected_date[:4]
+        tempMonthYear = Data.tempByMajorCity[Data.tempByMajorCity["dt"] == selected_date + "-01"]
         for index, row in tempMonthYear.iterrows():
             bubbleScale = (tempMonthYear["AverageTemperature"] + 30)
-        fig = px.scatter_geo(tempMonthYear, lat=majorCities["Latitude"], lon=majorCities["Longitude"], size=bubbleScale,
+        fig = px.scatter_geo(tempMonthYear, lat=Data.majorCities["Latitude"], lon=Data.majorCities["Longitude"],
+                             size=bubbleScale,
                              hover_name=tempMonthYear["City"], color=tempMonthYear["AverageTemperature"],
                              color_continuous_scale=px.colors.sequential.Hot_r,
                              hover_data=["Country", "AverageTemperature"])
@@ -110,7 +105,7 @@ class Temperatures:
         fig.show()
 
     def countryStats(self, nation):
-        byNation = tempByCity[tempByCity.Country == nation]
+        byNation = Data.tempByCity[Data.tempByCity["Country"] == nation]
         first = str(byNation.dt.iloc[0])
         latest = str(byNation.dt.iloc[-1])
         maxTemp = str(round(max(byNation.AverageTemperature), 2))
@@ -119,7 +114,6 @@ class Temperatures:
         lowest = str(byNation.sort_values(by=["AverageTemperature"], ascending=True).City.iloc[0])
         try:
             random_country = CountryInfo(nation).name().capitalize()
-            country_continent = CountryInfo(random_country).region()
             country_area = format(CountryInfo(random_country).area(), ",d") #I use the format function to show separators between numbers
             country_capital = CountryInfo(random_country).capital()
             country_population = format(CountryInfo(random_country).population(), ",d")
@@ -128,13 +122,12 @@ class Temperatures:
             print(("\nHere is some stats about " + nation + "\n").upper())
             print("-"*80)
             print("\nWEATHER STATS:\n")
-            print("First recorded temperature: " + months[first[-5:-3]] + " " + first[:4])
-            print("Latest recorded temperature: " + months[latest[-5:-3]] + " " + latest[:4])
+            print("First recorded temperature: " + Data.months[first[-5:-3]] + " " + first[:4])
+            print("Latest recorded temperature: " + Data.months[latest[-5:-3]] + " " + latest[:4])
             print("Highest monthly average temperature recorded: " + maxTemp + "°C" + " in " + highest)
             print("Lowest monthly average temperature recorded: " + minTemp + "°C" + " in " + lowest)
             print("\n" + "-"*80)
             print("\nOTHER INFOS:\n")
-            print("Continent: " + str(country_continent))
             print("Area (in square km): " + str(country_area))
             print("Population: " + str(country_population))
             print("Capital city: " + str(country_capital))
@@ -143,9 +136,8 @@ class Temperatures:
         except AttributeError:
             print("Please choose another country")
 
-    def tempShock(self):
-        random_year = str(np.random.randint(1830, 2013))
-        tempYear = tempByCity[tempByCity["dt"].str.contains(random_year)].drop(
+    def tempShock(self, chosen_year):
+        tempYear = Data.tempByCity[Data.tempByCity["dt"].str.contains(chosen_year)].drop(
             ["Latitude", "Longitude", "AverageTemperatureUncertainty"], axis=1)
         minTemp = tempYear.groupby("City").min("AverageTemperature")
         minTemp.rename(columns={"AverageTemperature": "MinimumTemperature"}, inplace=True)
@@ -158,12 +150,15 @@ class Temperatures:
         fig = tempDiff["TempDifference"][:10].plot(kind="barh", color="SaddleBrown")
         fig.set_xlim(left=40)
         plt.title(
-            "Cities with the biggest difference between highest and lowest temperature in " + random_year + "\n")
-        plt.xlabel("\nTemperature shock (°C)")
+            "Cities with the biggest difference between highest and lowest temperature in " + str(chosen_year) + "\n",
+            fontsize=18)
+        plt.xlabel("\nTemperature shock (°C)", fontsize=14)
+        plt.xticks(fontsize=12)
+        plt.yticks(fontsize=12)
         plt.show()
 
     def shockByYear(self):
-        temp = tempByCity.drop(["AverageTemperatureUncertainty", "Latitude", "Longitude"], axis=1)
+        temp = Data.tempByCity.drop(["AverageTemperatureUncertainty", "Latitude", "Longitude"], axis=1)
         temp["year"] = temp["dt"].str.slice(0, 4)
         max = temp.groupby(["City", "year"]).max("AverageTemperature")
         max.rename(columns={"AverageTemperature": "MaximumTemperature"}, inplace=True)
@@ -178,6 +173,7 @@ class Temperatures:
         temp_shock = temp_counted.sort_values(by="year")
         plt.figure(figsize=(20,6))
         plt.plot(temp_shock["year"], temp_shock["count"], color="mediumseagreen")
-        plt.xticks(temp_shock["year"][0::10], rotation=35)
-        plt.title("Number of cities with a yearly temperature shock greater than 49°C, by year\n")
+        plt.xticks(temp_shock["year"][0::10], fontsize=12)
+        plt.yticks(fontsize=12)
+        plt.title("Number of cities with a yearly temperature shock greater than 49°C, by year\n", fontsize=18)
         plt.show()

@@ -80,13 +80,13 @@ class Location:
     def _google_coords(self,city):
         # Google api can't find: Bally, Nigel, Sakura
         try:
-            base_url = "https://maps.googleapis.com/maps/api/geocode/json"
+            base_url = 'https://maps.googleapis.com/maps/api/geocode/json'
             params = {
                 'address': f"{city['City']}, {city['Country']}",
                 'key': self.api_key
             }
             response = requests.get(base_url, params=params).json()
-            if response['status'] == "OK":
+            if response['status'] == 'OK':
                 location = response['results'][0]['geometry']['location']
                 return [location['lat'], location['lng']]
             else:
@@ -103,13 +103,13 @@ class Location:
     cities_coord : dict
         Dictionary with the city and the coordinates
     """
-    def get_coordinates(self):
+    def _get_coordinates(self):
         cities = self.data[['City', 'Country', 'Latitude', 'Longitude']].drop_duplicates().reset_index(drop=True)
         cities_coord = {}
         for i in range(cities.shape[0]):
             city = cities.iloc[i]['City']
             country = cities.iloc[i]['Country']
-            city_country = f"{city}, {country}"
+            city_country = f'{city}, {country}'
             if city_country not in cities_coord:
                 coord = self._google_coords(cities.iloc[i])
                 if coord is not None:
@@ -122,7 +122,7 @@ class Location:
     Update the csv file with the new coordinates
     """
     def update_file(self):
-        cities_coord = self.get_coordinates()
+        cities_coord = self._get_coordinates()
         self.data['City_Country'] = self.data['City'] + ', ' + self.data['Country']
         self.data['Latitude'] = self.data['City_Country'].map(lambda x: cities_coord[x][0])
         self.data['Longitude'] = self.data['City_Country'].map(lambda x: cities_coord[x][1])

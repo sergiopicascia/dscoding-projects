@@ -3,16 +3,15 @@ import numpy as np
 
 class Strategy:
     """
-    This is a data structure consisting in 4 strategies (functions) which allocate guests in hotels,
-    calculates net earnings per each hotel, and finally the guests' level of satisfaction.
-    
+    This class represents different strategies for allocating guests to hotels.
+
     Parameters:
-        guests: DataFrame 
-            Is the DataFrame imported by the Hotelsdata class, which contains the guests' information.
+        guests: DataFrame
+            DataFrame containing guests' information.
         hotels: DataFrame
-            Is the DataFrame imported by the Hotelsdata class, which contains the hotels' information.
+            DataFrame containing hotels' information.
         pref: DataFrame
-            Is the DataFrame imported by the Hotelsdata class, which contains the preference's information.
+            DataFrame containing preferences' information.
     """
 
     def __init__(self, guests, hotels, pref):
@@ -20,30 +19,84 @@ class Strategy:
         self.hotels = hotels
         self.pref = pref
     
+    @staticmethod
+    def satisfaction(priority_hotels, hotel_index):
+        """
+        Calculate guest satisfaction based on the selected hotel's position in the preference list.
+
+        Parameters:
+            priority_hotels (list): List of hotels in the guest's preference order.
+            hotel_index (int): Index of the selected hotel in the priority list.
+
+        Returns:
+            int: Guest satisfaction level (1 to 5).
+                1 = completely satisfied.
+                2 = satisfied.
+                3 = neutral.
+                4 = dissatisfied.
+                5 = very dissatisfied.
+        """
+        satisfaction = 1 if hotel_index + 1 == 1 else(
+            2 if hotel_index + 1 <= (len(priority_hotels) * 0.25) else(
+                3 if hotel_index + 1 <= (len(priority_hotels) * 0.5) else(
+                    4 if hotel_index + 1 < (len(priority_hotels) * 0.75) else 5)))
+        return satisfaction
+    
+    def allocate_guest(self, guest, hotel_list, allocation):
+        """
+        Allocate a guest to a hotel based on availability and preferences.
+
+        Parameters:
+            guest (str): The guest to be allocated.
+            hotel_list (dict): Dictionary containing hotels and their available rooms.
+            allocation (dict): Current allocation details.
+            
+        Returns:
+            dict: Allocation details.
+        """
+
+        # guest's discount (from the guests DataFrame)
+        guest_discount = self.guests[self.guests['guest'] == guest]['discount'].values[0]
+        # guest's list of preferences (from the preference DataFrame).
+        priority_hotels = self.pref[self.pref['guest'] == guest].sort_values(by='priority')['hotel'].tolist()
+
+        # for loop to iterate over the hotel list. If it is in the guest's preference list and it is available, then it will substract
+        # one room to the hotel in the dictionary.
+        for hotel in hotel_list:
+            if hotel in priority_hotels and hotel_list[hotel] > 0:
+                hotel_list[hotel] -= 1
+
+                # Calculate the net earning by subtracting the guest discount from the hotel's price after the allocation is complete.
+                gross_earning = self.hotels[self.hotels['hotel'] == hotel]['price'].values[0]
+                net_earning = gross_earning * (1 - guest_discount)
+
+                # Calling the satisfaction function to calculate the guest's satsifaction level.
+                satisfaction = self.satisfaction(priority_hotels = priority_hotels, hotel_index = priority_hotels.index(hotel))
+
+                # Appending results from each iteration, to the allocation dictionary.
+                allocation['guest'].append(guest)
+                allocation['hotel'].append(hotel)
+                allocation['net_earning'].append(net_earning)
+                allocation['guest_satisfaction'].append(satisfaction)
+                break
+
+        return allocation
 
     @property
     def random(self):
-
         """
-        This is the random strategy, which randomly allocates guests to hotels.
-        
-        An allocation dictionary is created to store all the guests' allocations. 
+        Randomly allocates guests to hotels.
 
-        First, it randomly orders both guests list and hotels Series, so the allocation is completeley random. The hotel Series is
-        transformed into a dictionary, so it is easier to use for calculations.
+        Algorithm:
+            1. Randomly order both guests and hotels.
+            2. Iterate through guests and hotels, allocating based on preferences and availability.
+            3. Calculate net earnings for each hotel and guests' satisfaction.
+            4. Return a Pandas DataFrame with the allocation details.
 
-        Secondly, 2 for loops are runned:
-            - guest: iterates the random guest list, and retrieves the discount from the guests DataFrame, and the preference list
-            of the guest from the preference DataFrame.
-            - hotel: iterates the random hotel list, and if the hotel is in the guest's preference list and there are available rooms,
-            then the guest is allocated to the hotel, and a room is substracted from the hotel dictionary.
-
-        Finally, when the loops are over, both hotels' net earnings (price - discount) and guests' satisfaction are calculated.
-
-        The final results are append to the original dictionary (allocation).
-
-        A Pandas DataFrame of the allocation dictionary is the final output. 
+        Returns:
+            DataFrame: Allocation details with columns ['guest', 'hotel', 'net_earning', 'guest_satisfaction'].
         """
+
         # Dictionary to store all the allocations.
         allocation = {'guest': [], 'hotel': [], 'net_earning': [], 'guest_satisfaction': []}
         
@@ -53,43 +106,12 @@ class Strategy:
         # Pandas Series containing hotels and number of rooms.
         hotel_list = pd.Series(self.hotels['rooms'].values, index = self.hotels['hotel'])
         
-        # hotel_list is randomly ordered, and transformed into a dictionary, so manipulation and calculation of room availability
-        # is easier. 
-        random_hotel = hotel_list.sample(frac=1).to_dict() 
+        # Randomly order the hotel_list and transform it into a dictionary for easier manipulation and room availability calculations.
+        random_hotel = hotel_list.sample(frac = 1).to_dict() 
 
-        # for loop to iterate over the guests' random list, retrieving the guest's discount (from the guests DataFrame) and the list
-        # of preferences (from the preference DataFrame).
+        # for loop to iterate over the guest's list and allocate a hotel to him by calling the "allocate_guest" function.
         for guest in random_guest:       
-            guest_discount = self.guests[self.guests['guest'] == guest]['discount'].values[0]
-            priority_hotels = self.pref[self.pref['guest'] == guest].sort_values(by='priority')['hotel'].tolist()
-
-        # for loop after the guest loop, to iterate over the random_hotel dictionary, controlling that the hotel is available and it is
-        # in the guest's preference list. If available, then it will substract one room to the hotel, in the dictionary.      
-            for hotel in random_hotel:
-                if hotel in priority_hotels and random_hotel[hotel]>0:
-                    random_hotel[hotel] -=1
-        
-        # After the allocation is done, the net earning is calculated by substracting the guest discount to the hotel's price. 
-                    gross_earning = self.hotels[self.hotels['hotel'] == hotel]['price'].values[0]
-                    net_earning = gross_earning*(1-guest_discount)
-
-        # Calculation of the guest's satisfaction (from 1 -satisfied- to 5 -not satisfied-), based on the hotel selected for him:
-        #   - 1st hotel in preferences = 1 (completely satisfied).
-        #   - Among the first 25% of the hotels in the list: 2 (slighlty satisfied).
-        #   - Among the second 25% of the preference: 3 (neutral).
-        #   - Among the third 25% of the preference: 4 (slighlty unsatisfied).
-        #   - Among the last 25% of the hotels in the list: 5 (unsatisfied).    
-                    satisfaction = 1 if priority_hotels.index(hotel)+1 == 1 else(
-                        2 if priority_hotels.index(hotel)+1 <= (len(priority_hotels) * 0.25) else(
-                        3 if priority_hotels.index(hotel)+1 <= (len(priority_hotels) * 0.5) else(
-                        4 if priority_hotels.index(hotel)+1 < (len(priority_hotels) * 0.75) else 5)))
-
-        # Appending results from each iteration to the allocation dictionary.  
-                    allocation['guest'].append(guest)
-                    allocation['hotel'].append(hotel)
-                    allocation['net_earning'].append(net_earning)
-                    allocation['guest_satisfaction'].append(satisfaction)
-                    break
+            allocation = self.allocate_guest(guest, random_hotel, allocation)
         
         # Transform the dictionary to a Pandas DataFrame to easily manipulate for calculations and graphs, and returns the DataFrame.
         random_allocation = pd.DataFrame(allocation)
@@ -100,23 +122,16 @@ class Strategy:
     def preference(self):
         
         """
-        This is the preference strategy, which allocates guests to hotels based on the guests' preferences.
-        
-        An allocation dictionary is created to store all the guests' allocations.
+        Allocates guests to hotels based on guest preferences.
 
-        First, it creates a guests list and a dictionary of hotels with their available rooms.
+        Algorithm:
+            1. Obtain a list of the guests and a dictionary of the hotels with their availability.
+            2. Iterate through guests and allocate each guest to a hotel based on availability and preferences.
+            3. Calculate net earnings for each hotel and guests' satisfaction.
+            4. Return a Pandas DataFrame with the allocation details.
 
-        Secondly, 2 for loops are runned:
-            - guest: iterates the guest list, and retrieves the discount from the guests DataFrame, and the preference list
-            of the guest from the preference DataFrame.
-            - hotel: iterates the preference list, and if the hotel has available rooms, then the guest is allocated to the hotel,
-            and a room is substracted from the hotel dictionary.
-
-        Finally, when the loops are over, both hotels' net earnings (price - discount) and guests' satisfaction are calculated.
-
-        The final results are append to the original dictionary (allocation).
-
-        A Pandas DataFrame of the allocation dictionary is the final output. 
+        Returns:
+            DataFrame: Allocation details with columns ['guest', 'hotel', 'net_earning', 'guest_satisfaction'].
         """
 
         # Dictionary to store all the allocations.
@@ -132,36 +147,29 @@ class Strategy:
         # for loop to iterate over the guests' list, retrieving the guest's discount (from the guests DataFrame) and the list of
         # preferences (from the preference DataFrame).    
         for guest in guest_list:
-                guest_discount = self.guests[self.guests['guest'] == guest]['discount'].values[0]
-                priority_hotels = self.pref[self.pref['guest'] == guest].sort_values(by='priority')['hotel'].tolist()
-                
-        # for loop after the guest loop, to iterate over the guest's preference list. If available, then it will substract one room
-        # to the hotel, in the dictionary.
-                for hotel in priority_hotels:
-                    if hotel_list[hotel]>0:
-                        hotel_list[hotel] -=1
+            guest_discount = self.guests[self.guests['guest'] == guest]['discount'].values[0]
+            priority_hotels = self.pref[self.pref['guest'] == guest].sort_values(by='priority')['hotel'].tolist()
 
-        # After the allocation is done, the net earning is calculated by substracting the guest discount to the hotel's price.    
-                        gross_earning = self.hotels[self.hotels['hotel'] == hotel]['price'].values[0]
-                        net_earning = gross_earning*(1-guest_discount)
+            # for loop to iterate over the guest's preference list. If it is in the guest's preference list and it is available,
+            # then it will substract one room to the hotel in the dictionary.
+            for hotel in priority_hotels:
+                if hotel_list[hotel] > 0:
+                    hotel_list[hotel] -= 1
 
-        # Calculation of the guest's satisfaction (from 1 -satisfied- to 5 -not satisfied-), based on the hotel selected for him:
-        #   - 1st hotel in preferences = 1 (completely satisfied).
-        #   - Among the first 25% of the hotels in the list: 2 (slighlty satisfied).
-        #   - Among the second 25% of the preference: 3 (neutral).
-        #   - Among the third 25% of the preference: 4 (slighlty unsatisfied).
-        #   - Among the last 25% of the hotels in the list: 5 (unsatisfied).        
-                        satisfaction = 1 if priority_hotels.index(hotel)+1 == 1 else(
-                        2 if priority_hotels.index(hotel)+1 <= (len(priority_hotels) * 0.25) else(
-                        3 if priority_hotels.index(hotel)+1 <= (len(priority_hotels) * 0.5) else(
-                        4 if priority_hotels.index(hotel)+1 < (len(priority_hotels) * 0.75) else 5)))
+                    # Calculate the net earning by subtracting the guest discount from the hotel's price after the allocation is
+                    # complete.
+                    gross_earning = self.hotels[self.hotels['hotel'] == hotel]['price'].values[0]
+                    net_earning = gross_earning * (1 - guest_discount)
 
-        # Appending results from each iteration to the allocation dictionary.        
-                        allocation['guest'].append(guest)
-                        allocation['hotel'].append(hotel)
-                        allocation['net_earning'].append(net_earning)
-                        allocation['guest_satisfaction'].append(satisfaction)
-                        break
+                    # Calling the satisfaction function to calculate the guest's satsifaction level.
+                    satisfaction = self.satisfaction(priority_hotels = priority_hotels, hotel_index = priority_hotels.index(hotel))
+
+                    # Appending results from each iteration, to the allocation dictionary.
+                    allocation['guest'].append(guest)
+                    allocation['hotel'].append(hotel)
+                    allocation['net_earning'].append(net_earning)
+                    allocation['guest_satisfaction'].append(satisfaction)
+                    break
 
         # Transform the dictionary to a Pandas DataFrame to easily manipulate for calculations and graphs, and returns the DataFrame.             
         priority_allocation = pd.DataFrame(allocation)
@@ -172,23 +180,16 @@ class Strategy:
     def price(self):
     
         """
-        This is the price strategy, which allocates guests to hotels based on the hotels' price (form the cheapest to the most expensive).
-        
-        An allocation dictionary is created to store all the guests' allocations.
+        Allocates guests to hotels based on the hotels' prices (cheapest to most expensive).
 
-        First, it creates a guests list, and a dictionary of hotels ordered by price (ascending) with their available rooms.
+        Algorithm:
+            1. Order hotels based on price.
+            2. Iterate through guests and allocate each guest to a hotel based on price, availability and preferences.
+            3. Calculate net earnings for each hotel and guests' satisfaction.
+            4. Return a Pandas DataFrame with the allocation details.
 
-        Secondly, 2 for loops are runned:
-            - guest: iterates the guest list, and retrieves the discount from the guests DataFrame, and the preference list
-            of the guest from the preference DataFrame.
-            - hotel: iterates the hotel list, and if the hotel is in the guest's preference list and has available rooms,
-            then the guest is allocated to the hotel, and a room is substracted from the hotel dictionary.
-
-        Finally, when the loops are over, both hotels' net earnings (price - discount) and guests' satisfaction are calculated.
-
-        The final results are append to the original dictionary (allocation).
-
-        A Pandas DataFrame of the allocation dictionary is the final output. 
+        Returns:
+            DataFrame: Allocation details with columns ['guest', 'hotel', 'net_earning', 'guest_satisfaction'].
         """
         
         # Dictionary to store all the allocations.
@@ -199,43 +200,14 @@ class Strategy:
 
         # Pandas Series, containing hotels ordered by price (ascending) and the number of rooms available, is transformed into a
         # dictionary, so manipulation and calculation of room availability is easier.
-        hotel_ordered = self.hotels.sort_values(by='price') 
+        hotel_ordered = self.hotels.sort_values(by = 'price') 
         hotel_list = pd.Series(hotel_ordered['rooms'].values, index = hotel_ordered.hotel).to_dict()
 
 
         # for loop to iterate over the guests' list, retrieving the guest's discount (from the guests DataFrame) and the list of
         # preferences (from the preference DataFrame).    
         for guest in guest_list:
-            guest_discount = self.guests[self.guests['guest'] == guest]['discount'].values[0]
-            priority_hotels = self.pref[self.pref['guest'] == guest].sort_values(by='priority')['hotel'].tolist()
-
-        # for loop after the guest loop, to iterate over the hotels' list. If it is in the guest's preference list and has available
-        # rooms, then it will substract one room to the hotel, in the dictionary.    
-            for hotel in hotel_list:
-                if hotel in priority_hotels and hotel_list[hotel]>0:
-                    hotel_list[hotel] -=1
-        
-        # After the allocation is done, the net earning is calculated by substracting the guest discount to the hotel's price.
-                    gross_earning = self.hotels[self.hotels['hotel'] == hotel]['price'].values[0]
-                    net_earning = gross_earning*(1-guest_discount)
-
-        # Calculation of the guest's satisfaction (from 1 -satisfied- to 5 -not satisfied-), based on the hotel selected for him:
-        #   - 1st hotel in preferences = 1 (completely satisfied).
-        #   - Among the first 25% of the hotels in the list: 2 (slighlty satisfied).
-        #   - Among the second 25% of the preference: 3 (neutral).
-        #   - Among the third 25% of the preference: 4 (slighlty unsatisfied).
-        #   - Among the last 25% of the hotels in the list: 5 (unsatisfied).    
-                    satisfaction = 1 if priority_hotels.index(hotel)+1 == 1 else(
-                        2 if priority_hotels.index(hotel)+1 <= (len(priority_hotels) * 0.25) else(
-                        3 if priority_hotels.index(hotel)+1 <= (len(priority_hotels) * 0.5) else(
-                        4 if priority_hotels.index(hotel)+1 < (len(priority_hotels) * 0.75) else 5)))
-
-        # Appending results from each iteration to the allocation dictionary.    
-                    allocation['guest'].append(guest)
-                    allocation['hotel'].append(hotel)
-                    allocation['net_earning'].append(net_earning)
-                    allocation['guest_satisfaction'].append(satisfaction)
-                    break
+            allocation = self.allocate_guest(guest, hotel_list, allocation)
         
         # Transform the dictionary to a Pandas DataFrame to easily manipulate for calculations and graphs, and returns the DataFrame.
         price_allocation = pd.DataFrame(allocation)
@@ -246,24 +218,16 @@ class Strategy:
     def rooms(self):
         
         """
-        This is the rooms strategy, which allocates guests to hotels based on the hotels' rooms availability (form the least roomy to the
-        most roomy).
-        
-        An allocation dictionary is created to store all the guests' allocations.
+        Allocates guests to hotels based on the hotels' room availability (most roomy to least roomy).
 
-        First, it creates a guests list, and a dictionary of hotels ordered by rooms availability (ascending) with their available rooms.
+        Algorithm:
+            1. Order hotels based on room availability.
+            2. Iterate through guests and allocate each guest to a hotel based on room availability, availability and preferences.
+            3. Calculate net earnings for each hotel and guests' satisfaction.
+            4. Return a Pandas DataFrame with the allocation details.
 
-        Secondly, 2 for loops are runned:
-            - guest: iterates the guest list, and retrieves the discount from the guests DataFrame, and the preference list
-            of the guest from the preference DataFrame.
-            - hotel: iterates the hotel list, and if the hotel is in the guest's preference list and has available rooms,
-            then the guest is allocated to the hotel, and a room is substracted from the hotel dictionary.
-
-        Finally, when the loops are over, both hotels' net earnings (price - discount) and guests' satisfaction are calculated.
-
-        The final results are append to the original dictionary (allocation).
-
-        A Pandas DataFrame of the allocation dictionary is the final output. 
+        Returns:
+            DataFrame: Allocation details with columns ['guest', 'hotel', 'net_earning', 'guest_satisfaction'].
         """
 
         # Dictionary to store all the allocations.
@@ -274,42 +238,13 @@ class Strategy:
 
         # Pandas Series, containing hotels ordered by rooms availability (ascending) and the number of rooms available, is transformed
         # into a dictionary, so manipulation and calculation of room availability is easier.
-        hotel_ordered = self.hotels.sort_values(by='rooms') 
+        hotel_ordered = self.hotels.sort_values(by = 'rooms', ascending = False) 
         hotel_list = pd.Series(hotel_ordered['rooms'].values, index = hotel_ordered.hotel).to_dict()
 
         # for loop to iterate over the guests' list, retrieving the guest's discount (from the guests DataFrame) and the list of
         # preferences (from the preference DataFrame).        
         for guest in guest_list:
-            guest_discount = self.guests[self.guests['guest'] == guest]['discount'].values[0]
-            priority_hotels = self.pref[self.pref['guest'] == guest].sort_values(by='priority')['hotel'].tolist()
-
-        # for loop after the guest loop, to iterate over the hotels' list. If it is in the guest's preference list and has available
-        # rooms, then it will substract one room to the hotel, in the dictionary.    
-            for hotel in hotel_list:
-                if hotel in priority_hotels and hotel_list[hotel]>0:
-                    hotel_list[hotel] -=1
-        
-        # After the allocation is done, the net earning is calculated by substracting the guest discount to the hotel's price.
-                    gross_earning = self.hotels[self.hotels['hotel'] == hotel]['price'].values[0]
-                    net_earning = gross_earning*(1-guest_discount)
-
-        # Calculation of the guest's satisfaction (from 1 -satisfied- to 5 -not satisfied-), based on the hotel selected for him:
-        #   - 1st hotel in preferences = 1 (completely satisfied).
-        #   - Among the first 25% of the hotels in the list: 2 (slighlty satisfied).
-        #   - Among the second 25% of the preference: 3 (neutral).
-        #   - Among the third 25% of the preference: 4 (slighlty unsatisfied).
-        #   - Among the last 25% of the hotels in the list: 5 (unsatisfied).    
-                    satisfaction = 1 if priority_hotels.index(hotel)+1 == 1 else(
-                        2 if priority_hotels.index(hotel)+1 <= (len(priority_hotels) * 0.25) else(
-                        3 if priority_hotels.index(hotel)+1 <= (len(priority_hotels) * 0.5) else(
-                        4 if priority_hotels.index(hotel)+1 < (len(priority_hotels) * 0.75) else 5)))
-        
-        # Appending results from each iteration to the allocation dictionary.    
-                    allocation['guest'].append(guest)
-                    allocation['hotel'].append(hotel)
-                    allocation['net_earning'].append(net_earning)
-                    allocation['guest_satisfaction'].append(satisfaction)
-                    break
+            allocation = self.allocate_guest(guest, hotel_list, allocation)
         
         # Transform the dictionary to a Pandas DataFrame to easily manipulate for calculations and graphs, and returns the DataFrame.
         room_allocation = pd.DataFrame(allocation)
