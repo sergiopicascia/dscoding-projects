@@ -3,11 +3,10 @@ import pandas as pd
 
 class Hotelsdata:
     """
-    This is a data structure consisting in three dataframes containing data about guests, hotels and guests' priorities.
+    This is a data structure consisting in three DataFrames containing data about guests, hotels and guests' preference.
     
     Parameters:
-        path: str
-            A path that points where the datasets are stored.
+        path (str): A path that points where the datasets are stored.
     """
     def __init__(self, path):
         self.path = os.path.join(path, "")
