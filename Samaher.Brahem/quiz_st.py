@@ -140,15 +140,11 @@ class Quiz:
         used_questions = []
 
         st.title("✨ The Quiz ✨")
-        player_name = st.text_input("What do you want us to call you?", key="player_name")
-        st.session_state.player_name
-
+        player_name = st.text_input("What do you want us to call you?")
 
         if player_name:
-            difficulty_level = st.radio("Choose a difficulty level:", ('Easy', 'Medium', 'Hard'), key="difficulty")
-            st.session_state.difficulty
-            start = st.button("Start Quiz",key="start")
-            st.session_state.start
+            difficulty_level = st.radio("Choose a difficulty level:", ('Easy', 'Medium', 'Hard'), index=None)
+            start = st.button("Start Quiz")
             if difficulty_level and start:
                 st.write(f"Alright, {player_name}! Get ready to play!")
                 st.write("----------------------------")
@@ -160,7 +156,7 @@ class Quiz:
                     {'generator': self.generate_question, 'params': ('Where was this movie produced? ==> ', 'country')},
                     {'generator': self.generate_question, 'params': ('Which one of these movies has the highest score on IMDb?', 'score')}
                 ]
-
+                 
                 for i in range(10):
                     while True:
                         question_info = None
@@ -185,8 +181,8 @@ class Quiz:
 
                     # Providing a unique key for st.radio
                     radio_key = f"radio_{i}"  # Using a unique identifier for each iteration
-                    user_choice = st.radio("Choose your answer:", list(question_info['options'].keys()), key=radio_key, index=None, horizontal=True)
-                    st.session_state[radio_key]
+                    user_choice = st.radio("Choose your answer:", list(question_info['options'].keys()), key=radio_key, horizontal=True)
+
                     st.write("----------------------------")
                     
                     # Convert correct answer to letter format
