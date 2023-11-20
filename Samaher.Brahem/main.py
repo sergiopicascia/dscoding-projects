@@ -1,31 +1,26 @@
-from data import DataManager
+from data_manager import DataManager
+from quiz import Quiz
 
-# Opening the connection
-imdb_data = DataManager(
-    dbname='imdb',
-    user='samaher',
-    password="CodingIsFun++",
-    host='localhost',
-    port='5432'
-)
+try:
+    # Establishing connection to the IMDb database
+    imdb_data = DataManager(
+        dbname='imdb',
+        user='samaher',
+        password="CodingIsFun++",
+        host='localhost',
+        port='5432'
+    )
 
-# Get data from the movie table
-movie_data = imdb_data.get_movie()
+    # Getting the movie data from the database
+    movie_data = imdb_data.get_movie()
 
-# Get data from the genre table
-genre_data = imdb_data.get_genre()
+    # Creating a Quiz instance with the retrieved movie data
+    quiz = Quiz(movie_data)
 
-# Get data from the produced table
-prod_data = imdb_data.get_prod()
+    # Running the quiz game
+    quiz.quiz_game()
 
-# Get data from the rating table
-rating_data = imdb_data.get_rating()
-
-# Get data from the crew table
-crew_data = imdb_data.get_crew()
-
-
-
-
-# Closing the connection
-imdb_data.close_connection()
+finally:
+    # Ensuring the database connection is closed
+    if 'imdb_data' in locals():
+        imdb_data.close_connection()
