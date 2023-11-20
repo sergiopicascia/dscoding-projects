@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "stefano-bruschi"
+version = "0.1.0"
+description = "NASDAQ evaluation"
+authors = ["Brucekills <146462249+Brucekills@users.noreply.github.com>"]
+readme = "README.md"
+packages = [{include = "stefano"}]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+jupyter = "^1.0.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
