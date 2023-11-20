@@ -20,6 +20,7 @@ class Sidebar:
 
 
 class MainMenu:
+    @st.cache_data
     def main_menu(self):
         st.title("WEATHER DATA PROJECT")
         st.divider()
@@ -31,8 +32,10 @@ class MainMenu:
         col1, col2, col3 = st.columns(
             [0.27, 0.38, 0.35])  # Percentage of occupation of each column (to fit the images correclty)
         url1 = "https://www.weather.gov/images/ffc/events/severe_011114/500mb_140112.png"
-        url2 = "https://image.cnbcfm.com/api/v1/image/106140709-1568982403673gettyimages-1169784640.jpeg?v=1568992875&w=740&h=416&ffmt=webp&vtcrop=y"
-        url3 = "https://images.nationalgeographic.org/image/upload/t_edhub_resource_key_image/v1638886301/EducationHub/photos/lightning-bolts.jpg"
+        url2 = ("https://image.cnbcfm.com/api/v1/image/106140709-1568982403673gettyimages-1169784640.jpeg?v=1568992875"
+                "&w=740&h=416&ffmt=webp&vtcrop=y")
+        url3 = ("https://images.nationalgeographic.org/image/upload/t_edhub_resource_key_image/v1638886301"
+                "/EducationHub/photos/lightning-bolts.jpg")
         img1 = Image.open(requests.get(url1, stream=True).raw)
         img2 = Image.open(requests.get(url2, stream=True).raw)
         img3 = Image.open(requests.get(url3, stream=True).raw)
@@ -42,11 +45,12 @@ class MainMenu:
 
 
 class CitiesOverview:
+    @st.cache_data
     def cities_overview(self):
         st.header("CITIES OVERVIEW")
         st.divider()
         st.write("""In this page you will be able to see an overview of the cities in the dataset. First of all,
-                 just by loking at the dataset, we can see that there are some countries that are represented by a lot
+                 just by looking at the dataset, we can see that there are some countries that are represented by a lot
                  of cities; as one would expect, the most represented countries are the most populated ones.""")
         st.write("In particular, here's a chart showing the top 15 most represented countries in the dataset:\n")
         st.text(" ")
@@ -60,34 +64,36 @@ class CitiesOverview:
         st.write("")
         st.pyplot(CityCountry.bySubregion_plot(any))
         st.divider()
+
+    def major_map(self):
         st.write("""The data shown above is referring to the bigger dataset, which contains thousands of cities. I also 
                 used a smaller dataset, which contains only 100 cities. Click the button below to show the map of only
                  the major cities.""")
         st.write("")
+        projection = st.radio("Choose a map type", ["Equirectangular", "Orthographic"], captions=["2D map", "3D map"])
         if st.button("Show map", help="Click here to show the map of major cities", type="primary"):
-            BigCities.majorCitiesMap(any)
+            BigCities.majorCitiesMap(any, projection.lower())
 
 
 class CountryInformations:
     def country_info(self):
-        random_country = np.random.choice(Data.citiesWithContinents["Country"].unique())
+        random_country = np.random.choice(Data.cities["Country"].unique())
         st.header("COUNTRY INFORMATIONS")
         st.divider()
         st.write("""In this page you can see some informations about the countries present in the dataset. In addition,
                 you will be able to see the map of the country, with its cities.""")
         st.write("")
         selected_continent = st.selectbox("In which continent is the city located?",
-                                          sorted(list(Data.citiesWithContinents["Continent"].unique())),
-                                          index=None, placeholder="Click here to select a continent...")
+                                          sorted(list(Data.cities["Continent"].unique())),
+                                          index=None, placeholder="Click here to select a continent...", key="cont1")
         selected_subregion = st.selectbox("In which sub-region is the city located?",
-                                          sorted(list(Data.citiesWithContinents[
-                                                          Data.citiesWithContinents["Continent"] == selected_continent][
+                                          sorted(list(Data.cities[
+                                                          Data.cities["Continent"] == selected_continent][
                                                           "Subregion"].unique())), index=None,
-                                          placeholder="Click here to select a sub-region...")
+                                          placeholder="Click here to select a sub-region...", key="sub1")
         selected_country = st.selectbox("Which country do you want to know about?", sorted(list(
-            Data.citiesWithContinents[Data.citiesWithContinents["Subregion"] == selected_subregion][
-                "Country"].unique())),
-                                        index=None, placeholder="Click here to select a country...")
+            Data.cities[Data.cities["Subregion"] == selected_subregion][
+                "Country"].unique())), index=None, placeholder="Click here to select a country...", key="coun1")
         if st.toggle("Choose a completely random country", help="Activate to show the data of a random country"):
             selected_country = random_country
         st.write("")
@@ -148,36 +154,35 @@ class TempChartsMap:
                  city in 1900 and in 2012.""")
         st.write("")
         st.write("")
-        selected_continent = st.selectbox("In which continent is the city located?",
-                                          sorted(list(Data.citiesWithContinents["Continent"].unique())),
-                                          index=None, placeholder="Click here to select a continent...")
-        selected_subregion = st.selectbox("In which sub-region is the city located?",
-                                          sorted(list(Data.citiesWithContinents[
-                                                          Data.citiesWithContinents["Continent"] == selected_continent][
-                                                          "Subregion"].unique())),
-                                          index=None, placeholder="Click here to select a sub-region...")
-        selected_country = st.selectbox("In which country is the city located?",
-                                        sorted(list(Data.citiesWithContinents[
-                                                        Data.citiesWithContinents["Subregion"] == selected_subregion][
-                                                        "Country"].unique())),
-                                        index=None, placeholder="Click here to select a country...")
-        selected_city = st.selectbox("Of which city do you want to see the temperatures?",
-                                     sorted(list(Data.citiesWithContinents[
-                                                     Data.citiesWithContinents["Country"] == selected_country][
-                                                     "City"].unique())),
-                                     index=None, placeholder="Click here to select a city...")
+        chosen_continent = st.selectbox("In which continent is the city located?",
+                                        sorted(list(Data.cities["Continent"].unique())),
+                                        index=None, placeholder="Click here to select a continent...", key="cont2")
+        chosen_subregion = st.selectbox("In which sub-region is the city located?",
+                                        sorted(list(Data.cities[
+                                                        Data.cities["Continent"] == chosen_continent][
+                                                        "Subregion"].unique())),
+                                        index=None, placeholder="Click here to select a sub-region...", key="sub2")
+        chosen_country = st.selectbox("In which country is the city located?",
+                                      sorted(list(Data.cities[
+                                                      Data.cities["Subregion"] == chosen_subregion][
+                                                      "Country"].unique())), index=None, placeholder="Click here to select a country...", key="coun2")
+        chosen_city = st.selectbox("Of which city do you want to see the temperatures?",
+                                   sorted(list(Data.cities[
+                                                   Data.cities["Country"] == chosen_country][
+                                                   "City"].unique())),
+                                   index=None, placeholder="Click here to select a city...", key="city2")
         st.write("")
         if st.toggle("Choose a completely random city", help="Activate to show the plots of a random city in a random "
                                                              "country"):
-            selected_city = np.random.choice(Data.cities["City"])
+            chosen_city = np.random.choice(Data.cities["City"])
         st.write("")
         if st.button("Show me the plots", help="Click here to show the plots", type="primary"):
             st.divider()
             st.write("")
             st.write("")
-            st.pyplot(Temperatures.tempJanAug(any, selected_city))
+            st.pyplot(Temperatures.tempJanAug(any, chosen_city))
             st.divider()
-            st.pyplot(Temperatures.tempMonths(any, selected_city))
+            st.pyplot(Temperatures.tempMonths(any, chosen_city))
         st.divider()
         st.write("""Another useful thing to do is viewing the difference of temperatures between cities around the 
         world in the same time period. Below, you can choose a specific year and month, or let the randomness choose 
@@ -234,6 +239,7 @@ if Sidebar.options == "Main menu":
     MainMenu.main_menu(any)
 elif Sidebar.options == "Cities overview":
     CitiesOverview.cities_overview(any)
+    CitiesOverview.major_map(any)
 elif Sidebar.options == "Country informations":
     CountryInformations.country_info(any)
 elif Sidebar.options == "Temperatures charts and map":

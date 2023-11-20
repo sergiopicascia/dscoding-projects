@@ -22,7 +22,6 @@ class CityCountry:
         plt.figure(figsize=(12, 5))
         plt.bar(CityCountry.numCities.index[:15], CityCountry.numCities.City[:15], color="brown")
         plt.xticks(rotation=70)
-        plt.ylabel("Number of cities\n", fontsize=14)
         plt.title("Number of cities in the dataset, by country\n", fontsize=18)
 
     def byCountry_Map(self, nation):
@@ -40,23 +39,23 @@ class CityCountry:
         fig.show()
 
     def byContinent_Plot(self):
-        byContinent = Data.citiesWithContinents.value_counts("Continent")
+        byContinent = Data.cities.value_counts("Continent")
         sns.barplot(byContinent, orient="y", color="MediumOrchid")
         plt.title("Number of cities in the dataset, by continent\n", fontsize=18)
-        plt.xlabel("\nNumber of cities", fontsize=14)
+        plt.xlabel("")
         plt.ylabel("")
         plt.show()
 
     def bySubregion_plot(self):
-        grouped_asia = Data.citiesWithContinents[Data.citiesWithContinents["Continent"] == "Asia"]
+        grouped_asia = Data.cities[Data.cities["Continent"] == "Asia"]
         subregions_asia = grouped_asia["Subregion"].value_counts()
-        grouped_americas = Data.citiesWithContinents[Data.citiesWithContinents["Continent"] == "Americas"]
+        grouped_americas = Data.cities[Data.cities["Continent"] == "Americas"]
         subregions_americas = grouped_americas["Subregion"].value_counts()
-        grouped_europe = Data.citiesWithContinents[Data.citiesWithContinents["Continent"] == "Europe"]
+        grouped_europe = Data.cities[Data.cities["Continent"] == "Europe"]
         subregions_europe = grouped_europe["Subregion"].value_counts()
-        grouped_africa = Data.citiesWithContinents[Data.citiesWithContinents["Continent"] == "Africa"]
+        grouped_africa = Data.cities[Data.cities["Continent"] == "Africa"]
         subregions_africa = grouped_africa["Subregion"].value_counts()
-        grouped_oceania = Data.citiesWithContinents[Data.citiesWithContinents["Continent"] == "Oceania"]
+        grouped_oceania = Data.cities[Data.cities["Continent"] == "Oceania"]
         subregions_oceania = grouped_oceania["Subregion"].value_counts()
         fig, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(5, 1, figsize=(12, 15), constrained_layout=True)
         fig.suptitle("Number of cities in the dataset, by subregion\n", fontsize=18)
@@ -76,11 +75,11 @@ class CityCountry:
 
 class BigCities:
 
-    def majorCitiesMap(self):
+    def majorCitiesMap(self, projection):
         geo_df = gpd.read_file(r"C:\Users\sangi\Desktop\Info progetto python\Datasets\majorCities.csv", index_col=0)
         fig = px.scatter_geo(geo_df, lat="Latitude", lon="Longitude", hover_name="City",
                              hover_data=["Country", "Latitude", "Longitude"])
-        fig.update_geos(showocean=True, oceancolor="grey")
+        fig.update_geos(showocean=True, oceancolor="grey", projection_type=projection)
         fig.update_layout(title_text="List of major cities in the dataset\n", title_x=0.5)
         fig.show()
 
