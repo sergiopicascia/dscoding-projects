@@ -31,7 +31,6 @@ def comments_extractor(subreddit_name: str, submission_id: str):
             {
                 "author": comment.author.name if comment.author else "[deleted]",
                 "body": comment.body,
-                "score": comment.score,
                 "created_utc": comment.created_utc,
             }
         )
