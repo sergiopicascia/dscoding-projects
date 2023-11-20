@@ -1,5 +1,5 @@
 import pandas as pd
-
+import numpy as np
 
 class HotelPreferenceAllocator:
     def __init__(self, hotelsdata, guestdata, preferencesdata):
@@ -12,17 +12,15 @@ class HotelPreferenceAllocator:
         guest_preferences = self.preferencesdata[self.preferencesdata['guest'] == guest_id].reset_index()
 
         if guest_preferences.empty:
-            # No preferences, so 100% satisfaction
             return 100
 
-        is_hotel_one_of_preferred = hotel_id in guest_preferences['hotel'].values
+        is_hotel_one_of_preferred = np.isin(hotel_id, guest_preferences['hotel'].values)
 
-        if is_hotel_one_of_preferred:
-            index_of_preference = guest_preferences['hotel'].eq(hotel_id).idxmax()
+        if is_hotel_one_of_preferred.any():
+            index_of_preference = np.argmax(guest_preferences['hotel'].values == hotel_id)
             guest_preferences_count = len(guest_preferences)
             return round(((guest_preferences_count - index_of_preference) / guest_preferences_count) * 100)
         else:
-            # Guest settled for a not preferred hotel, so 0% satisfaction
             return 0
 
     def allocate_preferred_hotel(self, guest_id, guest_row):
@@ -44,7 +42,7 @@ class HotelPreferenceAllocator:
         return None
 
     def get_customer_preference_allocation(self):
-        allocation = pd.DataFrame(columns=['guest_id', 'hotel_id', 'satisfaction_percentage', 'paid_price'])
+        self.allocation = pd.DataFrame(columns=['guest_id', 'hotel_id', 'satisfaction_percentage', 'paid_price'])
 
         for guest_id, guest_row in self.guestdata.iterrows():
             allocation_entry = self.allocate_preferred_hotel(guest_id, guest_row)

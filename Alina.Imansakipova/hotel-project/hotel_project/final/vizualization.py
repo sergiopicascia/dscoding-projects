@@ -3,10 +3,10 @@ import matplotlib.pyplot as plt
 def visualize_allocation(allocation):
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
 
-    # Plot 1: Paid price sum for each hotel
+    # Plot 1: Total earnings for each hotel
     paid_price_by_hotel = allocation.groupby('hotel_id')['paid_price'].sum()
-    paid_price_by_hotel.plot(kind='bar', ax=ax1, title='Paid Price Sum by Hotel')
-    ax1.set_xlabel('Hotel ID')
+    paid_price_by_hotel.plot(kind='bar', ax=ax1, title='Total Earnings by Hotel')
+    ax1.set_xlabel('Total Earnings')
     ax1.set_ylabel('Paid Price Sum')
 
     # Plot 2: Satisfaction percentage for each guest
