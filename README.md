@@ -23,8 +23,10 @@ This repository will collect Python projects of the students attending the Codin
 6. Nov 3, 16:30-18:30 - *Data Visualization*
 7. Nov 10, 16:30-18:30 - *Dashboard*
 8. Nov 17, 16:30-18:30 - *Case Study*
-9. ~~Nov 24, 16:30-18:30~~ Nov 27, 12:30-15:30 - *Project Evaluation - I*
-10. ~~Dec 1, 16:30-18:30~~ Nov 29, 9:30-12:30 - *Project Evaluation - II*
+9. ~~Nov 24, 16:30-18:30~~ Nov 27, 12:30-15:30 - [*Project Evaluation - I*](https://teams.microsoft.com/l/meetup-join/19%3ameeting_MmQ5NTk2MTUtNTNlNC00MGVkLWI0NGQtODhjY2FmMGU2MGZm%40thread.v2/0?context=%7b%22Tid%22%3a%2213b55eef-7018-4674-a3d7-cc0db06d545c%22%2c%22Oid%22%3a%22162f7b34-50be-49a1-9032-cfab1311b202%22%7d)
+10. ~~Dec 1, 16:30-18:30~~ Nov 29, 9:30-12:30 - [*Project Evaluation - II*](https://teams.microsoft.com/l/meetup-join/19%3ameeting_ZmViYTNjZGEtOTc5MS00NzJmLTk5ZWItYmYwZjA4MmM5ODhm%40thread.v2/0?context=%7b%22Tid%22%3a%2213b55eef-7018-4674-a3d7-cc0db06d545c%22%2c%22Oid%22%3a%22162f7b34-50be-49a1-9032-cfab1311b202%22%7d)
+
+You can find the exam calendar [here](exams-calendar.pdf).
 
 The **deadline** for submitting your projects is Nov 23, 23:59. Any changes committed after this date will NOT be considered for the final evaluation.
 

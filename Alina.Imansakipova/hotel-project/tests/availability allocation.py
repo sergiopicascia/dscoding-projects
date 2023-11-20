@@ -4,7 +4,8 @@ hotelsdata = pd.read_excel(r"/Users/menimalina/Desktop/uni_due/coding/python/pyt
 guestdata = pd.read_excel(r"/Users/menimalina/Desktop/uni_due/coding/python/python-project/hotels/guests.xlsx").set_index('guest')
 preferencesdata=pd.read_excel(r"/Users/menimalina/Desktop/uni_due/coding/python/python-project/hotels/preferences.xlsx").drop_duplicates(subset=['guest','hotel'])
 from tests.satisfactionpercentage import calculate_satisfaction_percentage
-from tests.vizualization import visualize_allocation
+from hotel_project.final.vizualization import visualize_allocation
+from hotel_project.final.output import allocation_analysis
 def allocate_preferred_rooms(hotel_id, hotel_row, guestdata, preferencesdata, allocation):
     guests_who_preferred_hotel = preferencesdata[preferencesdata['hotel'] == hotel_id]['guest']
     #True when guest prefers hotel and he/she doesn't live anywhere at the moment, false - when they have a place to live => we have to exclude them.
@@ -60,4 +61,5 @@ def get_availability_allocation(hotelsdata, guestdata, preferencesdata):
 
 print('Start calculate availability allocation')
 availability_allocation = get_availability_allocation(hotelsdata, guestdata, preferencesdata)
+allocation_analysis(availability_allocation)
 visualize_allocation(availability_allocation.head(20))

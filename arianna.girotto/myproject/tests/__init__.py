@@ -1,27 +1,28 @@
+'''
+IMPORTARE I PACCHETTI CHE MI SERVONO PER IL PROGETTO
+'''
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+
+'''
+IMPORTARE I DATASET E PULIRLI, METTENDO SOLO I CAMPI CHE MI SERVONO
+'''
 title_basics = pd.read_csv("//Users/ariannagirotto/Desktop/dataset/title.basics.tsv", sep="\t", quoting=3,
                            encoding='utf-8', engine='python', nrows=100000)
 info_person = pd.read_csv("//Users/ariannagirotto/Desktop/dataset/name.tsv", sep="\t", quoting=3, encoding='utf-8',
                           engine='python', nrows=100000)
 
-def title_basics_type1(df):
-    random_tconst = np.random.choice(df['tconst'], replace=False)
-    movie_title = df.loc[df['tconst'] == random_tconst, 'primaryTitle'].values[0]
-    question = f"In quale anno è uscito {movie_title}?"
+title_basics = title_basics[(title_basics['startYear'] != '\\N') &
+                            (title_basics['tconst'] != '\\N') &
+                            (title_basics['genres'] != '\\N')]
+info_person = info_person[(info_person['birthYear'] != '\\N') &
+                          (info_person['primaryName'] != '\\N') &
+                          (info_person['primaryProfession'] != '\\N')]
 
-    right_answer = df.loc[df['tconst'] == random_tconst, 'startYear'].values[0]
-    wrong_answers = []
-    while len(wrong_answers) < 3:
-        wrong_answer = np.random.choice(df['startYear'])
-        if wrong_answer != right_answer and wrong_answer not in wrong_answers:
-            wrong_answers.append(wrong_answer)
+difficult_title_basics = title_basics[
+    (title_basics['startYear'].astype(int) >= 1800) &
+    (title_basics['startYear'].astype(int) < 1940)]
+difficult_title_basics = difficult_title_basics.sort_values(by='startYear', ascending=True)
 
-    answers = {
-        'correct': right_answer,
-        'incorrect': wrong_answers
-    }
-
-    return question, answers
-
-title_basics_type1(title_basics)
+print(difficult_title_basics)
