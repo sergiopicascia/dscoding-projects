@@ -446,48 +446,6 @@
    ]
   },
   {
-   "cell_type": "markdown",
-   "id": "be3bbeef-c20a-41cd-88d5-28e2f7771662",
-   "metadata": {
-    "tags": []
-   },
-   "source": [
-    "def allocate_random_hotel(guest_row, hotels):\n",
-    "    \"\"\" This function filters hotels with available rooms, selects a random available hotel, and decrements the number of available rooms by one. \"\"\"\n",
-    "    available_hotels = hotels[hotels['rooms'] > 0]\n",
-    "    if available_hotels.empty:\n",
-    "        return None\n",
-    "\n",
-    "    random_hotel_id = np.random.choice(available_hotels.index)\n",
-    "    hotels.loc[random_hotel_id, 'rooms'] -= 1\n",
-    "\n",
-    "    price_paid = round(available_hotels.loc[random_hotel_id, 'price'] * (1 - guest_row['discount']), 2)\n",
-    "\n",
-    "    return [guest_row.name, random_hotel_id, price_paid]"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "id": "e082324c-a9e2-42c7-913d-7f831b570324",
-   "metadata": {
-    "tags": []
-   },
-   "source": [
-    "def allocate_guest_to_hotels(guests, hotels):\n",
-    "    \"\"\" this function allocates each guest to a random hotel room\n",
-    "    \"\"\"\n",
-    "    allocations = []\n",
-    "\n",
-    "    for index, guest_row in guests.iterrows():  # Unpack the tuple to get the row correctly\n",
-    "        allocation_entry = allocate_random_hotel(guest_row, hotels)\n",
-    "        if allocation_entry is not None:\n",
-    "            allocations.append(allocation_entry)\n",
-    "\n",
-    "    allocation = pd.DataFrame(allocations, columns=['guest_id', 'hotel_id', 'paid_price'])\n",
-    "    return allocation"
-   ]
-  },
-  {
    "cell_type": "code",
    "execution_count": 25,
    "id": "cb3d3fe3-f86f-4a9c-a2c6-9821bbcc00fd",
