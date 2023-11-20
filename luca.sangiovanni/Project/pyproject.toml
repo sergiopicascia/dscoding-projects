@@ -10,6 +10,8 @@ python = "^3.11"
 geopandas = "^0.14.0"
 plotly-express = "^0.4.1"
 matplotlib = "^3.8.0"
+countryinfo = "^0.1.2"
+streamlit = "^1.28.2"
 
 
 [build-system]

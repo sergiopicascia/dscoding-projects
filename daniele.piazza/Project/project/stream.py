@@ -1,95 +1,346 @@
 import streamlit as st
 from location import Location
-from visualize import Visualize
+from visualize import City,Country
 import pandas as pd
+import os
+#Change .streamlit/config.toml to change the theme color, the map will change accordingly
+#For all the comments i used _= because streamlit doesn't support """ """ comments
+_="""
+ This file contains the streamlit app.
+It contains the following methods:
+    - load_location: load the location data
+    - load_city_data: load the city data
+    - load_country_data: load the country data
+    - create_html: create the html files for the heatmaps
+    - load_html: load the html files for the heatmaps
+    - choose_dataset: choose the dataset to display
+    - display_statistics: display the statistics of the dataset
+    - display_heatmap: display the heatmap of the dataset
+    - display_boxplot: display the boxplot of the dataset
+    - display_line_chart: display the line chart of the dataset
+    - display_prediction: display the prediction of the dataset
+    - display_line_year: display the line chart of the dataset for a specific year
+    - display_general: display the general information of the dataset
+    - display_specific: display the specific information of the dataset
+"""
 
-api_key = pd.read_csv("/Users/dani/Desktop/api_key.txt",header=None)[0][0]
-all_path = "Data/GlobalLandTemperaturesByCity.csv"
-major_path = "Data/GlobalLandTemperaturesByMajorCity.csv"
+update = False # Set to True if you want to update the coordinates of the cities in the csv files
+st.set_page_config(layout='wide', initial_sidebar_state='collapsed', page_title='Global Climate Data Analysis', page_icon='🌍')
+API_KEY = pd.read_csv('/Users/dani/Desktop/api_key.txt',header=None)[0][0] #change with your google api key
+ALL_PATH = 'Data/GlobalLandTemperaturesByCity.csv'
+MAJOR_PATH = 'Data/GlobalLandTemperaturesByMajorCity.csv'
+COUNTRY_PATH = 'Data/GlobalLandTemperaturesByCountry.csv'
 
-st.set_page_config(layout="wide")
+_="""
+Load the location data
 
-update = False # Set to True if you want to update the coordinates of the cities in the file
+Parameters
+----------
+path : str
+    Path of the CSV file
+API_KEY : str
+    Google API key
+
+Returns
+-------
+location : Location
+    Location object
+"""
 @st.cache_data
-def load_location(path, api_key):
-    location = Location(path, api_key)
+def load_location(path, API_KEY):
+    location = Location(path, API_KEY)
     if update:
         location.update_file()
     return location
 
+_="""
+Load the city data
+
+Parameters
+----------
+data : pandas.core.frame.DataFrame
+    Dataframe with data from the cities about the temperature
+
+Returns
+-------
+city : City
+    City object
+"""
 @st.cache_data
-def load_map_data(location_data):
-    vis = Visualize(location_data)
-    return vis
+def load_city_data(data):
+    city = City(data)
+    return city
 
-@st.cache_data()
-def load_bubble(_vis, size:None):
-    if size is None:
-        return _vis.bubble_range()
-    return _vis.bubble(size)
+_="""
+Load the country data
 
-location_major = load_location(major_path, api_key)
-location_all = load_location(all_path, api_key)
-major_map = load_map_data(location_major.data)
-all_map = load_map_data(location_all.data)
-major_bubble = load_bubble(major_map, 10)
-all_bubble = load_bubble(all_map, 4)
-major_range = major_map.bubble_range()
-all_range = all_map.bubble_range()
+Parameters
+----------
+path : str
+    Path of the CSV file
+
+Returns
+-------
+country : Country
+    Country object
+"""
+@st.cache_data
+def load_country_data(path):
+    country = Country(path)
+    return country
+
+major = load_city_data(load_location(MAJOR_PATH, API_KEY).data)
+all = load_city_data(load_location(ALL_PATH, API_KEY).data)
+country = load_country_data(COUNTRY_PATH)
+
+_="""
+Create the html files for the heatmaps
+"""
+def create_html():
+    major.temperature().write_html('temperature_major.html')
+    major.range().write_html('range_major.html')
+    all.temperature().write_html('temperature_all.html')
+    all.range().write_html('range_all.html')
+
+_="""
+Load the html files for the heatmaps. If the file doesn't exist, create it.
+
+Parameters
+----------
+path : str
+    Path of the html file
+
+Returns
+-------
+html : str
+    Html file
+"""
+@st.cache_data
+def load_html(path):
+    if not os.path.exists(path):
+        create_html()
+    with open(path, 'r') as f:
+        return f.read()
+    
+_="""
+Choose the dataset to display
+
+Returns
+-------
+vis : City
+    City object
+temperature : str 
+    Html file for the temperature heatmap
+range : str
+    Html file for the range heatmap
+"""
+def choose_dataset():
+    dataset = st.radio('Choose a dataset', ('Major cities', 'All cities'))
+    if dataset == 'Major cities':
+        st.write('This dataset includes climate data from major cities around the world.')
+        vis = major
+        temperature = load_html('temperature_major.html')
+        range = load_html('range_major.html')
+    else:
+        st.write('This dataset includes climate data from all cities around the world.')
+        vis = all
+        temperature = load_html('temperature_all.html')
+        range = load_html('range_all.html')
+    return vis, temperature, range
+
+_="""
+Display the statistics of the dataset
+
+Parameters
+----------
+data : City or Country
+    City or Country object
+label : str
+    Label of the dataset
+"""
+def display_statistics(place,label):
+    st.subheader('Dataset Statistics')
+    stats = place.statistics()
+    stats = stats.rename(columns={
+        'AverageTemperature': 'Average Temperature',
+        'MinTemperature': 'Minimum Temperature',
+        'MaxTemperature': 'Maximum Temperature',
+        'Std': 'Standard Deviation',
+    })
+    stats.index.name = label
+    st.dataframe(stats, width=1400, height=420)
+
+_="""
+Display the heatmap of the dataset
+
+Parameters
+----------
+place : City or Country
+    City or Country object
+average : bool
+    True if the heatmap is for the average temperature, False if it is for the temperature range
+label : str
+    Label of the dataset
+html : str
+    Html file for the heatmap
+"""
+def display_heatmap(place, average, label, html = None):
+    max = None
+    number = None
+    high = None
+    if average:
+        st.subheader('Average Temperature Heatmap')
+        caption = 'average'
+        if label.lower() == 'city':
+            order = st.radio('Choose the order of the cities', ('Descending (Hottest)', 'Ascending (Coldest)'))
+            high = True if order == 'Descending (Hottest)' else False
+            caption_number = 'hottest' if high else 'coldest'
+    else:
+        st.subheader('Temperature Range Heatmap')
+        caption_number = 'most significant temperature range'
+        caption = 'range (max-min)'
+    if label.lower() == 'city':  
+        max = place.data_year['City_Country'].nunique()
+        number = st.number_input(f'Choose the number of {caption_number} cities to display on the map. Enter a number from 1 to {max}.', min_value=1, max_value=max, value=max)
+    st.caption(f'This heatmap displays the {caption} of the temperatures for each {label.lower()} in the dataset.')
+    if number == max and html is not None:
+        st.components.v1.html(html, width=1400, height=800, scrolling=True)
+    else:
+        st.plotly_chart(place.temperature(number,high) if average else place.range(number))
+
+_="""
+Display the boxplot of the dataset
+
+Parameters
+----------
+place : City or Country
+    City or Country object
+selected : str
+    Selected city or country
+"""
+def display_boxplot(place, selected):
+    st.subheader(f'Temperature Boxplot for {selected}')
+    st.caption(f'This boxplot shows the distribution of temperatures for {selected} overviewing each month.')
+    boxplot = place.boxplot(selected)
+    st.plotly_chart(boxplot)
+
+_="""
+Display the line chart of the dataset
+
+Parameters
+----------
+place : City or Country
+    City or Country object
+selected : str
+    Selected city or country
+"""
+def display_line_chart(place, selected):
+    st.subheader(f'Temperature Line Chart for {selected}')
+    st.caption(f'This line chart shows the temperature trends for {selected} over the years.')
+    fig = place.line(selected)
+    st.plotly_chart(fig)
+
+_="""
+Display the prediction of the dataset
+
+Parameters
+----------
+place : City or Country
+    City or Country object
+selected : str
+    Selected city or country
+"""
+def display_prediction(place, selected):
+    st.subheader("Temperature's Prediction")
+    st.caption('This line chart shows the predicted temperatures for the next 50 years.')
+    predicted_temperatures = place.predict_temperature(selected)
+    st.plotly_chart(predicted_temperatures)
+
+_="""
+Display the line chart of the dataset for a specific year
+
+Parameters
+----------
+place : City or Country
+    City or Country object
+selected : str
+    Selected city or country
+year : int
+    Selected year
+"""
+def display_line_year(place, selected, year):
+    st.subheader(f'Climate Data for {selected} in {year}')
+    st.caption(f'This line chart shows the temperatures for {selected} during the months of {year}.')
+    fig = place.line_year(selected,year)
+    st.plotly_chart(fig)
+_="""
+Display the general information of the dataset
+
+Parameters
+----------
+place : City or Country
+    City or Country object
+label : str
+    Label of the dataset
+temperature : str
+    Html file for the temperature heatmap
+range : str
+    Html file for the range heatmap
+"""
+def display_general(place,label,temperature = None, range = None):
+    display_statistics(place,label)
+    display_heatmap(place, False, label, range)
+    display_heatmap(place, True, label, temperature)
+
+_="""
+Display the specific information of the dataset
+
+Parameters
+----------
+place : City or Country
+    City or Country object
+label : str
+    Label of the dataset
+"""
+def display_specific(place,label):
+    if label == 'City':
+        upper = 'Country'
+        filter = 'City_Country'
+    else:
+        upper = 'Continent'
+        filter = label
+    unique = place.data_year[upper].unique()
+    unique.sort()
+    selected = st.selectbox(f'Choose a {upper}', ('All', *unique))
+    if selected != 'All':
+        places = place.data_year[place.data_year[upper] == selected][filter].unique()
+    else:
+        places = place.data_year[filter].unique()
+    places.sort()
+    selected_place = st.selectbox(f'Choose a {label}', places,placeholder=f'Select a {label}',index=None)
+    if selected_place is not None:
+        st.header(f'Climate Data for {selected_place}')
+        if label == 'City':
+            st.plotly_chart(place.show_city(selected_place))
+        display_boxplot(place, selected_place)
+        display_line_chart(place, selected_place)
+        display_prediction(place, selected_place)
+        selected_year = st.selectbox('Choose a year', place.data_year[place.data_year[filter]==selected_place]['Year'].unique())
+        display_line_year(place, selected_place, selected_year)
 
 def main():
-    page = st.selectbox("", ("General Data", "City Information"))
-    st.title("Climate Data Analysis")
-    dataset = st.selectbox("Select a dataset", ("Major", "All"))
-    if dataset == "Major":
-        location = location_major
-        st.write("This dataset contains data about the major cities of the world")
-        vis = major_map
-        bubble = major_bubble
-        range = major_range
-    else:
-        location = location_all
-        st.write("This dataset contains data about all the cities of the world")
-        vis = all_map
-        bubble = all_bubble
-        range = all_range
-    if page == "General Data":
-        st.header("General Data")
-        st.header("Statistics about the dataset")
-        city_stats = location.additional_statistics()
-        st.write("", city_stats)
-        #st.subheader("General Map")
-        #st.plotly_chart(vis.show_locations())
-        st.subheader("Heatmap")
-        #st.plotly_chart(vis.heatmap())
-        st.plotly_chart(bubble)
-        st.subheader("Range Heatmap")
-        st.plotly_chart(range)
-    elif page == "City Information":
-        country = location.data['Country'].unique()
-        country.sort()
-        selected_country = st.selectbox("Select a country", ("All", *country))
-        if selected_country != "All":
-            city_list = location.data[location.data['Country'] == selected_country]['City_Country'].unique()
-        else:
-            city_list = location.data['City_Country'].unique()
-        st.header("City Information")
-        city_list.sort()
-        selected_city = st.selectbox("Select a City", city_list)
-        st.header(f"Data for city: {selected_city}")
+    st.title('Global Climate Data Analysis')
+    page = st.selectbox('Select a page', ('General Cities Data', 'Specific City Information','General Countries Data','Specific Country Information'))
+    if page == 'General Cities Data':
+        city, temperature, range = choose_dataset()
+        display_general(city,'City',temperature,range)
+    elif page == 'Specific City Information':
+        city, _, _ = choose_dataset()
+        display_specific(city,'City')
+    elif page == 'General Countries Data':
+        display_general(country,'Country')
+    elif page == 'Specific Country Information':
+        display_specific(country,'Country')
 
-        city_map = Visualize(location.data)
-        st.plotly_chart(city_map.show_city(selected_city))
-
-        fig_city = vis.line(selected_city)
-        st.plotly_chart(fig_city)
-        st.write("Predicted Temperatures for the next 100 years")
-        predicted_temperatures = vis.predict_city_temperature(selected_city)
-        st.plotly_chart(predicted_temperatures)
-        selected_year = st.selectbox("Select a year", vis.data_year[vis.data_year['City_Country']==selected_city]['Year'].unique())
-        st.header(f"Data for the city: {selected_city} and year: {selected_year}")
-        fig_city_year = vis.line_year(selected_city,selected_year)
-        st.plotly_chart(fig_city_year)
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
