@@ -24,7 +24,8 @@ class Quiz:
             title_row = filtered_data.sample()
             title_type = title_row['titleType'].values[0]
             title_name = title_row['primaryTitle'].values[0]
-            category = random.choice(['director', 'actor', 'actress'])
+            title_difficulty = title_row['difficulty'].values[0]
+            category = random.choice(['director', 'actor', 'actress'])  # Including actress category
             correct_answer_rows = title_row[title_row['category'] == category]
 
             if not correct_answer_rows.empty:
@@ -37,7 +38,9 @@ class Quiz:
         choices = random.sample(list(other_choices), 3) + [correct_answer]
         random.shuffle(choices)
 
-        question = f"Who is the {category} of the {title_type} {title_name}?"
+        if category in ['director', 'actor', 'actress']:
+            question = f"\n\nWho is the {category} of the {title_type} {title_name}?   {title_difficulty} Point(s)"
+
         return question, choices, correct_answer
 
     def generate_starred_movie_question(self, filtered_data):
@@ -47,8 +50,9 @@ class Quiz:
             person_row = filtered_data[filtered_data['category'].isin(['actor', 'actress'])].sample()
             person_name = person_row['primaryName'].values[0]
             title_type = person_row['titleType'].values[0]
+            title_difficulty = person_row['difficulty'].values[0]
+            # Get the correct title and create choices
             correct_title = person_row['primaryTitle'].values[0]
-
             other_titles = filtered_data['primaryTitle'].unique()
             other_titles = [title for title in other_titles if title != correct_title]
             choices = random.sample(list(other_titles), 3) + [correct_title]
@@ -56,7 +60,8 @@ class Quiz:
 
             valid_row = True
 
-        question = f"Which {title_type} did {person_name} star in?"
+        question = f"\n\nWhich {title_type} did {person_name} star in?   {title_difficulty} Point(s)"
+
         return question, choices, correct_title
 
     def get_number_of_questions(self):
@@ -73,6 +78,7 @@ class Quiz:
         max_possible_points = 0
 
         for _ in range(num_questions):
+            # Randomly select a difficulty level for each question
             difficulty = random.choice(self.data['difficulty'].unique())
             max_possible_points += difficulty
 
@@ -81,13 +87,19 @@ class Quiz:
             for i, choice in enumerate(choices, 1):
                 print(f"{i}. {choice}")
 
-            answer = input("Enter your answer (1-4): ")
-            selected_choice = choices[int(answer) - 1]
+            while True:
+                try:
+                    answer = input("Enter your answer (1-4): ")
+                    selected_choice = choices[int(answer) - 1]
+                    break  # Breaks the loop if the input is valid
+                except (ValueError, IndexError):
+                    print("Please enter a valid answer to the question above.")
+
 
             if selected_choice == correct_answer:
-                print("Correct!")
+                print("\nCorrect!")
                 total_points += difficulty
             else:
-                print("Incorrect. The correct answer was:", correct_answer)
+                print("\nIncorrect. The correct answer was:", correct_answer)
 
         print(f"\nQuiz Completed. You scored {total_points} out of {max_possible_points} points.")

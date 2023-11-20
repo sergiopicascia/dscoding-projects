@@ -177,11 +177,14 @@ class Quiz:
 
                     for letter, option in question_info['options'].items():
                         st.write(f"{letter}. {option}")
+                    
 
                     # Providing a unique key for st.radio
                     radio_key = f"radio_{i}"  # Using a unique identifier for each iteration
-                    user_choice = st.radio("Choose your answer:", list(question_info['options'].keys()), key=radio_key, index=None, horizontal=True)
+                    user_choice = st.radio("Choose your answer:", list(question_info['options'].keys()), key=radio_key, horizontal=True)
 
+                    st.write("----------------------------")
+                    
                     # Convert correct answer to letter format
                     correct_answer_index = list(question_info['options'].keys()).index(question_info['correct_answer'])
                     correct_answer_letter = chr(ord('A') + correct_answer_index)
@@ -214,7 +217,8 @@ class Quiz:
                 if not player_exists:
                     self.game_scores.append(game_score)
 
-                st.write(f"Total score: {total_score}")
+                st.subheader(f"Total score: {total_score}")
+                st.write("----------------------------")
                 st.write(f"Here's how you performed, {player_name}:")
                 self.display_histogram(player_name)
 
