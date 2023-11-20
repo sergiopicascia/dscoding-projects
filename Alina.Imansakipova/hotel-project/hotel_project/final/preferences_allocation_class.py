@@ -44,7 +44,7 @@ class HotelPreferenceAllocator:
         return None
 
     def get_customer_preference_allocation(self):
-        allocation = pd.DataFrame(columns=['guest_id', 'hotel_id', 'satisfaction_percentage', 'paid_price'])
+        self.allocation = pd.DataFrame(columns=['guest_id', 'hotel_id', 'satisfaction_percentage', 'paid_price'])
 
         for guest_id, guest_row in self.guestdata.iterrows():
             allocation_entry = self.allocate_preferred_hotel(guest_id, guest_row)

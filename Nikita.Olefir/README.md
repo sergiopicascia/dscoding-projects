@@ -1,4 +1,4 @@
-# AC Milan's fan's comments analysis
+# AC Milan fans' comments analysis
 
 By Nikita Olefir
 
@@ -43,5 +43,8 @@ I collect comments from two threads:
 - [X] Write a function to extract all comments of particular threads on Reddit
 - [X] Collect all comments of users written in the threads.
 - [ ] Add guidelines for users
-- [ ] 
-- 
+- [X] Write functions to preprocess text data
+- [ ] Add documentation to the TextPreprocessor class
+- [ ] Find the most frequent words in the dataframes 
+- [ ] Create a wordcloud for both of the dataframes
+- [ ] Add requirments file

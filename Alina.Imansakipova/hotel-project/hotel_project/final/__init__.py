@@ -17,25 +17,25 @@ def main():
     r_allocator = RandomHotelAllocator(hotelsdata.copy(), guestdata, preferencesdata)
     random_allocation = r_allocator.get_random_allocation()
     allocation_analysis(random_allocation)
-    visualize_allocation(random_allocation.head(20))
+    visualize_allocation(random_allocation.head(30))
 
     print('Start calculate availability allocation')
     a_allocator = HotelAvailabilityAllocator(hotelsdata.copy(), guestdata, preferencesdata)
     availability_allocation = a_allocator.get_availability_allocation()
     allocation_analysis(availability_allocation)
-    visualize_allocation(availability_allocation.head(20))
+    visualize_allocation(availability_allocation.head(30))
 
     print('Start calculate price allocation')
     price_allocator = HotelPriceAllocator(hotelsdata.copy(), guestdata, preferencesdata)
     price_allocation = price_allocator.get_price_allocation()
     allocation_analysis(price_allocation)
-    visualize_allocation(price_allocation.head(20))
+    visualize_allocation(price_allocation.head(30))
 
     print('Start calculate preference allocation')
     pref_allocator = HotelPreferenceAllocator(hotelsdata.copy(), guestdata, preferencesdata)
     customer_preference_allocation = pref_allocator.get_customer_preference_allocation()
     allocation_analysis(customer_preference_allocation)
-    visualize_allocation(customer_preference_allocation.head(20))
+    visualize_allocation(customer_preference_allocation.head(30))
 
 if __name__ == "__main__":
     main()
