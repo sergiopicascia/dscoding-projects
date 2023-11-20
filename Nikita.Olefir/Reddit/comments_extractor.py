@@ -35,4 +35,4 @@ def comments_extractor(subreddit_name: str, submission_id: str):
                 "created_utc": comment.created_utc,
             }
         )
-    comments_df = pd.DataFrame(all_comments)
+    return pd.DataFrame(all_comments)

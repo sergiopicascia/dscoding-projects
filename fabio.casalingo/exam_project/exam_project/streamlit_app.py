@@ -2,11 +2,26 @@ import random
 import pandas as pd
 import streamlit as st
 from methods import Travel
+from methods import MapHandler
 
 st.title('Python Project')
 
-# Inizializza la classe CityExplorer
-city_explorer = Travel()
+
+@st.cache_data(persist=True)
+def cached_travel_instance():
+    ex = Travel()
+    return ex
+
+
+@st.cache_data(persist=True)
+def cached_map_handler_instance():
+    mp = MapHandler()
+    return mp
+
+
+city_explorer = cached_travel_instance()
+maps = cached_map_handler_instance()
+
 
 @st.cache_data(persist=True)
 def shuffle_close(input_city_id, n):
@@ -14,18 +29,20 @@ def shuffle_close(input_city_id, n):
     random.shuffle(close)
     return close
 
-@st.cache_data
+
+@st.cache_data()
 def load_dataset():
     return pd.read_excel('C:/Uni/Coding/python/worldcities.xlsx')
+
 
 dataset = load_dataset()
 
 city_name_to_id_iso3 = {f"{city} ({iso3})": id for id, city, iso3 in
                         zip(dataset['id'], dataset['city'], dataset['iso3'])}
 
-action = st.sidebar.selectbox('Select an action',
+action = st.selectbox('Select an action',
                               ['Find the n closest cities', 'City to city',
-                               'Show the path going only on east', 'Minigame'])
+                               'Show the path going only on east','Population', 'Minigame'])
 
 if action == 'Find the n closest cities':
     selected_city_name_iso3 = st.selectbox('City', list(city_name_to_id_iso3.keys()))
@@ -46,7 +63,7 @@ if action == 'City to city':
     n += 1
     if st.button('Show the travel'):
         path = city_explorer.distance_between_two_cities(input_city1_id, input_city2_id, n)
-        st.write('La durata del percorso è: ')
+        st.write('The duration of the journey is : ')
         travel_time = city_explorer.time(path)
         if travel_time > 24:
             d = int(travel_time / 24)
@@ -55,7 +72,7 @@ if action == 'City to city':
         else:
             st.write(travel_time, 'hours')
         st.write('The path')
-        mappa = city_explorer.map_2d(path)
+        mappa = maps.map_2d(path)
         st.components.v1.html(mappa._repr_html_(), width=800, height=600)
 
 if action == 'Show the path going only on east':
@@ -67,6 +84,7 @@ if action == 'Show the path going only on east':
             st.components.v1.iframe(html_file_path, width=800, height=600)
         else:
             closest_cities = city_explorer.east(input_city_id)
+            city_explorer = cached_travel_instance()
             st.write('The duration of the travel is:')
             travel_time = city_explorer.time(closest_cities)
             if travel_time > 24:
@@ -76,8 +94,8 @@ if action == 'Show the path going only on east':
             else:
                 st.write(travel_time, 'hours')
             st.write('path')
-            mappa = city_explorer.map_3d(closest_cities)
-            st.components.v1.html(mappa._repr_html_(), width=800, height=600)
+            mappa = maps.map_3d(closest_cities)
+            st.map(mappa._repr_html_(), width=800, height=800)
 
 if action == 'Minigame':
     selected_city_name_iso3 = st.selectbox('City', list(city_name_to_id_iso3.keys()))
@@ -96,3 +114,6 @@ if action == 'Minigame':
         else:
             st.write('You lost')
             st.write('Right answer was:', true)
+
+if action == 'Population':
+    maps.population(dataset)

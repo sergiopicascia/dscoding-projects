@@ -11,14 +11,17 @@ from abc import abstractmethod
 
 """
 This class is used to visualize the data. It contains methods to create the following visualizations:
-- Heatmap (heatmap): a heatmap with the average temperature of each city/country for each year
 - Line Chart Year (line_year): a line chart with the average temperature of a selected city/country in each month
 - Line Chart (line): a line chart with the average temperature of a selected city/country in each year
-- Temperature Range Heatmap (bubble_range): a heatmap with the range of temperatures for each city/country for each year
-- Average Temperature Heatmap (bubble): a heatmap with the average temperature for each city/country for each year
-- Predicted Temperatures (predict_city_temperature): a line chart with the predicted temperatures for the next 50 years for a selected city/country
-- Additional Statistics (additional_statistics): a dataframe with additional statistics about the dataset
+- Temperature Range Heatmap (range): a heatmap with the range of temperatures for each city/country for each year
+- Average Temperature Heatmap (temperature): a heatmap with the average temperature for each city/country for each year
+- Predicted Temperatures (predict_temperature): a line chart with the predicted temperatures for the next 50 years for a selected city/country
+- Additional Statistics (statistics): a dataframe with additional statistics about the dataset
 - Temperature Boxplot (boxplot): a boxplot and scatterplot with the distribution of temperatures for a selected city/country during each month
+
+It also contains the following methods that should be implemented by the subclasses:
+- _range_figure: a bubble map with the range of temperatures for each city/country for each year
+- _temperature_figure: a bubble map with the average temperature for each city/country
 """
 class Visualize:
     """
@@ -57,21 +60,22 @@ class Visualize:
             MaxTemp=('AverageTemperature', 'max'),
             Std=('AverageTemperature','std')).reset_index()
         self.data_year['YearlyAverage'] = self.data_year['YearlyAverage'].round(2)
-        self.clean_data()
-        self.calculate_annual_uncertainty()
-        self.get_theme() 
+        self._clean_data()
+        self._calculate_annual_uncertainty()
+        self._get_theme() 
 
     """
-    Calculate the annual uncertainty for each city/country.
+    Calculate the annual uncertainty for each city/country and save it in the data_year dataframe as a new column.
+    Using the formula: sqrt(sum(uncertainty^2))
     """
-    def calculate_annual_uncertainty(self):
+    def _calculate_annual_uncertainty(self):
         annual_uncertainty = self.data.groupby(['Year', self.label])['AverageTemperatureUncertainty'].apply(lambda x: (x ** 2).sum() ** 0.5)
         self.data_year = pd.merge(self.data_year, annual_uncertainty.reset_index(name='AverageTemperatureUncertainty'), on=['Year', self.label])
 
     """
     Clean the data by removing incomplete years.
     """
-    def clean_data(self):
+    def _clean_data(self):
         self.data.sort_values(by='dt', inplace=True)
         complete_years = self.data_year[self.data_year['AvailableMonths'] == 12][[self.label, 'Year']]
         self.data = pd.merge(self.data, complete_years, how='inner', on=[self.label, 'Year'])
@@ -81,8 +85,19 @@ class Visualize:
 
     """
     Get the theme from the streamlit config file.
+
+    Attributes
+    ----------
+    primaryColor : str
+        Primary color for visualization theme
+    backgroundColor : str
+        Background color for visualization theme
+    secondaryBackgroundColor : str
+        Secondary background color for visualization theme
+    textColor : str
+        Text color for visualization theme
     """
-    def get_theme(self):
+    def _get_theme(self):
         config = toml.load('.streamlit/config.toml')
         self.primaryColor = config['theme']['primaryColor']
         self.backgroundColor = config['theme']['backgroundColor']
@@ -102,7 +117,7 @@ class Visualize:
     fig : plotly.graph_objects.Figure
         The updated figure
     """
-    def fig_layout(self,fig):
+    def _fig_layout(self,fig):
         fig.update_layout({'paper_bgcolor': self.backgroundColor},
                           width=1300,
                           height=700,
@@ -113,7 +128,8 @@ class Visualize:
         fig.update_mapboxes(bounds_east=180, bounds_west=-180, bounds_north=90, bounds_south=-70)
         fig.update_geos(
             resolution=110,
-            showcountries=True, countrycolor='Black',
+            showcountries=True,
+            countrycolor='Black',
             lataxis = dict(range = [-90, 90]),
             lonaxis = dict(range = [-180, 180]),
             showocean=True, oceancolor=self.backgroundColor,
@@ -139,15 +155,15 @@ class Visualize:
         The figure with the line chart
     """
     def line_year(self,selected,year):
-        city_data = self.data[(self.data[self.label] == selected) & (self.data['Year'] == year)]
-        month = city_data['dt'].dt.month
-        fig = px.line(city_data, x=month, y='AverageTemperature', markers=True, color_discrete_sequence=[self.primaryColor])
+        place = self.data[(self.data[self.label] == selected) & (self.data['Year'] == year)]
+        month = place['dt'].dt.month
+        fig = px.line(place, x=month, y='AverageTemperature', markers=True, color_discrete_sequence=[self.primaryColor])
         fig.update_xaxes(title_text='Month',showgrid=False)
         fig.update_layout(xaxis={'tickmode': 'array',
                                  'tickvals':month.unique(),
-                                 'ticktext': city_data['dt'].dt.strftime('%B').unique()})
+                                 'ticktext': place['dt'].dt.strftime('%B').unique()})
         fig.update_yaxes(showgrid=False)
-        return self.fig_layout(fig)
+        return self._fig_layout(fig)
 
     """
     Show a line chart with the average temperature of a selected city/country in each year and it's uncertainty.
@@ -163,11 +179,11 @@ class Visualize:
         The figure with the line chart
     """
     def line(self, selected):
-        city_data = self.data_year[(self.data_year[self.label] == selected)]
+        place = self.data_year[(self.data_year[self.label] == selected)]
         fig = go.Figure()
         fig.add_trace(go.Scatter(
-            x=city_data['Year'],
-            y=city_data['YearlyAverage'] - city_data['AverageTemperatureUncertainty'],
+            x=place['Year'],
+            y=place['YearlyAverage'] - place['AverageTemperatureUncertainty'],
             marker=dict(color=self.primaryColor),
             line=dict(width=0),
             mode='lines',
@@ -175,8 +191,8 @@ class Visualize:
             name='Lower bound'
         ))
         fig.add_trace(go.Scatter(
-            x=city_data['Year'],
-            y=city_data['YearlyAverage'] + city_data['AverageTemperatureUncertainty'],
+            x=place['Year'],
+            y=place['YearlyAverage'] + place['AverageTemperatureUncertainty'],
             mode='lines',
             marker=dict(color=self.primaryColor),
             line=dict(width=0),
@@ -186,15 +202,15 @@ class Visualize:
             name='Upper bound'
         ))
         fig.add_trace(go.Scatter(
-            x=city_data['Year'],
-            y=city_data['YearlyAverage'],
+            x=place['Year'],
+            y=place['YearlyAverage'],
             mode='lines',
             name='Average Temperature',
             line=dict(color=self.primaryColor)
         ))
         fig.update_xaxes(showgrid=False)
         fig.update_yaxes(showgrid=False)
-        return self.fig_layout(fig)
+        return self._fig_layout(fig)
         
     """
     Show a bubble map with the range of temperatures for each city/country for each year.
@@ -203,21 +219,23 @@ class Visualize:
     Parameters
     ----------
     n : int
-        The number of cities to be shown
+        The number of cities to be shown (not supported for countries)
 
     Returns
     -------
     fig : plotly.graph_objects.Figure
         The figure with the bubble map
     """
-    def range(self, n=None):
+    def range(self, n = None):
         df = self.data_year.copy()
         scaler = MinMaxScaler()
         df['Range'] = (df['MaxTemp'] - df['MinTemp']).round(2)
+        min = df['Range'].min()
+        max = df['Range'].max()
         df['Size'] =  scaler.fit_transform(df[['Range']])
         if n is not None:
             df = df.groupby('Year').apply(lambda x: x.nlargest(n, 'Range')).reset_index(drop=True)
-        return self.range_figure(df)
+        return self._range_figure(df,min,max)
 
     """
     Show a bubble map with the average temperature for each city/country for each year.
@@ -226,20 +244,27 @@ class Visualize:
     Parameters
     ----------
     n : int
-        The number of cities to be shown
+        The number of cities to be shown (not supported for countries)
+    high : bool
+        Whether to show the cities with the highest or lowest temperatures (not supported for countries)
 
     Returns
     -------
     fig : plotly.graph_objects.Figure
         The figure with the bubble map
     """
-    def temperature(self,n=None):
+    def temperature(self,n=None, high = False):
         df = self.data_year.copy()
+        min = df['YearlyAverage'].min()
+        max = df['YearlyAverage'].max()
         if n is not None:
-            df = df.groupby('Year').apply(lambda x: x.nlargest(n, 'YearlyAverage')).reset_index(drop=True)
+            if high:
+                df = df.groupby('Year').apply(lambda x: x.nlargest(n, 'YearlyAverage')).reset_index(drop=True)
+            else:
+                df = df.groupby('Year').apply(lambda x: x.nsmallest(n, 'YearlyAverage')).reset_index(drop=True)
         bubble_counts = df['Year'].value_counts()
         df['Size'] = df['Year'].apply(lambda x: 1000 / np.log((bubble_counts[x]) + 1))
-        return self.temperature_figure(df)
+        return self._temperature_figure(df,min,max)
 
 
     """
@@ -249,22 +274,23 @@ class Visualize:
     ----------
     selected : str
         The name of the city/country to be shown
+    next : int
+        The number of years to predict
 
     Returns
     -------
     fig : plotly.graph_objects.Figure
         The figure with the line chart
     """
-    def predict_temperature(self,selected):
-        city_data = self.data_year[(self.data_year[self.label] == selected)]
-        years = city_data['Year'].values.reshape(-1, 1)
-        temperatures = city_data['YearlyAverage'].values
+    def predict_temperature(self,selected,next=50):
+        place = self.data_year[(self.data_year[self.label] == selected)]
+        years = place['Year'].values.reshape(-1, 1)
+        temperatures = place['YearlyAverage'].values
         poly_reg = PolynomialFeatures(degree=4)
-        years_poly = poly_reg.fit_transform(years)
+        years_poly = poly_reg.fit_transform(years) 
         lin_reg_poly = LinearRegression()
         lin_reg_poly.fit(years_poly, temperatures)
-        range = np.arange(years.max(), years.max()+50)
-        future_years = range.reshape(-1, 1)
+        future_years = np.arange(years.max(), years.max()+next).reshape(-1, 1)
         future_years_poly = poly_reg.transform(future_years)
         predicted_temperatures = lin_reg_poly.predict(poly_reg.transform(years))
         future_predicted_temperatures = lin_reg_poly.predict(future_years_poly)
@@ -279,7 +305,7 @@ class Visualize:
                         line=dict(color=self.primaryColor),
                         name='Polynomial Regression'
                         )
-        fig.add_scatter(x=range,
+        fig.add_scatter(x=future_years.flatten(),
                         y=future_predicted_temperatures,
                         mode='lines', 
                         line=dict(color='red'),
@@ -288,31 +314,31 @@ class Visualize:
         fig.update_layout(xaxis_title='Year', yaxis_title='Temperature')
         fig.update_xaxes(showgrid=False)
         fig.update_yaxes(showgrid=False)
-        return self.fig_layout(fig)
+        return self._fig_layout(fig)
     
 
     """
-    Calculate additional statistics about the dataset: average, minimum, maximum and standard deviation of the temperatures for each city/country.
+    Calculate general statistics about the dataset: average, minimum, maximum and standard deviation of the temperatures for each city/country.
 
     Returns
     -------
-    city_stats : pandas.DataFrame
+    stats : pandas.DataFrame
         The dataframe with the statistics
     """
-    def additional_statistics(self):
-        city_stats = self.data.groupby(self.label).agg(
+    def statistics(self):
+        stats = self.data.groupby(self.label).agg(
             AverageTemperature=('AverageTemperature', 'mean'),
             MinTemperature=('AverageTemperature', 'min'),
             MaxTemperature=('AverageTemperature', 'max'),
             Std=('AverageTemperature','std')).round(2)
-        return city_stats
+        return stats
     
     """
     Show a boxplot and scatterplot with the distribution of temperatures for a selected city/country during each month of the years.
 
     Parameters
     ----------
-    city_country : str
+    selected : str
         The name of the city/country to be shown
 
     Returns
@@ -351,11 +377,12 @@ class Visualize:
                             )  
         fig.update_layout(xaxis={'tickmode': 'array',
                                  'tickvals':df['Month'].unique(),
-                                 'ticktext': df['Month_Name'].unique()})
+                                 'ticktext': df['Month_Name'].unique()}
+                         )
         fig.update_traces(line=dict(width=2))
         fig.update_xaxes(showgrid=False)
         fig.update_yaxes(showgrid=False)
-        return self.fig_layout(fig)
+        return self._fig_layout(fig)
 
     """
     Show a map with the range of temperatures for each city/country for each year.
@@ -364,6 +391,10 @@ class Visualize:
     ----------
     df : pandas.DataFrame
         The dataframe with the data to be shown
+    min : float
+        The minimum value for the range
+    max : float
+        The maximum value for the range
 
     Returns
     -------
@@ -371,7 +402,7 @@ class Visualize:
         The figure with the map
     """
     @abstractmethod
-    def range_figure(self,df,min,max):
+    def _range_figure(self,df,min,max):
         pass
 
     """
@@ -388,15 +419,15 @@ class Visualize:
         The figure with the map
     """
     @abstractmethod
-    def temperature_figure(self,df,min,max):
+    def _temperature_figure(self,df,min,max):
         pass
 
 
 
 """
 This class is used to visualize the data for cities. It inherits from the Visualize class and implements the following methods:
-- range_figure: a bubble map with the range of temperatures for each city for each year
-- temperature_figure: a bubble map with the average temperature for each city for each year
+- _range_figure: a bubble map with the range of temperatures for each city for each year
+- _temperature_figure: a bubble map with the average temperature for each city for each year
 - heatmap: a heatmap with the average temperature of each city for each year
 - show_locations: a map with all the cities in the dataset
 - show_city: a map with the city of choice
@@ -404,13 +435,11 @@ This class is used to visualize the data for cities. It inherits from the Visual
 class City(Visualize):
     def __init__(self,data):
         self.data = data.copy()
-        group = ["City_Country", 'Year', 'Latitude', 'Longitude']
+        group = ['City_Country', 'Year', 'Latitude', 'Longitude', 'Country']
         super().__init__('City_Country',group)
 
     #Implement abstract method
-    def range_figure(self,df):
-        min = df['Range'].min()
-        max = df['Range'].max()
+    def _range_figure(self,df,min,max):
         fig = px.scatter_mapbox(df,
                                 lat='Latitude',
                                 lon='Longitude',
@@ -430,35 +459,33 @@ class City(Visualize):
                                     'Latitude': False,
                                     'Longitude': False,
                                     'YearlyAverage': False,
-                                    'Size': False
-                                })
-        return self.fig_layout(fig)
+                                    'Size': False}
+                                )
+        return self._fig_layout(fig)
     
     #Implement abstract method
-    def temperature_figure(self,df):
-        min = df['YearlyAverage'].min()
-        max = df['YearlyAverage'].max()
+    def _temperature_figure(self,df,min,max):
         fig = px.scatter_mapbox(df,
-                        lat='Latitude',
-                        lon='Longitude',
-                        color='YearlyAverage',
-                        hover_name='City_Country',
-                        size='Size',
-                        zoom=1,
-                        animation_frame='Year',
-                        mapbox_style='open-street-map',
-                        template='plotly_dark',
-                        range_color=(min,max),
-                        color_continuous_scale=px.colors.diverging.Portland,
-                        hover_data={
-                            'YearlyAverage': True,
-                            'City_Country': False,
-                            'Year': False,
-                            'Latitude': False,
-                            'Longitude': False,
-                            'Size':False
-                        })
-        return self.fig_layout(fig)
+                                lat='Latitude',
+                                lon='Longitude',
+                                color='YearlyAverage',
+                                hover_name='City_Country',
+                                size='Size',
+                                zoom=1,
+                                animation_frame='Year',
+                                mapbox_style='open-street-map',
+                                template='plotly_dark',
+                                range_color=(min,max),
+                                color_continuous_scale=px.colors.diverging.Portland,
+                                hover_data={
+                                    'YearlyAverage': True,
+                                    'City_Country': False,
+                                    'Year': False,
+                                    'Latitude': False,
+                                    'Longitude': False,
+                                    'Size':False}
+                                )
+        return self._fig_layout(fig)
     
     """
     Show a heatmap with the average temperature of each city for each year.
@@ -481,15 +508,16 @@ class City(Visualize):
                                 hover_name='City_Country',
                                 mapbox_style='open-street-map', 
                                 animation_group='City_Country',
-                                color_continuous_scale=px.colors.diverging.Portland,opacity=0.8,template='plotly_dark',
+                                color_continuous_scale=px.colors.diverging.Portland,opacity=0.8,
+                                template='plotly_dark',
                                 hover_data={
                                     'YearlyAverage': True,
                                     'City_Country': False,
                                     'Year': False,
                                     'Latitude': False,
-                                    'Longitude': False,
-                                })
-        return self.fig_layout(fig)
+                                    'Longitude': False}
+                                )
+        return self._fig_layout(fig)
     
     """
     Show a map with all the cities in the dataset.
@@ -502,14 +530,17 @@ class City(Visualize):
     def show_locations(self):
         city = self.data.groupby('City').first().reset_index()
         fig = px.scatter_mapbox(city,
-                    lat='Latitude',
-                    lon='Longitude',
-                    hover_name='City',mapbox_style='open-street-map',zoom=1)
+                                lat='Latitude',
+                                lon='Longitude',
+                                hover_name='City',
+                                mapbox_style='open-street-map',
+                                zoom=1
+                                )
         fig.update_geos(
             visible=True, resolution=50,
             showcountries=True, countrycolor='RebeccaPurple'
         )
-        return self.fig_layout(fig)
+        return self._fig_layout(fig)
     
     """
     Show a map with the city of choice.
@@ -533,29 +564,30 @@ class City(Visualize):
                                 hover_name='City_Country',
                                 mapbox_style='open-street-map',
                                 zoom=7,
-                                center={'lat': filtered_data['Latitude'].iloc[0], 'lon': filtered_data['Longitude'].iloc[0]},
+                                center={'lat': filtered_data['Latitude'].iloc[0],
+                                        'lon': filtered_data['Longitude'].iloc[0]},
                                 size='Size',
                                 hover_data={
                                     'City_Country': False,
                                     'Latitude': False,
                                     'Longitude': False,
-                                    'Size': False
-                                })
+                                    'Size': False}
+                                )
         fig.update_geos(
             visible=True,
             resolution=50,
             showcountries=True,
             countrycolor='RebeccaPurple'
         )
-        return  self.fig_layout(fig)
+        return  self._fig_layout(fig)
     
 
 
 
 """
 This class is used to visualize the data for countries. It inherits from the Visualize class and implements the following methods:
-- range_figure: a bubble map with the range of temperatures for each country for each year
-- temperature_figure: a bubble map with the average temperature for each country for each year
+- _range_figure: a bubble map with the range of temperatures for each country for each year
+- _temperature_figure: a bubble map with the average temperature for each country for each year
 - country_to_continent: a function to get the continent of a country
 """
 class Country(Visualize):
@@ -590,7 +622,7 @@ class Country(Visualize):
         self.data['Country'] = self.data['Country'].str.replace('Burma', 'Myanmar')
         self.data.loc[self.data['Country'] == 'Denmark (Europe)', 'Country'] = 'Denmark'
         self.data.loc[:,'Continent'] = self.data['Country'].apply(self.country_to_continent)
-        self.data.loc[(self.data['Country'] == 'Congo (Democratic Republic Of The)') | (self.data['Country'] == "Côte D'Ivoire"), 'Continent'] = 'Africa'
+        self.data.loc[(self.data['Country'] == "Congo (Democratic Republic Of The)") | (self.data['Country'] == "Côte D'Ivoire"), 'Continent'] = 'Africa'
         self.data.loc[self.data['Country'] == 'Bosnia And Herzegovina', 'Continent'] = 'Europe'
         self.data.dropna(subset=['Continent'], inplace=True)
         self.data['dt'] = pd.to_datetime(self.data['dt'])
@@ -621,9 +653,7 @@ class Country(Visualize):
         return country_continent_name
 
     #Implement abstract method
-    def temperature_figure(self,df):
-        min = df['YearlyAverage'].min()
-        max = df['YearlyAverage'].max()
+    def _temperature_figure(self,df,min,max):
         fig = px.choropleth(df,
                             locations='Country',
                             locationmode = 'country names', 
@@ -635,28 +665,26 @@ class Country(Visualize):
                             hover_data={
                                 'YearlyAverage': True,
                                 'Country': False,
-                                'Year': False
-                                })
+                                'Year': False}
+                            )
         fig.update_layout(dragmode=False)
-        return self.fig_layout(fig)
+        return self._fig_layout(fig)
     
     #Implement abstract method
-    def range_figure(self,df):
-        min = df['Range'].min()
-        max = df['Range'].max()
+    def _range_figure(self,df,min,max):
         fig = px.choropleth(df,
-                        locations='Country',
-                        locationmode='country names',
-                        color='Range',
-                        color_continuous_scale=px.colors.diverging.Portland,
-                        animation_frame='Year',
-                        hover_name='Country',
-                        range_color=(min, max),
-                        hover_data={
-                            'Country': False,
-                            'Year': False,
-                            'YearlyAverage': False
-                        })
+                            locations='Country',
+                            locationmode='country names',
+                            color='Range',
+                            color_continuous_scale=px.colors.diverging.Portland,
+                            animation_frame='Year',
+                            hover_name='Country',
+                            range_color=(min, max),
+                            hover_data={
+                                'Country': False,
+                                'Year': False,
+                                'YearlyAverage': False}
+                            )
         fig.update_layout(dragmode=False)
-        return self.fig_layout(fig)
+        return self._fig_layout(fig)
     
