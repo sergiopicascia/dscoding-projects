@@ -5,8 +5,13 @@ columns with stemmed and lemmatized words from a column in a pandas dataframe
 import pandas as pd
 from nltk.stem import PorterStemmer, WordNetLemmatizer
 import nltk
+from contextlib import redirect_stdout
+from io import StringIO
 
-class TextStemLem:
+with StringIO() as captured_output, redirect_stdout(captured_output):
+    nltk.download('wordnet')
+
+class TextStemLem(object):
     """
     A class for to create columns with stemmed and lemmatized words from a column in a pandas DataFrame.
 
@@ -49,7 +54,6 @@ class TextStemLem:
         Returns:
             pd.DataFrame: A pandas dataframe with an additional column containing lemmatized words.
         """
-        nltk.download('wordnet')
         lemmatizer = WordNetLemmatizer()
         self.dataframe['lemmatized_words'] = self.dataframe[column_name].apply(
             lambda x: ' '.join([lemmatizer.lemmatize(word) for word in x.split()])

@@ -2,7 +2,6 @@
 *.xlsx
 *.csv
 credentials.py
-Reddit_API.ipynb
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
