@@ -2,17 +2,16 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 import matplotlib.pyplot as plt
+import seaborn as sns
 import plotly.express as px
-import streamlit as st
 from countryinfo import CountryInfo
 from project.utils import Data
 
 
 class CityCountry:
-
     numCities = Data.cities.drop(["Latitude", "Longitude"], axis=1).groupby("Country").count().sort_values(by="City",
-                                                                                                      ascending=
-                                                                                                      False)
+                                                                                                           ascending=
+                                                                                                           False)
 
     def byCountry_List(self):
         count_cities = CityCountry.numCities.copy()
@@ -20,11 +19,10 @@ class CityCountry:
         return count_cities.head(15)
 
     def byCountry_Plot(self):
-        plt.figure(figsize=(12,5))
+        plt.figure(figsize=(12, 5))
         plt.bar(CityCountry.numCities.index[:15], CityCountry.numCities.City[:15], color="brown")
         plt.xticks(rotation=70)
-        plt.ylabel("Number of cities in the dataset\n")
-        plt.title("Number of cities in the dataset, by country\n")
+        plt.title("Number of cities in the dataset, by country\n", fontsize=18)
 
     def byCountry_Map(self, nation):
         byCountry = Data.cities[Data.cities["Country"] == nation]
@@ -40,14 +38,48 @@ class CityCountry:
         fig.update_layout(title_text=mapTitle, title_x=0.5)
         fig.show()
 
+    def byContinent_Plot(self):
+        byContinent = Data.cities.value_counts("Continent")
+        sns.barplot(byContinent, orient="y", color="MediumOrchid")
+        plt.title("Number of cities in the dataset, by continent\n", fontsize=18)
+        plt.xlabel("")
+        plt.ylabel("")
+        plt.show()
+
+    def bySubregion_plot(self):
+        grouped_asia = Data.cities[Data.cities["Continent"] == "Asia"]
+        subregions_asia = grouped_asia["Subregion"].value_counts()
+        grouped_americas = Data.cities[Data.cities["Continent"] == "Americas"]
+        subregions_americas = grouped_americas["Subregion"].value_counts()
+        grouped_europe = Data.cities[Data.cities["Continent"] == "Europe"]
+        subregions_europe = grouped_europe["Subregion"].value_counts()
+        grouped_africa = Data.cities[Data.cities["Continent"] == "Africa"]
+        subregions_africa = grouped_africa["Subregion"].value_counts()
+        grouped_oceania = Data.cities[Data.cities["Continent"] == "Oceania"]
+        subregions_oceania = grouped_oceania["Subregion"].value_counts()
+        fig, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(5, 1, figsize=(12, 15), constrained_layout=True)
+        fig.suptitle("Number of cities in the dataset, by subregion\n", fontsize=18)
+        fig.supylabel("Number of cities\n", fontsize=14)
+        ax1.set_title("\nAsia\n", fontsize=14)
+        ax2.set_title("\nAmericas\n", fontsize=14)
+        ax3.set_title("\nEurope\n", fontsize=14)
+        ax4.set_title("\nAfrica\n", fontsize=14)
+        ax5.set_title("\nOceania\n", fontsize=14)
+        sns.barplot(subregions_asia, ax=ax1, color="DarkGreen")
+        sns.barplot(subregions_americas, ax=ax2, color="RoyalBlue")
+        sns.barplot(subregions_europe, ax=ax3, color="DarkGoldenRod")
+        sns.barplot(subregions_africa, ax=ax4, color="LightCoral")
+        sns.barplot(subregions_oceania, ax=ax5, color="Teal")
+        fig.show()
+
 
 class BigCities:
 
-    def majorCitiesMap(self):
+    def majorCitiesMap(self, projection):
         geo_df = gpd.read_file(r"C:\Users\sangi\Desktop\Info progetto python\Datasets\majorCities.csv", index_col=0)
         fig = px.scatter_geo(geo_df, lat="Latitude", lon="Longitude", hover_name="City",
                              hover_data=["Country", "Latitude", "Longitude"])
-        fig.update_geos(showocean=True, oceancolor="grey")
+        fig.update_geos(showocean=True, oceancolor="grey", projection_type=projection)
         fig.update_layout(title_text="List of major cities in the dataset\n", title_x=0.5)
         fig.show()
 
@@ -62,8 +94,8 @@ class Temperatures:
         fig.suptitle("Temperatures in " + city_name + " during the years\n", fontsize=18)
         ax1.plot(tempJan["dt"], tempJan["AverageTemperature"], color="b")
         ax2.plot(tempAug["dt"], tempAug["AverageTemperature"], color="r")
-        ax1.set_title("1st of January\n", fontsize=14)
-        ax2.set_title("1st of August\n", fontsize=14)
+        ax1.set_title("January\n", fontsize=14)
+        ax2.set_title("August\n", fontsize=14)
         ax1.set_xticks(tempJan.dt, tempJan.dt.str[:4], fontsize=12)
         ax2.set_xticks(tempAug.dt, tempAug.dt.str[:4], fontsize=12)
         fig.supylabel("Temperatures (°C)", fontsize=14)
@@ -114,26 +146,27 @@ class Temperatures:
         lowest = str(byNation.sort_values(by=["AverageTemperature"], ascending=True).City.iloc[0])
         try:
             random_country = CountryInfo(nation).name().capitalize()
-            country_area = format(CountryInfo(random_country).area(), ",d") #I use the format function to show separators between numbers
+            country_area = format(CountryInfo(random_country).area(),
+                                  ",d")  # I use the format function to show separators between numbers
             country_capital = CountryInfo(random_country).capital()
             country_population = format(CountryInfo(random_country).population(), ",d")
             country_region = CountryInfo(random_country).region()
             country_subregion = CountryInfo(random_country).subregion()
             print(("\nHere is some stats about " + nation + "\n").upper())
-            print("-"*80)
+            print("-" * 80)
             print("\nWEATHER STATS:\n")
             print("First recorded temperature: " + Data.months[first[-5:-3]] + " " + first[:4])
             print("Latest recorded temperature: " + Data.months[latest[-5:-3]] + " " + latest[:4])
             print("Highest monthly average temperature recorded: " + maxTemp + "°C" + " in " + highest)
             print("Lowest monthly average temperature recorded: " + minTemp + "°C" + " in " + lowest)
-            print("\n" + "-"*80)
+            print("\n" + "-" * 80)
             print("\nOTHER INFOS:\n")
             print("Area (in square km): " + str(country_area))
             print("Population: " + str(country_population))
             print("Capital city: " + str(country_capital))
             print("Continent: " + str(country_region))
             print("Subregion: " + str(country_subregion))
-        except AttributeError:
+        except KeyError:
             print("Please choose another country")
 
     def tempShock(self, chosen_year):
@@ -146,7 +179,7 @@ class Temperatures:
         temp1 = pd.concat([minTemp, maxTemp], axis=1, join="inner")
         temp1["TempDifference"] = temp1["MaximumTemperature"] - temp1["MinimumTemperature"]
         tempDiff = temp1.sort_values(by="TempDifference", ascending=False)
-        plt.figure(figsize=(15,6))
+        plt.figure(figsize=(15, 6))
         fig = tempDiff["TempDifference"][:10].plot(kind="barh", color="SaddleBrown")
         fig.set_xlim(left=40)
         plt.title(
@@ -171,7 +204,7 @@ class Temperatures:
             columns={"count": "TimesAbove49"}).sort_values(by="year")
         temp_counted = temp49["year"].value_counts().sort_values(ascending=False).reset_index()
         temp_shock = temp_counted.sort_values(by="year")
-        plt.figure(figsize=(20,6))
+        plt.figure(figsize=(20, 6))
         plt.plot(temp_shock["year"], temp_shock["count"], color="mediumseagreen")
         plt.xticks(temp_shock["year"][0::10], fontsize=12)
         plt.yticks(fontsize=12)
