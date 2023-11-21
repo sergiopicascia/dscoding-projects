@@ -19,7 +19,7 @@ This Streamlit application is designed to optimize hotel room allocations based 
 To start the application:
 1. Ensure you have Streamlit installed.
 2. Navigate to the application directory.
-3. Run `streamlit run app.py`.
+3. Run `streamlit run streamlit_run.py`.
 
 ### Navigating the Interface
 - Use the sidebar to select between viewing data or running allocation strategies.
