@@ -27,7 +27,7 @@ To start the application:
 - Explore detailed dataframes and visualizations for insights on strategy performance.
 
 ### Technology Stack
-- **Python**: Core programming language.
 - **Streamlit**: For creating the web application interface.
 - **Pandas**: For data manipulation and analysis.
 - **Matplotlib**: For generating plots and visualizations.
+- **Numpy**: For analysis of large arrays.
