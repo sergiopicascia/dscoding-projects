@@ -45,9 +45,12 @@ I collect comments from two threads:
 - [X] Add documentation to the TextPreprocessor class
 - [X] Find the most frequent words in the dataframes
 - [X] Add documentatio to the WordReplacer class
-- [ ] Add documentation to the functions from "des_statistics" module
-- [ ] Create functions to add stemmed words and lemmatized words
+- [X] Add documentation to the functions from "descriptive_statistics" module
+- [X] Create functions to add stemmed words and lemmatized words
+- [X] Create a function to hash the names of the authors
+- [X] Create a function to change the date format of the time when comments were created
 - [ ] Create a wordcloud for both of the dataframes
+- [ ] Add documentation to the module with streamlit usage
 - [ ] Add a README file for the streamlit folder
 - [ ] Make a sentiment analysis over time
 - [ ] Make words embedding and visualize it
@@ -55,4 +58,5 @@ I collect comments from two threads:
 - [ ] Add requirments file
 - [ ] Redact gitigrnore file
 - [ ] Redact README file
+- [ ] Create a Jupyter Notebook to present the code
 - [ ] Redact the whole project

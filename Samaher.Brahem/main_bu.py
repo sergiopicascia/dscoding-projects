@@ -1,5 +1,5 @@
 from data_manager import DataManager
-from quiz import Quiz 
+from quiz import Quiz
 
 try:
     # Establishing connection to the IMDb database
@@ -11,12 +11,14 @@ try:
         port='5432'
     )
 
+    # Getting the movie data from the database
     movie_data = imdb_data.get_movie()
 
+    # Creating a Quiz instance with the retrieved movie data
     quiz = Quiz(movie_data)
 
-    quiz.run_quiz_game()
-
+    # Running the quiz game
+    quiz.quiz_game()
 
 finally:
     # Ensuring the database connection is closed
