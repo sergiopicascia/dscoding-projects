@@ -1,4 +1,3 @@
-import streamlit as st
 from quiz_st import Quiz
 from data_manager import DataManager 
 
@@ -17,7 +16,7 @@ movie_data = imdb_data.get_movie()
 # Creating a Quiz instance with the retrieved movie data
 quiz = Quiz(movie_data)
 
-# Launching
+# Running the quiz
 quiz.quiz_game()
 
 

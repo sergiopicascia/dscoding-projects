@@ -171,7 +171,7 @@ class Quiz:
 
         return user_choice
     
-    def handle_question(self, question_info):
+    def handle_answer(self, question_info):
         user_choice = self.get_user_choice()
         is_correct = user_choice == question_info['correct_answer']
         score = self.calculate_score(question_info['difficulty_level'], is_correct)
@@ -207,7 +207,7 @@ class Quiz:
         return self.game_scores
     
 
-    def run_quiz_game(self):
+    def run_quiz(self):
         player_name = self.welcome_player()
         user_difficulty = self.choose_difficulty()
 
@@ -236,7 +236,7 @@ class Quiz:
                     break
 
             self.display_question(question_info)
-            score = self.handle_question(question_info)
+            score = self.handle_answer(question_info)
             total_score += score
 
         self.update_scores(player_name, total_score)
