@@ -12,10 +12,9 @@ The goal is to answer the following research questions:
 2) Do fans of Milan tend to 'forgive' the coach of the Milan (Stefano Pioli) after victories
 3) Do they ten to blame/praise the team in general or they address individual players + coach?
 
-
 ## Data
 
-To get the information about the fans' reactions, I collect comments from Reddit's threads on the respective topics. To do so, I use Reddit (get yourself familiar with the [documentation](https://www.reddit.com/dev/api/)). 
+To get the information about the fans' reactions, I collect comments from Reddit's threads on the respective topics. To do so, I use Reddit (get yourself familiar with the [documentation](https://www.reddit.com/dev/api/)).
 
 I collect comments from two threads:
 
@@ -42,9 +41,22 @@ I collect comments from two threads:
 - [X] Develop Reddit API application
 - [X] Write a function to extract all comments of particular threads on Reddit
 - [X] Collect all comments of users written in the threads.
-- [ ] Add guidelines for users
 - [X] Write functions to preprocess text data
-- [ ] Add documentation to the TextPreprocessor class
-- [ ] Find the most frequent words in the dataframes 
+- [X] Add documentation to the TextPreprocessor class
+- [X] Find the most frequent words in the dataframes
+- [X] Add documentatio to the WordReplacer class
+- [X] Add documentation to the functions from "descriptive_statistics" module
+- [X] Create functions to add stemmed words and lemmatized words
+- [X] Create a function to hash the names of the authors
+- [X] Create a function to change the date format of the time when comments were created
 - [ ] Create a wordcloud for both of the dataframes
+- [ ] Add documentation to the module with streamlit usage
+- [ ] Add a README file for the streamlit folder
+- [ ] Make a sentiment analysis over time
+- [ ] Make words embedding and visualize it
+- [ ] Add guidelines for users
 - [ ] Add requirments file
+- [ ] Redact gitigrnore file
+- [ ] Redact README file
+- [ ] Create a Jupyter Notebook to present the code
+- [ ] Redact the whole project
