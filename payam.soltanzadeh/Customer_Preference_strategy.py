@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[21]:
+# In[24]:
 
 
 import pandas as pd
@@ -151,7 +151,8 @@ def calculate_metrics(allocation_df, hotels_df):
         "Number of Hotels Utilized": allocation_df['hotel'].nunique(),
         "Full Capacity Hotels Count": hotels_fully_occupied,
         "Overall Revenue Earned": allocation_df['final_price'].sum(),
-        "Average Earnings Per Hotel": allocation_df.groupby('hotel')['final_price'].sum().mean()
+        "Average Earnings Per Hotel": allocation_df.groupby('hotel')['final_price'].sum().mean(),
+        "Average Guest Satisfaction": allocation_df['guest_satisfaction'].mean(),
     }
 
     return pd.DataFrame(list(results.items()), columns=['Metric', 'Value'])
@@ -236,7 +237,6 @@ def main():
     allocation_description = "<b>Table 1: Allocation Results Summary</b><br>This table shows the distribution of guests across various hotels, the price paid, and their satisfaction scores."
     allocation_post_description = "*Note: Only the first 5 rows are displayed for brevity. For the complete data, please use the download link below.*"
     display_with_description(allocation_description, customer_preference_allocation_df.head(), allocation_post_description)
-
     metrics_description = "<b>Table 2: Performance Metrics Overview</b><br>This table provides key metrics summarizing the allocation's effectiveness, including total guests allocated, revenue earned, and average guest satisfaction."
     metrics_post_description = "*Note: Guest satisfaction scores range from 1 to 5, with 1 being the guest's top choice and 5 being around their last preference.*"
     display_with_description(metrics_description, results_df, metrics_post_description)
