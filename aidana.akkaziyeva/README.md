@@ -4,15 +4,15 @@ This is a Streamlit web application that provides visualizations of Netflix data
 ## Project Structure
 The project is structured as follows:
 
-app.py: The main script that utilizes Streamlit to display visualizations and the Netflix quiz.
-usage.ipynb: Jupyter Notebook file used for presenting the project.
-modules/quiz.py: Contains the NetflixQuiz class with methods to generate quiz questions.
-modules/preprocessing.py: Handles data preprocessing for the Netflix dataset.
-modules/visualizations.py: Provides functions for visualizing data using Streamlit.
+app.py: The main script that utilizes Streamlit to display visualizations and the Netflix quiz.<br>
+usage.ipynb: Jupyter Notebook file used for presenting the project.<br>
+modules/quiz.py: Contains the NetflixQuiz class with methods to generate quiz questions.<br>
+modules/preprocessing.py: Handles data preprocessing for the Netflix dataset.<br>
+modules/visualizations.py: Provides functions for visualizing data using Streamlit.<br>
 
 ## Data
 The Netflix dataset (netflix_data.csv) is required for this project. Make sure to place it in the project root directory.
 
 ## Features
-Visualizations: Explore visual representations of movie durations, TV show seasons, and distribution by release year.
+Visualizations: Explore visual representations of movie durations, TV show seasons, and distribution by release year.<br>
 Netflix Quiz: Test your knowledge with a quiz that covers various aspects of the Netflix dataset.
