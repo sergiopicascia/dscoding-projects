@@ -1,4 +1,3 @@
-# app.py
 import streamlit as st
 import pandas as pd
 from modules.preprocessing import preprocess_data
@@ -10,13 +9,21 @@ def main():
     data = pd.read_csv('netflix_data.csv')
     quiz_data = NetflixQuiz(data)
     
+    st.title('Netflix Data Quiz')
+
+    st.write('This is a Streamlit web application that provides visualizations of Netflix data and includes a quiz game based on the Netflix dataset. The quiz covers various aspects such as directors, genres, ratings, cast members, and movie production countries.')
+
+    st.header("First Ten Rows of Netflix Data")
+    st.write(data.head(10))
+
     movie_length, season_counts, release_year_data = preprocess_data(data)
 
     # Displaying visualizations
     show_visualizations(movie_length, season_counts, release_year_data)
     
-    st.title('Quiz Time!')
-    difficulty = st.selectbox("Select Difficulty", ["Easy", "Medium", "Hard"])
+    st.header('Quiz Time!')
+    st.write('Select the difficulty level below and answer the questions')
+    difficulty = st.selectbox("Level", ["Easy", "Medium", "Hard"])
 
     # Initializing session variables
     if 'questions' not in st.session_state or st.session_state.difficulty != difficulty:

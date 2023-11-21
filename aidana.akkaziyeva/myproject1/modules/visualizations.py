@@ -1,6 +1,4 @@
-# modules/visualizations.py
 import streamlit as st
-
 
 
 def show_movie_durations_histogram(movie_length):
@@ -16,7 +14,7 @@ def release_year_chart(release_year_data):
     st.line_chart(release_year_data)
 
 def show_visualizations(movie_length, season_counts, release_year_data):
-    st.title('Netflix Data Visualizations')
+    
     show_movie_durations_histogram(movie_length)
     shows_by_season_chart(season_counts)
     release_year_chart(release_year_data)

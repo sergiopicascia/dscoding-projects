@@ -1,4 +1,3 @@
-# modules/quiz.py
 import pandas as pd
 import numpy as np
 import random
@@ -14,7 +13,7 @@ class NetflixQuiz:
 
         question = f"Who directed '{show}'?"
 
-        incorrect_opts = non_empty[non_empty['director'] != correct_opt].sample(n=3)['director'].unique().tolist()
+        incorrect_opts = non_empty[non_empty['director'] != correct_opt].sample(n=3)['director'].tolist()
 
         options = [correct_opt, *incorrect_opts]
         random.shuffle(options)
@@ -77,7 +76,7 @@ class NetflixQuiz:
         non_empty = self.data[(self.data['type']=='Movie') & self.data['country'].notnull()]
         show_row = non_empty.sample(n=1).iloc[0]
 
-        show, correct_opt = show_row['title'], show_row['country'].split(',')[0].strip()    #im showing the first country only
+        show, correct_opt = show_row['title'], show_row['country'].split(',')[0].strip()    
         question = f"In which country was the movie '{show}' produced?"
 
         unique_countries = set(country.strip() for countries in non_empty['country'] for country in countries.split(',') if country.strip())  #the latter checks if stripped 'country' is not empty(empty is false)

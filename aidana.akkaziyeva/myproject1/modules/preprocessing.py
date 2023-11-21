@@ -1,4 +1,3 @@
-# modules/preprocessing.py
 import pandas as pd
 
 def preprocess_data(data):
@@ -13,3 +12,8 @@ def preprocess_data(data):
     release_year_data = pd.DataFrame({'TV Shows': show_release_year, 'Movies': movie_release_year})
 
     return movie_length, season_counts, release_year_data
+
+
+
+#def data_info(data):
+  #  return data.head()
