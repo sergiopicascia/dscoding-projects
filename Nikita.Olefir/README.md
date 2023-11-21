@@ -47,6 +47,8 @@ I collect comments from two threads:
 - [X] Add documentatio to the WordReplacer class
 - [X] Add documentation to the functions from "descriptive_statistics" module
 - [X] Create functions to add stemmed words and lemmatized words
+- [X] Create a function to hash the names of the authors
+- [X] Create a function to change the date format of the time when comments were created
 - [ ] Create a wordcloud for both of the dataframes
 - [ ] Add documentation to the module with streamlit usage
 - [ ] Add a README file for the streamlit folder
