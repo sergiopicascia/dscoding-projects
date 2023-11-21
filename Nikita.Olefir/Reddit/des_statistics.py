@@ -6,7 +6,7 @@
     2) Calculation of the statistics regaridng words' appearances
 
     3) Indentification of the n most popular words (+graph)
-    """
+"""
 
 import numpy as np
 import pandas as pd
