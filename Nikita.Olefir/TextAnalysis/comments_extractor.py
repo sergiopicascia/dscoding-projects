@@ -1,4 +1,4 @@
-from Reddit_API_Wrapper import reddit
+from API_Reddit.Reddit_API_Wrapper import reddit
 import pandas as pd
 
 
@@ -31,7 +31,6 @@ def comments_extractor(subreddit_name: str, submission_id: str):
             {
                 "author": comment.author.name if comment.author else "[deleted]",
                 "body": comment.body,
-                "score": comment.score,
                 "created_utc": comment.created_utc,
             }
         )
