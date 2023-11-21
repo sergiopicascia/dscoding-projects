@@ -13,8 +13,12 @@ title_basics = pd.read_csv("//Users/ariannagirotto/Desktop/dataset/title.basics.
 info_person = pd.read_csv("//Users/ariannagirotto/Desktop/dataset/name.tsv", sep="\t", quoting=3, encoding='utf-8',
                           engine='python', nrows=100000)
 
-title_basics = title_basics[(title_basics != '\\N').all(axis=1)]
-info_person = info_person[(info_person != '\\N').all(axis=1)]
+title_basics = title_basics[(title_basics['startYear'] != '\\N') &
+                            (title_basics['tconst'] != '\\N') &
+                            (title_basics['genres'] != '\\N')]
+info_person = info_person[(info_person['birthYear'] != '\\N') &
+                          (info_person['primaryName'] != '\\N') &
+                          (info_person['primaryProfession'] != '\\N')]
 
 easy_title_basics = title_basics[
     (title_basics['startYear'].astype(int) >= 1990) &
@@ -24,11 +28,12 @@ easy_title_basics = easy_title_basics.sort_values(by='startYear', ascending=Fals
 medium_title_basics = title_basics[
     (title_basics['startYear'].astype(int) >= 1940) &
     (title_basics['startYear'].astype(int) < 1990)]
-easy_title_basics = easy_title_basics.sort_values(by='startYear', ascending=False)
+medium_title_basics = medium_title_basics.sort_values(by='startYear', ascending=False)
 
 difficult_title_basics = title_basics[
     (title_basics['startYear'].astype(int) >= 1800) &
     (title_basics['startYear'].astype(int) < 1940)]
+difficult_title_basics = difficult_title_basics.sort_values(by='startYear', ascending=True)
 
 easy_info_person = info_person[
     (info_person['birthYear'].astype(int) >= 1960) &
@@ -43,6 +48,8 @@ medium_info_person = medium_info_person.sort_values(by='birthYear', ascending=Fa
 difficult_info_person = info_person[
     (info_person['birthYear'].astype(int) >= 1800) &
     (info_person['birthYear'].astype(int) < 1930)]
+difficult_info_person = difficult_info_person.sort_values(by='birthYear', ascending=True)
+
 '''
 FUNZIONI PER CREARE LE DOMANDE E LE RISPOSTE
 '''
@@ -71,7 +78,7 @@ def title_basics_type1(df):
 def title_basics_type2(df):
     random_tconst = np.random.choice(df['tconst'], replace=False)
     movie_title = df.loc[df['tconst'] == random_tconst, 'primaryTitle'].values[0]
-    question = f"Di quale genere è il film {movie_title}?"
+    question = f"Di quale genere è il film/serie tv {movie_title}?"
 
     right_answer = df.loc[df['tconst'] == random_tconst, 'genres'].values[0]
     wrong_answers = []
@@ -198,12 +205,11 @@ def easy():
                 elif user_answer > len(answer_options):
                     print("Risposta non valida.\n")
                 else:
-                    print("Risposta errata!\n")
+                    print("Risposta errata!")
+                    print(f"La risposta giusta era '{answers[i]['correct']}'\n")
                     break
             except ValueError:
                 print("Inserisci un numero valido.\n")
-
-    print(f"Il punteggio finale è {score}/{len(questions)}")
     final_score = score / len(questions)
     percentuale_easy = final_score * 100
     if percentuale_easy >= 50:
@@ -213,14 +219,15 @@ def easy():
         elif 80 < percentuale_easy <= 100:
             print(f"Fantastic! You have a nice knowledge of film. Too easy? Try the medium quiz")
     else:
-        print(f"Fail! You have done {percentuale_easy}% and you haven't passed the easy quiz. Are you living in a cave?Try "
-              f"again!")
+        print(
+            f"Fail! You have done {percentuale_easy}% and you haven't passed the easy quiz. Are you living in a cave?Try "
+            f"again!")
     return percentuale_easy
 
 
 def medium():
-    title_basics_questions, title_basics_answers = title_basics_qa(medium_title_basics, 1)
-    info_person_questions, info_person_answers = info_person_qa(medium_info_person, 1)
+    title_basics_questions, title_basics_answers = title_basics_qa(medium_title_basics, 2, 2)
+    info_person_questions, info_person_answers = info_person_qa(medium_info_person, 2, 2)
 
     title_basics_pairs = list(zip(title_basics_questions, title_basics_answers))
     info_person_pairs = list(zip(info_person_questions, info_person_answers))
@@ -249,7 +256,8 @@ def medium():
                 elif user_answer > len(answer_options):
                     print("Risposta non valida.\n")
                 else:
-                    print("Risposta errata!\n")
+                    print("Risposta errata!")
+                    print(f"La risposta giusta era '{answers[i]['correct']}'\n")
                     break
             except ValueError:
                 print("Inserisci un numero valido.\n")
@@ -271,8 +279,8 @@ def medium():
 
 
 def difficult():
-    title_basics_questions, title_basics_answers = title_basics_qa(difficult_title_basics, 1)
-    info_person_questions, info_person_answers = info_person_qa(difficult_info_person, 1)
+    title_basics_questions, title_basics_answers = title_basics_qa(difficult_title_basics, 2, 2)
+    info_person_questions, info_person_answers = info_person_qa(difficult_info_person, 2, 2)
 
     title_basics_pairs = list(zip(title_basics_questions, title_basics_answers))
     info_person_pairs = list(zip(info_person_questions, info_person_answers))
@@ -301,7 +309,8 @@ def difficult():
                 elif user_answer > len(answer_options):
                     print("Risposta non valida.\n")
                 else:
-                    print("Risposta errata!\n")
+                    print("Risposta errata!")
+                    print(f"La risposta giusta era '{answers[i]['correct']}'\n")
                     break
             except ValueError:
                 print("Inserisci un numero valido.\n")
@@ -322,32 +331,46 @@ def difficult():
             f"pass it")
     return percentuale_diff
 
+
 '''
 FUNZIONE PER SCEGLIERE IL QUIZ CHE VUOI
 '''
 
 
 def choose_quiz():
+    quiz_results = {'easy': [], 'medium': [], 'difficult': []}
     while True:
-        choosen_quiz = False
-        while not choosen_quiz:
-            user_answer = input("Inserisci il quiz che vuoi fare tra easy, medium e difficult: ")
-            user_answer = user_answer.lower()
+        user_answer = input("Inserisci il quiz che vuoi fare tra easy, medium e difficult: ").lower()
+        if user_answer in quiz_results:
             if user_answer == "easy":
-                easy()
-                choosen_quiz = True
+                score = easy()
             elif user_answer == "medium":
-                medium()
-                choosen_quiz = True
+                score = medium()
             elif user_answer == "difficult":
-                difficult()
-                choosen_quiz = True
-            else:
-                print("Quiz non valido. Inserisci un quiz valido.")
-        repeat = input("Vuoi ripetere il quiz? (Sì o No): ")
-        if repeat.lower() != "sì" and repeat.lower() != "si":
-            break
+                score = difficult()
+
+            quiz_results[user_answer].append(score)
+
+            repeat = input("Vuoi ripetere il quiz? (Sì o No): ").lower()
+            if repeat == "no":
+                break
+        else:
+            print("Quiz non valido. Inserisci un quiz valido.")
+
+    for quiz_type, scores in quiz_results.items():
+        if scores:
+            average_score = sum(scores) / len(scores)
+            color = 'green' if (average_score >= 50 and quiz_type == 'easy') or \
+                               (average_score >= 60 and quiz_type == 'medium') or \
+                               (average_score >= 70 and quiz_type == 'difficult') else 'red'
+            plt.bar(quiz_type, average_score, color=color, label=quiz_type)
+            plt.text(quiz_type, average_score, f'{average_score:.2f}%')
+
+    plt.ylim(0, 100)
+    plt.ylabel('Average Score')
+    plt.title('Results')
+    plt.legend()
+    plt.show()
 
 
 choose_quiz()
-
