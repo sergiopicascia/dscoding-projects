@@ -103,7 +103,7 @@ class Location:
     cities_coord : dict
         Dictionary with the city and the coordinates
     """
-    def get_coordinates(self):
+    def _get_coordinates(self):
         cities = self.data[['City', 'Country', 'Latitude', 'Longitude']].drop_duplicates().reset_index(drop=True)
         cities_coord = {}
         for i in range(cities.shape[0]):
@@ -122,7 +122,7 @@ class Location:
     Update the csv file with the new coordinates
     """
     def update_file(self):
-        cities_coord = self.get_coordinates()
+        cities_coord = self._get_coordinates()
         self.data['City_Country'] = self.data['City'] + ', ' + self.data['Country']
         self.data['Latitude'] = self.data['City_Country'].map(lambda x: cities_coord[x][0])
         self.data['Longitude'] = self.data['City_Country'].map(lambda x: cities_coord[x][1])

@@ -11,14 +11,17 @@ from abc import abstractmethod
 
 """
 This class is used to visualize the data. It contains methods to create the following visualizations:
-- Heatmap (heatmap): a heatmap with the average temperature of each city/country for each year
 - Line Chart Year (line_year): a line chart with the average temperature of a selected city/country in each month
 - Line Chart (line): a line chart with the average temperature of a selected city/country in each year
-- Temperature Range Heatmap (bubble_range): a heatmap with the range of temperatures for each city/country for each year
-- Average Temperature Heatmap (bubble): a heatmap with the average temperature for each city/country for each year
-- Predicted Temperatures (predict_city_temperature): a line chart with the predicted temperatures for the next 50 years for a selected city/country
-- Additional Statistics (additional_statistics): a dataframe with additional statistics about the dataset
+- Temperature Range Heatmap (range): a heatmap with the range of temperatures for each city/country for each year
+- Average Temperature Heatmap (temperature): a heatmap with the average temperature for each city/country for each year
+- Predicted Temperatures (predict_temperature): a line chart with the predicted temperatures for the next 50 years for a selected city/country
+- Additional Statistics (statistics): a dataframe with additional statistics about the dataset
 - Temperature Boxplot (boxplot): a boxplot and scatterplot with the distribution of temperatures for a selected city/country during each month
+
+It also contains the following methods that should be implemented by the subclasses:
+- _range_figure: a bubble map with the range of temperatures for each city/country for each year
+- _temperature_figure: a bubble map with the average temperature for each city/country
 """
 class Visualize:
     """
@@ -152,13 +155,13 @@ class Visualize:
         The figure with the line chart
     """
     def line_year(self,selected,year):
-        city_data = self.data[(self.data[self.label] == selected) & (self.data['Year'] == year)]
-        month = city_data['dt'].dt.month
-        fig = px.line(city_data, x=month, y='AverageTemperature', markers=True, color_discrete_sequence=[self.primaryColor])
+        place = self.data[(self.data[self.label] == selected) & (self.data['Year'] == year)]
+        month = place['dt'].dt.month
+        fig = px.line(place, x=month, y='AverageTemperature', markers=True, color_discrete_sequence=[self.primaryColor])
         fig.update_xaxes(title_text='Month',showgrid=False)
         fig.update_layout(xaxis={'tickmode': 'array',
                                  'tickvals':month.unique(),
-                                 'ticktext': city_data['dt'].dt.strftime('%B').unique()})
+                                 'ticktext': place['dt'].dt.strftime('%B').unique()})
         fig.update_yaxes(showgrid=False)
         return self._fig_layout(fig)
 
@@ -176,11 +179,11 @@ class Visualize:
         The figure with the line chart
     """
     def line(self, selected):
-        city_data = self.data_year[(self.data_year[self.label] == selected)]
+        place = self.data_year[(self.data_year[self.label] == selected)]
         fig = go.Figure()
         fig.add_trace(go.Scatter(
-            x=city_data['Year'],
-            y=city_data['YearlyAverage'] - city_data['AverageTemperatureUncertainty'],
+            x=place['Year'],
+            y=place['YearlyAverage'] - place['AverageTemperatureUncertainty'],
             marker=dict(color=self.primaryColor),
             line=dict(width=0),
             mode='lines',
@@ -188,8 +191,8 @@ class Visualize:
             name='Lower bound'
         ))
         fig.add_trace(go.Scatter(
-            x=city_data['Year'],
-            y=city_data['YearlyAverage'] + city_data['AverageTemperatureUncertainty'],
+            x=place['Year'],
+            y=place['YearlyAverage'] + place['AverageTemperatureUncertainty'],
             mode='lines',
             marker=dict(color=self.primaryColor),
             line=dict(width=0),
@@ -199,8 +202,8 @@ class Visualize:
             name='Upper bound'
         ))
         fig.add_trace(go.Scatter(
-            x=city_data['Year'],
-            y=city_data['YearlyAverage'],
+            x=place['Year'],
+            y=place['YearlyAverage'],
             mode='lines',
             name='Average Temperature',
             line=dict(color=self.primaryColor)
@@ -271,13 +274,15 @@ class Visualize:
     ----------
     selected : str
         The name of the city/country to be shown
+    next : int
+        The number of years to predict
 
     Returns
     -------
     fig : plotly.graph_objects.Figure
         The figure with the line chart
     """
-    def predict_temperature(self,selected):
+    def predict_temperature(self,selected,next=50):
         place = self.data_year[(self.data_year[self.label] == selected)]
         years = place['Year'].values.reshape(-1, 1)
         temperatures = place['YearlyAverage'].values
@@ -285,7 +290,7 @@ class Visualize:
         years_poly = poly_reg.fit_transform(years) 
         lin_reg_poly = LinearRegression()
         lin_reg_poly.fit(years_poly, temperatures)
-        future_years = np.arange(years.max(), years.max()+50).reshape(-1, 1)
+        future_years = np.arange(years.max(), years.max()+next).reshape(-1, 1)
         future_years_poly = poly_reg.transform(future_years)
         predicted_temperatures = lin_reg_poly.predict(poly_reg.transform(years))
         future_predicted_temperatures = lin_reg_poly.predict(future_years_poly)
@@ -421,8 +426,8 @@ class Visualize:
 
 """
 This class is used to visualize the data for cities. It inherits from the Visualize class and implements the following methods:
-- range_figure: a bubble map with the range of temperatures for each city for each year
-- temperature_figure: a bubble map with the average temperature for each city for each year
+- _range_figure: a bubble map with the range of temperatures for each city for each year
+- _temperature_figure: a bubble map with the average temperature for each city for each year
 - heatmap: a heatmap with the average temperature of each city for each year
 - show_locations: a map with all the cities in the dataset
 - show_city: a map with the city of choice
@@ -581,8 +586,8 @@ class City(Visualize):
 
 """
 This class is used to visualize the data for countries. It inherits from the Visualize class and implements the following methods:
-- range_figure: a bubble map with the range of temperatures for each country for each year
-- temperature_figure: a bubble map with the average temperature for each country for each year
+- _range_figure: a bubble map with the range of temperatures for each country for each year
+- _temperature_figure: a bubble map with the average temperature for each country for each year
 - country_to_continent: a function to get the continent of a country
 """
 class Country(Visualize):
@@ -616,7 +621,7 @@ class Country(Visualize):
         self.data = self.data[self.data['Country'] != 'Denmark']
         self.data['Country'] = self.data['Country'].str.replace('Burma', 'Myanmar')
         self.data.loc[self.data['Country'] == 'Denmark (Europe)', 'Country'] = 'Denmark'
-        self.data.loc[:,'Continent'] = self.data['Country'].apply(self._country_to_continent)
+        self.data.loc[:,'Continent'] = self.data['Country'].apply(self.country_to_continent)
         self.data.loc[(self.data['Country'] == "Congo (Democratic Republic Of The)") | (self.data['Country'] == "Côte D'Ivoire"), 'Continent'] = 'Africa'
         self.data.loc[self.data['Country'] == 'Bosnia And Herzegovina', 'Continent'] = 'Europe'
         self.data.dropna(subset=['Continent'], inplace=True)
@@ -638,7 +643,7 @@ class Country(Visualize):
     country_continent_name : str
         The name of the continent
     """
-    def _country_to_continent(self,country_name):
+    def country_to_continent(self,country_name):
         try:
             country_alpha2 = pc.country_name_to_country_alpha2(country_name)
             country_continent_code = pc.country_alpha2_to_continent_code(country_alpha2)

@@ -4,7 +4,7 @@ from visualize import City,Country
 import pandas as pd
 import os
 #Change .streamlit/config.toml to change the theme color, the map will change accordingly
-
+#For all the comments i used _= because streamlit doesn't support """ """ comments
 _="""
  This file contains the streamlit app.
 It contains the following methods:
@@ -20,6 +20,8 @@ It contains the following methods:
     - display_line_chart: display the line chart of the dataset
     - display_prediction: display the prediction of the dataset
     - display_line_year: display the line chart of the dataset for a specific year
+    - display_general: display the general information of the dataset
+    - display_specific: display the specific information of the dataset
 """
 
 update = False # Set to True if you want to update the coordinates of the cities in the csv files
