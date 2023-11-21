@@ -138,19 +138,15 @@ class Quiz:
         plt.tight_layout()
         plt.show()
 
-
-
-    def quiz_game(self):
-        difficulty_levels = ['easy', 'medium', 'hard']
-        total_score = 0
-        used_questions = []
-
-
+    def welcome_player(self):
         print('HELLO THERE! Welcome to ✨ The Quiz ✨')
         player_name = input("What do you want us to call you? ")
         print('Alright, ' + player_name + '!\n GET READY TO PLAY 🔥')
         print("----------------------------")
+        return player_name
 
+    def choose_difficulty(self):
+        difficulty_levels = ['easy', 'medium', 'hard']
         user_difficulty = input("Choose a difficulty level (easy, medium, hard): ").lower()
         print("----------------------------")
 
@@ -158,11 +154,71 @@ class Quiz:
             print("Invalid difficulty level. Please choose from: easy, medium, hard")
             user_difficulty = input("Choose a difficulty level (easy, medium, hard): ").lower()
 
+        return user_difficulty
+
+    def display_question(self, question_info):
+        print(question_info['question'])
+        for letter, option in question_info['options'].items():
+            print(f"{letter}. {option}")
+
+    def get_user_choice(self):
+        user_choice = None
+        while user_choice not in ['A', 'B', 'C', 'D']:
+            user_choice = input("Enter your choice (A, B, C, D): ").upper()
+
+            if user_choice not in ['A', 'B', 'C', 'D']:
+                print("You typed a wrong letter. Please type again.")
+
+        return user_choice
+    
+    def handle_question(self, question_info):
+        user_choice = self.get_user_choice()
+        is_correct = user_choice == question_info['correct_answer']
+        score = self.calculate_score(question_info['difficulty_level'], is_correct)
+
+        if is_correct:
+            print("Correct!")
+        else:
+            print(f"Wrong! The correct answer is: {question_info['correct_answer']}")
+
+        print(f"Your score for this question: {score}")
+        print("----------------------------")
+        return score
+
+    def update_scores(self, player_name, total_score):
+        game_score = (player_name, total_score)
+        self.load_scores('game_scores.json')  # Load existing scores
+
+        player_exists = False
+        for index, (name, score) in enumerate(self.game_scores):
+            if name == player_name:
+                player_exists = True
+                self.game_scores[index] = (name, score + total_score)
+                break
+
+        if not player_exists:
+            self.game_scores.append(game_score)
+
+        print(f"Total score: {total_score}")
+        print(f"Here's how you performed, {player_name}:")
+        self.display_histogram(player_name)
+        self.save_scores('game_scores.json')  # Save scores after each game in JSON format
+
+        return self.game_scores
+    
+
+    def run_quiz_game(self):
+        player_name = self.welcome_player()
+        user_difficulty = self.choose_difficulty()
+
         question_generators = [
             {'generator': self.generate_question, 'params': ('When was this movie released? ==> ', 'year')},
             {'generator': self.generate_question, 'params': ('Where was this movie produced? ==> ', 'country')},
             {'generator': self.generate_question, 'params': ('Which one of these movies has the highest score on IMDb?', 'score')}
         ]
+
+        total_score = 0
+        used_questions = []
 
         for i in range(10):
             while True:
@@ -179,49 +235,9 @@ class Quiz:
                     used_questions.append(question_info['question'])
                     break
 
-            print(question_info['question'])
-
-            for letter, option in question_info['options'].items():
-                print(f"{letter}. {option}")
-
-            user_choice = None
-            while user_choice not in ['A', 'B', 'C', 'D']:
-                user_choice = input("Enter your choice (A, B, C, D): ").upper()
-
-                if user_choice not in ['A', 'B', 'C', 'D']:
-                    print("You typed a wrong letter. Please type again.")
-
-            is_correct = user_choice == question_info['correct_answer']
-            score = self.calculate_score(question_info['difficulty_level'], is_correct)
+            self.display_question(question_info)
+            score = self.handle_question(question_info)
             total_score += score
 
-            if is_correct:
-                print("Correct!")
-            else:
-                print(f"Wrong! The correct answer is: {question_info['correct_answer']}")
+        self.update_scores(player_name, total_score)
 
-            print(f"Your score for this question: {score}")
-            print("----------------------------")
-
-        game_score = (player_name, total_score)
-        self.load_scores('game_scores.json')  # Load existing scores
-
-        # If the player already exists in the scores, update their score
-        player_exists = False
-        for index, (name, score) in enumerate(self.game_scores):
-            if name == player_name:
-                player_exists = True
-                self.game_scores[index] = (name, score + total_score)
-                break
-
-        # If the player doesn't exist, add their score to the list
-        if not player_exists:
-            self.game_scores.append(game_score)
-
-        print(f"Total score: {total_score}")
-        print(f"Here's how you performed, {player_name}:")
-        self.display_histogram(player_name)
-
-        self.save_scores('game_scores.json')  # Save scores after each game in JSON format
-
-        return self.game_scores
