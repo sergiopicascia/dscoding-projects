@@ -1,5 +1,5 @@
 import praw
-from credentials import USERNAME, PASSWORD, CLIENT_ID, CLIENT_SECRET
+from API_Reddit.credentials import USERNAME, PASSWORD, CLIENT_ID, CLIENT_SECRET
 
 reddit = praw.Reddit(
     client_id=CLIENT_ID,
@@ -7,4 +7,4 @@ reddit = praw.Reddit(
     username=USERNAME,
     password=PASSWORD,
     user_agent="MyAPI/1 by (nikitaolefir)",
-)
+    )

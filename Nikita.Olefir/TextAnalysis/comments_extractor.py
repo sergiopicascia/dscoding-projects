@@ -1,4 +1,4 @@
-from Reddit_API_Wrapper import reddit
+from API_Reddit.Reddit_API_Wrapper import reddit
 import pandas as pd
 
 
