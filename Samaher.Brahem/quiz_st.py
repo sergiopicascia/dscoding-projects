@@ -156,7 +156,7 @@ class Quiz:
                     {'generator': self.generate_question, 'params': ('Where was this movie produced? ==> ', 'country')},
                     {'generator': self.generate_question, 'params': ('Which one of these movies has the highest score on IMDb?', 'score')}
                 ]
-
+                 
                 for i in range(10):
                     while True:
                         question_info = None
@@ -181,7 +181,7 @@ class Quiz:
 
                     # Providing a unique key for st.radio
                     radio_key = f"radio_{i}"  # Using a unique identifier for each iteration
-                    user_choice = st.radio("Choose your answer:", list(question_info['options'].keys()), key=radio_key, index=None, horizontal=True)
+                    user_choice = st.radio("Choose your answer:", list(question_info['options'].keys()), key=radio_key, horizontal=True)
 
                     st.write("----------------------------")
                     

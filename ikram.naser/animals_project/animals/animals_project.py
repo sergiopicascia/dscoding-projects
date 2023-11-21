@@ -11,33 +11,38 @@ from sklearn.naive_bayes import GaussianNB
 import seaborn as sns
 from sklearn.cluster import KMeans
 
+
 #importing datasets
+from animals_project.animals.functions import data_import
+importing = data_import()
+importing.import_zoo()
+importing.import_class_types()
+
 zoo = pd.read_csv('C:/Users/admin/Downloads/animal_DB/zoo.csv')
 class_types = pd.read_csv('C:/Users/admin/Downloads/animal_DB/class.csv')
-df=pd.merge(zoo,class_types,how='left',left_on='class_type',right_on='Class_Number')
+df = pd.merge(zoo, class_types, how='left', left_on='class_type', right_on='Class_Number')
 
 #visualizing the animals distribution
 animal_classes = class_types.iloc[:,2]
 n_of_animals = class_types.iloc[:,1]
 animals_distribution = dict(zip(animal_classes, n_of_animals))
 
-plt.figure(figsize=(10, 6))
-plt.bar(animal_classes, n_of_animals, color='blue')
-plt.xlabel('Animal classes')
-plt.ylabel('Number of animals')
-plt.title('Animal Class Types Distribution')
-plt.show()
+from animals_project.animals.functions import Visualizations
+plot = Visualizations()
+plot.distribution_plot(animal_classes, n_of_animals)
 
 #data preprocessing
 X = zoo.iloc[:, 1:17]
 Y = zoo.iloc[:, 17]
-X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size = 0.3, random_state = 42, stratify = Y)
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.3, random_state=42, stratify=Y)
 np.array(X_train)
 np.array(X_test) #to check if I can put everything in one bracket
 
 sc = StandardScaler()
 X_train = sc.fit_transform(X_train)
 X_test = sc.transform(X_test)
+from animals.functions import scaling
+
 
 #K Nearest Neighbor
 classifier_knn = KNeighborsClassifier()
@@ -148,15 +153,10 @@ algorithms = pd.DataFrame({
 algorithms.sort_values(by='Score', ascending=False)
 
 #Correlation analysis
-plt.subplots(figsize=(10,5))
-ax = plt.axes()
-ax.set_title('Correlation matrix')
-corr = zoo.iloc[:, 1:].corr()
-sns.heatmap(corr, annot=True, xticklabels=corr.columns.values, yticklabels=corr.columns.values)
+from animals_project.animals.functions import Visualizations
+plot = Visualizations()
+plot.correlation_plot()
 
-#which feature(s) are relevant to efficiently classify the animals?
-print(corr[corr != 1][abs(corr)> 0.65].dropna(how='all', axis=1).dropna(how='all', axis=0))
-df.iloc[:, 1:19].groupby("Class_Number").mean()
 
 #K Means Clustering
 ##elbow method
@@ -183,12 +183,12 @@ plt.figure(figsize=(10, 6))
 for cluster_num in range(num_clusters):
     cluster_data = zoo[y_kmeans == cluster_num]
     plt.scatter(cluster_data['eggs'], cluster_data['hair'], label=f'Cluster {cluster_num}')
-plt.scatter(kmeans.cluster_centers_[:, 0], kmeans.cluster_centers_[:, 1], s = 200, c = 'yellow', label = 'Centroids')
-plt.title('Clustering of Animals Based on Features')
-plt.xlabel('eggs')
-plt.ylabel('hair')
-plt.legend()
-plt.show()
+    plt.scatter(kmeans.cluster_centers_[:, 0], kmeans.cluster_centers_[:, 1], s = 200, c = 'yellow', label = 'Centroids')
+    plt.title('Clustering of Animals Based on Features')
+    plt.xlabel('eggs')
+    plt.ylabel('hair')
+    plt.legend()
+    plt.show()
 
 
 
