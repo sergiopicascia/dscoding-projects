@@ -11,8 +11,8 @@ class City:
         self.id = city_id
         self.neighbors = []
 
-    def add_neighbor(self, neighbor, distance):
-        self.neighbors.append({'city': neighbor, 'distance': distance})
+    def add_neighbor(self, neighbor, travel_time):
+        self.neighbors.append({'city': neighbor, 'travel_time': travel_time})
 
     def calculate_distance(self, destination_city):
         '''
@@ -54,3 +54,9 @@ class City:
         if destination_city.population > 200000:
             result_time += 2
         return result_time
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return self.name

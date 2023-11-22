@@ -1,71 +1,62 @@
-{
- "cells": [
-  {
-   "cell_type": "code",
-   "execution_count": 3,
-   "id": "7f8bee54-72ce-4ac1-83cd-0d74e17b8724",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "import pandas as pd\n",
-    "import numpy as np"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "c250f539-9e8d-4bb3-b903-0fa77c41cdd3",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "def allocate_and_calculate(hotels, guests, preferences):\n",
-    "    \"\"\" this function allocates guests to their preferred hotels,\n",
-    "    calculates the paid price, satisfaction, and returns the allocation information as a list\n",
-    "    \"\"\"\n",
-    "    allocation_list = []\n",
-    "\n",
-    "    for guest_id, guest_row in guests.iterrows():\n",
-    "        guest_preferred_hotels = preferences[preferences['guest'] == guest_id]['hotel']\n",
-    "\n",
-    "        for _, preferred_hotel_id in guest_preferred_hotels.items():\n",
-    "            preferred_hotel_row = hotels.loc[preferred_hotel_id]\n",
-    "\n",
-    "            if preferred_hotel_row['rooms'] > 0:\n",
-    "                preferred_hotel_row['rooms'] -= 1\n",
-    "\n",
-    "                paid_price_coefficient = 1 - guest_row['discount']\n",
-    "                paid_price = preferred_hotel_row['price'] * paid_price_coefficient\n",
-    "\n",
-    "                satisfaction = calculate_satisfaction_percentage(guest_id, preferred_hotel_id, preferences)\n",
-    "\n",
-    "                allocation_entry = [guest_id, preferred_hotel_id, satisfaction, paid_price]\n",
-    "                allocation_list.append(allocation_entry)\n",
-    "\n",
-    "                break  # Break to the next guest after successful allocation\n",
-    "\n",
-    "    return allocation_list"
-   ]
-  }
- ],
- "metadata": {
-  "kernelspec": {
-   "display_name": "Python 3 (ipykernel)",
-   "language": "python",
-   "name": "python3"
-  },
-  "language_info": {
-   "codemirror_mode": {
-    "name": "ipython",
-    "version": 3
-   },
-   "file_extension": ".py",
-   "mimetype": "text/x-python",
-   "name": "python",
-   "nbconvert_exporter": "python",
-   "pygments_lexer": "ipython3",
-   "version": "3.11.4"
-  }
- },
- "nbformat": 4,
- "nbformat_minor": 5
-}
+import pandas as pd
+import numpy as np
+import openpyxl
+from utils import satisfaction
+guests= pd.read_excel(r"C:\Users\lejda\Desktop\coding - Python\guests.xlsx")
+hotels = pd.read_excel(r"C:\Users\lejda\Desktop\coding - Python\hotels.xlsx")
+preferences = pd.read_excel(r"C:\Users\lejda\Desktop\coding - Python\preferences.xlsx")
+
+class PreferencesAllocator:
+    def __init__(self, hotels, guests, preferences):
+         """Initialize the AvailabilityBasedAllocator.
+
+        Parameters:
+        - hotels (pd.DataFrame): DataFrame containing information about hotels.
+        - guests (pd.DataFrame): DataFrame containing information about guests.
+        - preferences (pd.DataFrame): DataFrame containing guest preferences.
+     """
+        #we use copies to avoid modifying the original dataframes
+        self.hotels = hotels.copy()
+        self.guests = guests.copy()
+        self.preferences = preferences.copy()
+        
+    def allocate_and_calculate(hotels, guests, preferences):
+    """
+    Allocate guests to their preferred hotels, calculate paid price and satisfaction.
+
+    Parameters:
+    - hotels (pd.DataFrame): DataFrame containing information about hotels.
+    - guests (pd.DataFrame): DataFrame containing information about guests.
+    - preferences (pd.DataFrame): DataFrame containing guest preferences.
+
+    Returns:
+    - list: List of allocation information for each guest, including guest ID, hotel ID,
+            satisfaction, and paid price.
+    """
+    allocation_list = []
+
+    for guest_id, guest_row in guests.iterrows():
+        #the code is iterating through the guests in the guests DataFrame and, for each guest,
+        #extracting the preferred hotels from the preferences DataFrame based on their ID.
+        guest_preferred_hotels = preferences[preferences['guest'] == f'guest_{guest_id}']['hotel']
+
+        for _, preferred_hotel_id in guest_preferred_hotels.items():
+            #we extract a numerical index from hotel_id, removing the prefix "hotel_", subtracting 1 to the remain number
+            #and covert it into an integer to get the hotel_id number
+            hotel_index = int(preferred_hotel_id.lstrip('hotel_')) - 1
+            preferred_hotel_row = hotels.loc[hotel_index]
+
+            if preferred_hotel_row['rooms'] > 0:
+                hotels.loc[hotel_index, 'rooms'] -= 1
+
+                paid_price_coefficient = 1 - guest_row['discount']
+                paid_price = preferred_hotel_row['price'] * paid_price_coefficient
+
+                satisfaction = calculate_satisfaction_percentage(guest_id, preferred_hotel_id, preferences)
+
+                allocation_entry = [guest_id, preferred_hotel_id, satisfaction, paid_price]
+                allocation_list.append(allocation_entry)
+
+                break
+
+    return allocation_list
