@@ -31,6 +31,7 @@ class PriceBasedAllocator:
         Returns:
         - bool: True if allocation is possible, False otherwise.
         """
+        #we ensure that there are available rooms in the hotel and we check that the guest has not specified any preferences
         return hotel_row['rooms'] > 0 and guest_id not in self.preferences.index
 
     def calculate_paid_price(self, row):
@@ -44,14 +45,14 @@ class PriceBasedAllocator:
         - pd.DataFrame: DataFrame containing allocation information.
         """
         allocation_list = []
-
+        #we merge the three dataframes and we sort the values based on price in ascending order
         sorted_hotels = preferences.merge(hotels, on=['hotel']).merge(guests).sort_values(by='price')
 
-        for group_key, group in sorted_hotels.groupby('hotel', sort=False):
+        for group_key, group in sorted_hotels.groupby('hotel', sort=False): #we group the rows of sorted_hotels dataframe based on the         hotel column 
             for id, row in group.iterrows():
-                if group.iloc[0]['rooms'] == 0:
+                if group.iloc[0]['rooms'] == 0: #we check if the number of available rooms in the first row of the current group is                      equal to zero
                     break
-                group['rooms'] -= 1
+                group['rooms'] -= 1 #we decrement the number of rooms for the current hotel group by 1
                 paid_price = self.calculate_paid_price(row)
                 satisfaction = calculate_satisfaction_percentage(row['guest'], row['hotel'], preferences)
                 allocation_entry = [row['guest'], row['hotel'], satisfaction, paid_price]

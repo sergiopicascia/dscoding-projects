@@ -41,6 +41,8 @@ class PreferencesAllocator:
         guest_preferred_hotels = preferences[preferences['guest'] == f'guest_{guest_id}']['hotel']
 
         for _, preferred_hotel_id in guest_preferred_hotels.items():
+            #we extract a numerical index from hotel_id, removing the prefix "hotel_", subtracting 1 to the remain number
+            #and covert it into an integer to get the hotel_id number
             hotel_index = int(preferred_hotel_id.lstrip('hotel_')) - 1
             preferred_hotel_row = hotels.loc[hotel_index]
 
