@@ -12,7 +12,7 @@ class RouteFinder:
         if current_city_data.empty:
             return []
 
-        # Convert latitude and longitude to decimal format
+       
         current_lat = convert_to_decimal(current_city_data.iloc[0]['Latitude'])
         current_lon = convert_to_decimal(current_city_data.iloc[0]['Longitude'])
         current_city_coords = (current_lat, current_lon)
@@ -25,7 +25,7 @@ class RouteFinder:
             if city_data.empty:
                 continue
 
-            # Convert latitude and longitude to decimal format
+           
             city_lat = convert_to_decimal(city_data.iloc[0]['Latitude'])
             city_lon = convert_to_decimal(city_data.iloc[0]['Longitude'])
             city_coords = (city_lat, city_lon)
@@ -33,7 +33,7 @@ class RouteFinder:
             distance = great_circle(current_city_coords, city_coords).km
             distances.append((city, distance))
 
-        # Sort cities by distance and return the 'limit' closest ones
+        
         closest_cities = sorted(distances, key=lambda x: x[1])[:limit]
         return [city for city, _ in closest_cities]
 
@@ -65,7 +65,7 @@ class RouteFinder:
             iteration_count += 1
             visited_cities.add(current_city)
 
-            # Get the three closest cities
+            
             all_cities = merged_data['City'].unique().tolist()
             closest_cities = self.get_closest_cities(current_city, all_cities, merged_data, limit=3)
             closest_cities = [city for city in closest_cities if city not in visited_cities]
@@ -74,7 +74,7 @@ class RouteFinder:
                 print("No available next city. Exiting...")
                 break
 
-            # Choose the warmest city among the closest ones
+            
             warmest_city = self.get_warmest_city(closest_cities, merged_data)
 
             if warmest_city:
