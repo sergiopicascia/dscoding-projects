@@ -1,13 +1,20 @@
 # routing.py
 
-import geopy.distance
-from modules.utils import convert_to_decimal as ut
+import geopy.distance as gd
+from utils import convert_to_decimal as ut
 
 class Routing:
     def get_distance(self, city1, city2, data):
         """Calculate the distance between two cities based on their latitude and longitude."""
-        city_data1 = data[data['City'] == city1][['Latitude', 'Longitude']]
-        city_data2 = data[data['City'] == city2][['Latitude', 'Longitude']]
+        lat_col = 'Latitude'
+        lon_col = 'Longitude'
+
+        # Check if the specified columns exist in the DataFrame
+        if lat_col not in data.columns or lon_col not in data.columns:
+            return float('inf')
+
+        city_data1 = data[data['City'] == city1][[lat_col, lon_col]]
+        city_data2 = data[data['City'] == city2][[lat_col, lon_col]]
 
         if city_data1.empty or city_data2.empty:
             return float('inf')
@@ -20,13 +27,46 @@ class Routing:
         lon1 = float(ut(lon1))
         lon2 = float(ut(lon2))
 
-        return geopy.distance.distance((lat1, lon1), (lat2, lon2)).km
+        return gd.distance((lat1, lon1), (lat2, lon2)).km
 
     def get_closest_cities(self, current_city, cities, data):
         """Get the three closest cities to the current city."""
-        distances = [(city, self.get_distance(current_city, city, data)) for city in cities if city != current_city]
+        lat_col = 'Latitude'
+        lon_col = 'Longitude'
+
+        # Check if the specified columns exist in the DataFrame
+        if lat_col not in data.columns or lon_col not in data.columns:
+            return []
+
+        distances = [
+            (city, self.get_distance(current_city, city, data)) for city in cities if city != current_city
+        ]
+        distances = [(city, distance) for city, distance in distances if distance != float('inf')]
         distances.sort(key=lambda x: x[1])
         return [city[0] for city in distances[:3]]  # Retrieve only three closest cities
+        #def get_distance(self, city1, city2, data):
+        """Calculate the distance between two cities based on their latitude and longitude."""
+        #city_data1 = data[data['City'] == city1][['Latitude', 'Longitude']]
+        #city_data2 = data[data['City'] == city2][['Latitude', 'Longitude']]
+
+        #if city_data1.empty or city_data2.empty:
+            #return float('inf')
+
+        #lat1, lon1 = city_data1.values[0]
+        #lat2, lon2 = city_data2.values[0]
+
+        #lat1 = float(ut(lat1))
+        #lat2 = float(ut(lat2))
+        #lon1 = float(ut(lon1))
+        #lon2 = float(ut(lon2))
+
+        #return gd.distance((lat1, lon1), (lat2, lon2)).km
+
+    #def get_closest_cities(self, current_city, cities, data):
+        """Get the three closest cities to the current city."""
+        #distances = [(city, self.get_distance(current_city, city, data)) for city in cities if city != current_city]
+        #distances.sort(key=lambda x: x[1])
+        #return [city[0] for city in distances[:3]]  # Retrieve only three closest cities
 
     def find_warmest_route(self, avg_temperatures, start_city, end_city="Cape Town"):
         """Find the warmest route from the specified starting city to the end city, based on average temperatures."""
