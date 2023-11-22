@@ -9,7 +9,7 @@ class rating:
         self.bgg = pd.read_csv(path)  # Read the data from the CSV file into a Pandas DataFrame
         # Drop rows with missing values and sort the DataFrame by game id
         self.bgg = self.bgg.dropna().sort_values(by= ['game']).reset_index(drop = True)
-        self.bgg = self.bgg[0:10000] # Select the first 100,000 rows
+        self.bgg = self.bgg[0:100000] # Select the first 100,000 rows
         self.counting = self.bgg.groupby(['game']).count() # Count number of votes for each game.
         self.title = self.bgg.groupby('game')['title'].first()
 
