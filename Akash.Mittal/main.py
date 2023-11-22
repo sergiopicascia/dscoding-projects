@@ -24,7 +24,7 @@ from collections import Counter
 
 #### Addressing the warning for Windows Memory Leak in using K-Means
 import os
-os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["OMP_NUM_THREADS"] = '1'
 
 
 # In[8]:
@@ -43,15 +43,44 @@ animal_data.import_data() # Imporitng Data
 # In[12]:
 
 
-X = animal_data.data.drop(['class_type'], axis=1) # Dropping the Class_type column
+X_numeric = animal_data.data.drop(['animal_name','class_type'], axis=1) #Segregating only Numeric Data for Analysis
 
 Y = animal_data.data['class_type'] # Target Column for Animal Class 
 
-#Segregating only Numeric Data for Analysis
-X_numeric = X.drop(['animal_name'], axis=1)
-
 # animal_data.create_pair_plot() # Creating a PairWise ScatterPlot for the Different Animal Features {Commented Out as it Takes more time to Plot that much graphs}
 
+# User Inputs for damping ratio used for Affinity Algorithm, and Number of Clusters used for K-Means
+
+def afp_damp():
+    while True:
+        try:
+            damp = float(input("Enter the damping parameter for Affinity Propagation (a float value between [0.5, 1) only): "))
+            if 0.5 <= damp < 1:
+                break
+            else:
+                print("Enter a valid input")
+        except ValueError:
+            print("Invalid input. Enter a float value.")
+
+    return damp
+
+damp = afp_damp()
+
+# Takes input for number of clusters in K-Means algorithm
+def k_means_clusters():
+    while True:
+        try:
+            num_cluster_kmeans = int(input("Enter the number of clusters for K-Means: "))
+            if 4 <= num_cluster_kmeans <= 10:
+                break
+            else:
+                print("Enter a number for number of clusters between 4 and 10, both inclusive")
+        except ValueError:
+            print("Invalid input. Enter an integer value.")
+
+    return num_cluster_kmeans
+
+num_cluster_kmeans = k_means_clusters()
 
 # In[46]:
 
@@ -59,7 +88,7 @@ X_numeric = X.drop(['animal_name'], axis=1)
 # Using AffinityPropagation to Cluster the Data Points
 
 #Creating Affinity Object; the damping factor can be between [0.5, 1), preference for exemplars is set None, no preference to any point.
-af = AffinityPropagation(damping = 0.7, preference = None)
+af = AffinityPropagation(damping = damp, preference = None)
 
 # Fitting of the Affinity Propagation algorithm
 af.fit(X_numeric)
@@ -87,8 +116,7 @@ plt.show(block=False)
 
 #Labelling the Clusters
 unique_af_labels = np.unique(af_labels)
-print("Clusters Created by Affinity Propagation: ")
-print(f"Number of Clusters Created {num_clusters}")
+print(f"{num_clusters} Clusters Created by Affinity Propagation: ")
 for label in unique_af_labels:
     cluster_size = np.sum(af_labels == label)
     print(f"Cluster {label}: {cluster_size} data points")
@@ -119,10 +147,6 @@ print(animal_info)
 # Initializing the KMeans with n_init=10, to avoid warning for change in values of Kmeans algorithm in later release of ski-kit learn.
 # Specified number of Clusters as 7, as we know there are 7 clusters.
 
-# Takes input for number of clusters in K-Means algorithm
-
-num_cluster_kmeans = int(input("Enter the number of clusters for K-Means: "))
-
 kmeans = KMeans(n_clusters=num_cluster_kmeans, random_state=30, n_init=10)
 
 animal_kmean_labels = kmeans.fit_predict(X_numeric)
@@ -146,7 +170,7 @@ kmeans_labels = kmeans.labels_
 
 cluster_counter = Counter(kmeans_labels).items()
 sorted_cluster = sorted(cluster_counter)
-print("Clusters Created by K-Mean Algorithm: ")
+print(f"{num_cluster_kmeans} Clusters Created by K-Means Algorithm: ")
 for cluster, count in sorted_cluster:
     print(f"Cluster {cluster}: {count} data points")
 
