@@ -141,7 +141,7 @@ class Quiz:
     def welcome_player(self):
         print('HELLO THERE! Welcome to ✨ The Quiz ✨')
         player_name = input("What do you want us to call you? ")
-        print('Alright, ' + player_name + '!\n GET READY TO PLAY 🔥')
+        print('Alright, ' + player_name + '\n GET READY TO PLAY 🔥')
         print("----------------------------")
         return player_name
 
