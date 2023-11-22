@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-class Satisfaction:
+class satisfaction:
     def calculate_satisfaction_percentage(preferences, guest_id, hotel_id):
         guest_preferences = preferences[preferences['guest'] == guest_id].reset_index() #filter preferences for the given guest
         if guest_preferences.empty:
