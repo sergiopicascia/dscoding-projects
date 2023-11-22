@@ -30,6 +30,9 @@ class Location:
         self.data['dt'] = pd.to_datetime(self.data['dt'])
         self.data['Year'] = self.data['dt'].dt.year
         self.data['City_Country'] = self.data['City'] + ', ' + self.data['Country']
+        if type(self.data['Latitude'].iloc[0]) == str:
+            self._update_file()
+
     
     """
     Convert the coordinate from the format Coord(N/S/E/W)
@@ -121,11 +124,9 @@ class Location:
     """
     Update the csv file with the new coordinates
     """
-    def update_file(self):
+    def _update_file(self):
         cities_coord = self._get_coordinates()
-        self.data['City_Country'] = self.data['City'] + ', ' + self.data['Country']
         self.data['Latitude'] = self.data['City_Country'].map(lambda x: cities_coord[x][0])
         self.data['Longitude'] = self.data['City_Country'].map(lambda x: cities_coord[x][1])
-        self.data.drop(columns='City_Country', inplace=True)
         self.data.to_csv(self.path, index=False)
 

@@ -13,6 +13,11 @@ from sklearn.cluster import KMeans
 
 
 #importing datasets
+from animals_project.animals.functions import data_import
+importing = data_import()
+importing.import_zoo()
+importing.import_class_types()
+
 zoo = pd.read_csv('C:/Users/admin/Downloads/animal_DB/zoo.csv')
 class_types = pd.read_csv('C:/Users/admin/Downloads/animal_DB/class.csv')
 df = pd.merge(zoo, class_types, how='left', left_on='class_type', right_on='Class_Number')

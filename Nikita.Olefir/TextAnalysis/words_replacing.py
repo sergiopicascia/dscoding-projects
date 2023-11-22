@@ -5,7 +5,7 @@ import pandas as pd
 import re
 
 
-class WordReplacer:
+class WordReplacer(object):
     """
     A class for replacing words in a pandas DataFrame.
 

@@ -27,16 +27,16 @@ class TextPreprocessor(object):
         dataframe (pd.DataFrame): The input pandas DataFrame containing text data.
     """
 
-    def __init__(self, dataframe:pd.DataFrame):
+    def __init__(self, dataframe: pd.DataFrame):
         """
         Initialize the TextPreprocessor object.
 
         Arguments:
-            dataframe (pd.DataFrame): The input pandas DataFrame containing text data.
+            dataframe (pd.DataFrame): the input pandas DataFrame containing text data.
         """
         self.dataframe = dataframe
 
-    def text_to_lower_case(self, column_name:str):
+    def text_to_lower_case(self, column_name: str):
         """
         Transfroms all text of the column in a pandas dataframe to the lower case.
 
@@ -49,7 +49,7 @@ class TextPreprocessor(object):
         self.dataframe[column_name] = self.dataframe[column_name].str.lower()
         return self
 
-    def remove_links(self, column_name:str):
+    def remove_links(self, column_name: str):
         """
         Removes all links in the text of a specified column in a pandas dataframe.
 
@@ -64,7 +64,7 @@ class TextPreprocessor(object):
         )
         return self
 
-    def remove_punctuations(self, column_name:str):
+    def remove_punctuations(self, column_name: str):
         """
         Removes all punctuations in the text of a specified column in a pandas dataframe.
 
@@ -82,7 +82,7 @@ class TextPreprocessor(object):
         )
         return self
 
-    def remove_stopwords(self, column_name:str):
+    def remove_stopwords(self, column_name: str):
         """
         Removes all stopwords in the text of a specified column in a pandas dataframe.
 
@@ -94,7 +94,7 @@ class TextPreprocessor(object):
         """
         nlp = spacy.load("en_core_web_sm")
 
-        def remove_stopwords_from_text(text:str):
+        def remove_stopwords_from_text(text: str):
             doc = nlp(text)
             return " ".join([token.text for token in doc if not token.is_stop])
 
@@ -103,7 +103,7 @@ class TextPreprocessor(object):
         )
         return self
 
-    def remove_special_characters(self, column_name:str):
+    def remove_special_characters(self, column_name: str):
         """
         Removes all special characters in the text of a specified column in a pandas dataframe.
 
@@ -121,7 +121,7 @@ class TextPreprocessor(object):
         )
         return self
 
-    def remove_words_with_small_length(self, column_name:str):
+    def remove_words_with_small_length(self, column_name: str):
         """
         Removes all words that consist of less than 3 words in the text of a specified column in a pandas dataframe.
 
@@ -136,7 +136,7 @@ class TextPreprocessor(object):
         )
         return self
 
-    def mask_curse_words(self, column_name:str, curse_word_list=None):
+    def mask_curse_words(self, column_name: str, curse_word_list=None):
         """
         Mask all the specified curse words in the text of a specified column in a pandas dataframe.
 
@@ -148,12 +148,12 @@ class TextPreprocessor(object):
             pd.DataFrame: pandas dataframe with the text witout curse words masked (in a specified column).
         """
         if curse_word_list is None:
-            curse_word_list = ["fuck", "fucking", "dipshit", "shit", "shiiit", "cunt"]
+            curse_word_list = ["fuck", "fucking", "dipshit", "shit", "shiiit", "cunt", "garbage"]
         pattern = re.compile(
             r"\b(?:" + "|".join(curse_word_list) + r")\b", flags=re.IGNORECASE
         )
 
-        def mask_text(text:str):
+        def mask_text(text: str):
             def mask_word(match):
                 word = match.group(0)
                 return word[:2] + "*" * (len(word) - 2)
@@ -163,7 +163,7 @@ class TextPreprocessor(object):
         self.dataframe[column_name] = self.dataframe[column_name].apply(mask_text)
         return self
 
-    def apply_all(self, column_name:str):
+    def apply_all(self, column_name: str):
         """
         Applies all of the above function to the text in a specified column in a pandas dataframe.
 
