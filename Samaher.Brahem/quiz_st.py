@@ -135,7 +135,7 @@ class Quiz:
 
         st.pyplot(fig)
 
-    def quiz_game(self):
+    def run_quiz(self):
         total_score = 0
         used_questions = []
 

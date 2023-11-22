@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[8]:
+# In[11]:
 
 
 import pandas as pd
@@ -52,37 +52,42 @@ def load_datasets(hotels_path, guests_path, preferences_path):
         print(f"Error loading file: {e}")
         exit()
 
-def simplified_availability_allocation(hotels_df, guests_df, preferences_df):
-    allocations = []
 
-    # Create a dictionary for hotel room availability
-    hotel_availability = hotels_df.set_index('hotel')['rooms'].to_dict()
 
-    # Iterate through each guest
-    for guest_id, guest_info in guests_df.iterrows():
-        guest_discount = guest_info['discount']
-        guest_preferences = preferences_df[preferences_df['guest'] == guest_info['guest']]
-        sorted_preferences = guest_preferences.sort_values(by='priority')
+def availability_allocation(hotels_df, guests_df, preferences_df):
+    
+    allocation = {'guest': [], 'hotel': [], 'final_price': [], 'guest_satisfaction': []}
+    
+    guest_list = guests_df['guest'].tolist()
 
-        # Find a suitable hotel based on availability and preference
-        for _, pref in sorted_preferences.iterrows():
-            hotel_name = pref['hotel']
-            if hotel_availability.get(hotel_name, 0) > 0:
-                hotel_availability[hotel_name] -= 1
-                room_price = hotels_df.loc[hotels_df['hotel'] == hotel_name, 'price'].iloc[0]
-                final_price = room_price * (1 - guest_discount)
-                
-                satisfaction_level = 1 + sorted_preferences['hotel'].tolist().index(hotel_name)
-                allocations.append({
-                    'guest': guest_info['guest'],
-                    'hotel': hotel_name,
-                    'final_price': final_price,
-                    'guest_satisfaction': satisfaction_level
-                })
+    hotel_ordered = hotels_df.sort_values(by='rooms') 
+    hotel_list = pd.Series(hotel_ordered['rooms'].values, index = hotel_ordered.hotel).to_dict()
+        
+    for guest in guest_list:
+            
+        guest_discount = guests_df[guests_df['guest'] == guest]['discount'].values[0]
+
+        priority_hotels = preferences_df[preferences_df['guest'] == guest].sort_values(by='priority')['hotel'].tolist()
+        
+        for hotel in hotel_list:
+            if hotel in priority_hotels and hotel_list[hotel]>0:
+                hotel_list[hotel] -=1
+    
+                gross_earning = hotels_df[hotels_df['hotel'] == hotel]['price'].values[0]
+                net_earning = gross_earning*(1-guest_discount)
+        
+                satisfaction = 1 if priority_hotels.index(hotel)+1 == 1 else(
+                    2 if priority_hotels.index(hotel)+1 <= (len(priority_hotels) * 0.25) else(
+                    3 if priority_hotels.index(hotel)+1 <= (len(priority_hotels) * 0.5) else(
+                    4 if priority_hotels.index(hotel)+1 < (len(priority_hotels) * 0.75) else 5)))
+        
+                allocation['guest'].append(guest)
+                allocation['hotel'].append(hotel)
+                allocation['final_price'].append(net_earning)
+                allocation['guest_satisfaction'].append(satisfaction)
                 break
 
-    # Convert to DataFrame
-    allocation_df = pd.DataFrame(allocations)
+    allocation_df = pd.DataFrame(allocation)
     return allocation_df
 
 # Apply the availability allocation strategy

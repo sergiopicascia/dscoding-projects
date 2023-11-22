@@ -1,0 +1,63 @@
+"""
+# The Following Code has been incorporate in classes above so it is Marked Out in comment, just for my own reference, and how I build it up.
+
+
+# let's read the excel files
+# Using r" " for the file path so that there are no issues with the // slashes in address of file path.
+# class.xlsx includes the data about animals and their corresponding classes.
+# zoo.xlsx incldues tne animal features for each animal. 
+
+zoo_class = r"C:\Users\Akash Mittal\Documents\Zoo_Lab\class.xlsx"
+
+animals = r"C:\Users\Akash Mittal\Documents\Zoo_Lab\zoo.xlsx"
+
+# Creating a dataframe, df_zoo_class for the Zoo_Class
+df_zoo_class = pd.read_excel(zoo_class)
+
+# Creating a dataframe, df_animals for the animal features.
+df_animals = pd.read_excel(animals)
+
+df_zoo_class
+
+df_animals.head()
+
+#head returns a concise set of data from the dataframe
+
+#### The dataframe also has class column, so, let's drop that column from the dataframe to have a dataframe specific for analysis.
+
+df_animals_analysis = df_animals.drop('class_type', axis=1) # Axis = 1 for dropping a column, else for a row, Axis=0 
+
+data_size_cols = anim_features.shape[1] # Counting the number of features in the data-frame
+print(data_size_cols)
+
+# Segregating the Animal Features in anim_features.
+
+anim_features = df_animals_analysis[["hair", "feathers", "eggs", "milk", "airborne", "aquatic", "predator", "toothed", "backbone", "breathes", "venomous", "fins", "legs", "tail", "domestic", "catsize"]]
+
+print(anim_features)
+
+# Creating Exemplary Scatter PLots of some data points here 
+
+data_size_rows = anim_features.shape[0] # Counting the number of elements in the data-frame
+print(data_size_rows)
+
+data_cols_names = anim_features.columns
+
+data_cols_names
+
+### Using Seaborn and MatplotLib to create pairwise scatter Plots of the Various Animal Features
+
+# Selecting Numeric Columns from the df_animals_analysis dataframe
+
+df_analysis_numeric = df_animals_analysis.select_dtypes(include='number')
+
+sns.pairplot(df_animals, kind='scatter', plot_kws={'alpha': 0.5})
+plt.suptitle('Pair Plot of Anime Features', y=1.02)
+plt.show()
+
+
+# Another Way to make the plot
+sns.pairplot(df_animals)
+plt.suptitle('Pair Plot of Anime Features', y=1.02)
+plt.show()
+"""
