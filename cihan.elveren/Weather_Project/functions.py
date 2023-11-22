@@ -10,7 +10,6 @@ def load_data(file_path):
     return data
 
 def clean_and_transform_data(data):
-    
     # Convert the 'dt' column to datetime type
     data['dt'] = pd.to_datetime(data['dt'])
 
@@ -183,42 +182,32 @@ def plot_temperature_range_bar(city_data, top_cities):
 
     plt.show()
 
-# Bu fonksiyonu kullanarak, belirli şehirlerin sıcaklık aralıklarını gösteren bir bar grafiği çizebilirsiniz.
-# Örnek kullanım: plot_temperature_range_bar(city_data=top_cities_with_ranges, top_cities=top_10_cities)
 
 
+def calculate_city_yearly_temperature_ranges(data):
+    # Create a copy of the DataFrame to avoid SettingWithCopyWarning
+    data = data.copy()
 
-def plot_temperature_range_map(city_data_file, start_year, end_year, top_n=10):
-    """
-    Plot a map showing the top cities with the largest temperature ranges within a specific time range.
-    
-    Args:
-    city_data_file (str): File path to the city data CSV.
-    start_year (int): Starting year of the time range.
-    end_year (int): Ending year of the time range.
-    top_n (int): Number of top cities to be plotted.
-    """
-    cities_df = pd.read_csv(city_data_file)
+    # Extract year from date
+    data['Year'] = pd.to_datetime(data['dt']).dt.year
 
-    # Filter data for the specified period and calculate temperature range
-    filtered_data = cities_df[(pd.to_datetime(cities_df['dt']).dt.year >= start_year) & 
-                              (pd.to_datetime(cities_df['dt']).dt.year <= end_year)]
-    city_temp_range = filtered_data.groupby('City').agg(
-        max_temp=('AverageTemperature', 'max'),
-        min_temp=('AverageTemperature', 'min')
-    ).reset_index()
-    city_temp_range['temp_range'] = city_temp_range['max_temp'] - city_temp_range['min_temp']
+    # Calculate max and min temperatures for each city and year
+    yearly_temps = data.groupby(['City', 'Year'])['AverageTemperature'].agg(['max', 'min']).reset_index()
 
-    # Identify the top cities with the largest temperature range
-    top_cities = city_temp_range.nlargest(top_n, 'temp_range')
+    # Calculate temperature range
+    yearly_temps['temp_range'] = yearly_temps['max'] - yearly_temps['min']
 
-    # Merge with geographical coordinates
-    top_cities_geo = pd.merge(top_cities, filtered_data[['City', 'Latitude', 'Longitude']].drop_duplicates(), on='City')
+    return yearly_temps
+
+def plot_temperature_range_map(top_cities, top_n=10):
+   
+    import geopandas as gpd
+    import matplotlib.pyplot as plt
 
     # Create a GeoDataFrame for the top cities
     top_cities_gdf = gpd.GeoDataFrame(
-        top_cities_geo,
-        geometry=gpd.points_from_xy(top_cities_geo.Longitude, top_cities_geo.Latitude)
+        top_cities.head(top_n),
+        geometry=gpd.points_from_xy(top_cities.Longitude, top_cities.Latitude)
     )
 
     # Load the world dataset for the background map
@@ -239,25 +228,6 @@ def plot_temperature_range_map(city_data_file, start_year, end_year, top_n=10):
     plt.text(0.90, 0.5, city_labels_str, transform=ax.transAxes, fontsize=10,
              verticalalignment='center', bbox=dict(boxstyle="round,pad=0.3", edgecolor='black', facecolor='white', alpha=0.5))
 
-    plt.title(f'Top {top_n} Cities with the Widest Temperature Range Between {start_year}-{end_year}', fontsize=14)
+    plt.title(f'Top {top_n} Cities with the Widest Temperature Range', fontsize=14)
     ax.set_axis_off()
     plt.show()
-
-# Bu fonksiyonu kullanarak, belirli bir zaman aralığında en geniş sıcaklık aralığına sahip şehirlerin haritasını çizebilirsiniz.
-# Örnek kullanım: plot_temperature_range_map('MajorCities.csv', 1920, 1970, top_n=10)
-
-def calculate_city_yearly_temperature_ranges(data):
-    # Create a copy of the DataFrame to avoid SettingWithCopyWarning
-    data = data.copy()
-
-    # Extract year from date
-    data['Year'] = pd.to_datetime(data['dt']).dt.year
-
-    # Calculate max and min temperatures for each city and year
-    yearly_temps = data.groupby(['City', 'Year'])['AverageTemperature'].agg(['max', 'min']).reset_index()
-
-    # Calculate temperature range
-    yearly_temps['temp_range'] = yearly_temps['max'] - yearly_temps['min']
-
-    return yearly_temps
-
