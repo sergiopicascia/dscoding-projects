@@ -1,6 +1,10 @@
 import pandas as pd
 import numpy as np
+import openpyxl
 from utils import satisfaction
+guests= pd.read_excel(r"C:\Users\lejda\Desktop\coding - Python\guests.xlsx")
+hotels = pd.read_excel(r"C:\Users\lejda\Desktop\coding - Python\hotels.xlsx")
+preferences = pd.read_excel(r"C:\Users\lejda\Desktop\coding - Python\preferences.xlsx")
 
 class AvailabilityBasedAllocator:
     def __init__(self, hotels, guests, preferences):
@@ -35,8 +39,8 @@ class AvailabilityBasedAllocator:
                 # Check if the guest can be allocated to the current hotel
                 if can_allocate_to_hotel(hotel_row, guest_id, self.preferences) and guest_id not in allocated_guests:
                     paid_price = hotel_row['price'] * (1 - guest_row['discount'])
-                    satisfaction = calculate_satisfaction_percentage(guest_id, hotel_row.name, self.preferences)
-                    allocation_entry = [guest_id, hotel_row.name, satisfaction, paid_price]
+                    satisfaction = calculate_satisfaction_percentage(guest_id, hotel_row, self.preferences)
+                    allocation_entry = [guest_id, hotel_row, satisfaction, paid_price]
                     allocation_list.append(allocation_entry)
 
                     # Update the set of allocated guests for the current hotel

@@ -1,18 +1,23 @@
 import pandas as pd
 import numpy as np
 from utils import satisfaction
+import openpyxl
+guests= pd.read_excel(r"C:\Users\lejda\Desktop\coding - Python\guests.xlsx")
+hotels = pd.read_excel(r"C:\Users\lejda\Desktop\coding - Python\hotels.xlsx")
+preferences = pd.read_excel(r"C:\Users\lejda\Desktop\coding - Python\preferences.xlsx")
 
 
 class HotelAllocation:
     def __init__(self, hotels, guests):
-    """Initialize the HotelAllocation.
+        """Initialize the HotelAllocation.
 
         Parameters:
         - hotels (pd.DataFrame): DataFrame containing information about hotels.
         - guests (pd.DataFrame): DataFrame containing information about guests.
-    """
-        self.hotels = hotels
-        self.guests = guests
+        """
+        #we use copy to avoid modifying the original dataframes
+        self.hotels = hotels.copy()
+        self.guests = guests.copy()
     
     def accomodate_single_guest():
         pass
