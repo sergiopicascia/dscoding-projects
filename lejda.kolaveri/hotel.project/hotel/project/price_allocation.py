@@ -1,89 +1,59 @@
-{
- "cells": [
-  {
-   "cell_type": "code",
-   "execution_count": 1,
-   "id": "e422890e-5612-4a44-8e3c-f7a6ed3b46a2",
-   "metadata": {
-    "tags": []
-   },
-   "outputs": [],
-   "source": [
-    "import pandas as pd"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 2,
-   "id": "7a9c82f7-122f-4d94-8e19-1e869af5cf54",
-   "metadata": {
-    "tags": []
-   },
-   "outputs": [],
-   "source": [
-    "class PriceBasedAllocator:\n",
-    "    def __init__(self, hotels, guests, preferences):\n",
-    "        self.hotels = hotels\n",
-    "        self.guests = guests\n",
-    "        self.preferences = preferences\n",
-    "\n",
-    "    def allocate_and_calculate(self):\n",
-    "        allocation_list = []\n",
-    "\n",
-    "        # Sort hotels based on price (ascending order)\n",
-    "        sorted_hotels = self.hotels.sort_values(by='price')\n",
-    "\n",
-    "        for hotel_id, hotel_row in sorted_hotels.iterrows():\n",
-    "            for guest_id, guest_row in self.guests.iterrows():\n",
-    "                if self.can_allocate_to_hotel(hotel_row, guest_id):\n",
-    "                    paid_price = self.calculate_paid_price(hotel_row, guest_row)\n",
-    "                    satisfaction = self.calculate_satisfaction_percentage(guest_id, hotel_id)\n",
-    "                    allocation_entry = [guest_id, hotel_id, satisfaction, paid_price]\n",
-    "                    allocation_list.append(allocation_entry)\n",
-    "                    break  # Break to the next hotel after successful allocation\n",
-    "\n",
-    "        return pd.DataFrame(allocation_list, columns=['guest_id', 'hotel_id', 'satisfaction', 'paid_price'])\n",
-    "\n",
-    "    def can_allocate_to_hotel(self, hotel_row, guest_id):\n",
-    "        # Check if the hotel has available rooms and guest has not been allocated yet\n",
-    "        return hotel_row['rooms'] > 0 and guest_id not in self.preferences.index\n",
-    "\n",
-    "    def calculate_paid_price(self, hotel_row, guest_row):\n",
-    "        paid_price_coefficient = 1 - guest_row['discount']\n",
-    "        return hotel_row['price'] * paid_price_coefficient\n",
-    "\n",
-    "    def calculate_satisfaction_percentage(self, guest_id, hotel_id):\n",
-    "        pass\n"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "05554c94-bdd8-4124-b52b-d002fd9adbd2",
-   "metadata": {},
-   "outputs": [],
-   "source": []
-  }
- ],
- "metadata": {
-  "kernelspec": {
-   "display_name": "Python 3 (ipykernel)",
-   "language": "python",
-   "name": "python3"
-  },
-  "language_info": {
-   "codemirror_mode": {
-    "name": "ipython",
-    "version": 3
-   },
-   "file_extension": ".py",
-   "mimetype": "text/x-python",
-   "name": "python",
-   "nbconvert_exporter": "python",
-   "pygments_lexer": "ipython3",
-   "version": "3.11.4"
-  }
- },
- "nbformat": 4,
- "nbformat_minor": 5
-}
+import pandas as pd
+import numpy as np
+import openpyxl
+from utils import satisfaction
+guests= pd.read_excel(r"C:\Users\lejda\Desktop\coding - Python\guests.xlsx")
+hotels = pd.read_excel(r"C:\Users\lejda\Desktop\coding - Python\hotels.xlsx")
+preferences = pd.read_excel(r"C:\Users\lejda\Desktop\coding - Python\preferences.xlsx")
+
+class PriceBasedAllocator:
+    def __init__(self, hotels, guests, preferences):
+    """Initialize the AvailabilityBasedAllocator.
+
+        Parameters:
+        - hotels (pd.DataFrame): DataFrame containing information about hotels.
+        - guests (pd.DataFrame): DataFrame containing information about guests.
+        - preferences (pd.DataFrame): DataFrame containing guest preferences.
+    """
+        #we use copies to avoid modifying the original dataframes   
+        self.hotels = hotels.copy()
+        self.guests = guests.copy()
+        self.preferences = preferences.copy()
+        
+    def can_allocate_to_hotel(self, hotel_row, guest_id):
+        """
+        Check if a guest can be allocated to a hotel.
+
+        Parameters:
+        - hotel_row (pd.Series): Row of the hotel DataFrame.
+        - guest_id: ID of the guest.
+
+        Returns:
+        - bool: True if allocation is possible, False otherwise.
+        """
+        return hotel_row['rooms'] > 0 and guest_id not in self.preferences.index
+
+    def calculate_paid_price(self, row):
+        return row['price'] * 1 - row['discount']
+
+    def allocate_and_calculate(self):
+        """
+        Allocate guests to hotels based on price, calculate satisfaction and paid price.
+
+        Returns:
+        - pd.DataFrame: DataFrame containing allocation information.
+        """
+        allocation_list = []
+
+        sorted_hotels = preferences.merge(hotels, on=['hotel']).merge(guests).sort_values(by='price')
+
+        for group_key, group in sorted_hotels.groupby('hotel', sort=False):
+            for id, row in group.iterrows():
+                if group.iloc[0]['rooms'] == 0:
+                    break
+                group['rooms'] -= 1
+                paid_price = self.calculate_paid_price(row)
+                satisfaction = calculate_satisfaction_percentage(row['guest'], row['hotel'], preferences)
+                allocation_entry = [row['guest'], row['hotel'], satisfaction, paid_price]
+                allocation_list.append(allocation_entry)
+        return pd.DataFrame(allocation_list, columns=['guest_id', 'hotel_id', 'satisfaction', 'paid_price'])
