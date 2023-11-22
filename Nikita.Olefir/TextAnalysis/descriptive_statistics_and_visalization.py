@@ -40,6 +40,9 @@ def word_length_distribution(dataframe: pd.DataFrame, column_names: list, figsiz
             alpha=0.75,
             edgecolor="black",
         )
+        mean_length = word_lengths.mean()
+        axes[i].axvline(mean_length, color='red', linestyle='dashed', linewidth=2, label=f'Mean: {mean_length:.2f}')
+        
         axes[i].set_title(f"Distribution of Word Lengths in {column_name}")
         axes[i].set_xlabel("Word Length")
         axes[i].set_ylabel("Frequency")
@@ -105,15 +108,19 @@ def plot_most_frequent_words(dataframe:pd.DataFrame, column_names: list, top_n=1
     Examples:
         plot_most_frequent_words(df,'column_name', 20)
     """    
-    for column_name in column_names:
+    num_columns = len(column_names)
+    fig, axes = plt.subplots(1, num_columns, figsize=(8 * num_columns, 5))
+
+    for i, column_name in enumerate(column_names):
         word_counts = Counter(dataframe[column_name].str.split().sum())
         most_common_words = word_counts.most_common(top_n)
 
         words, counts = zip(*most_common_words)
-        plt.figure(figsize=(8, 5))
-        plt.bar(words, counts, color="skyblue")
-        plt.title(f"Top {top_n} Most Frequent Words in {column_name}")
-        plt.xlabel("Word")
-        plt.ylabel("Frequency")
-        plt.xticks(rotation=90)
-        plt.show()
+        axes[i].bar(words, counts, color="skyblue")
+        axes[i].set_title(f"Top {top_n} Most Frequent Words in {column_name}")
+        axes[i].set_xlabel("Word")
+        axes[i].set_ylabel("Frequency")
+        axes[i].tick_params(axis='x', rotation=90)
+
+    plt.tight_layout()
+    plt.show()
