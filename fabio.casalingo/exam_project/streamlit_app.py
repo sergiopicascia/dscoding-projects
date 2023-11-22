@@ -128,5 +128,5 @@ if action == 'Minigame':
 
 # Call the method population for display the population distribution
 if action == 'Population':
-    map_pop = maps.population(dataset)
+    map_pop = maps.population()
     st.plotly_chart(map_pop, width=800, height=800)
