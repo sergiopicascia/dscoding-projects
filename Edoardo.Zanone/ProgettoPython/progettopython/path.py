@@ -57,12 +57,24 @@ class Percorso:
     def trova_percorso_lista(self, index0 : int ,index1 : int ,distcurr:int,n):
         if (index0==index1) & (distcurr!=0):
             self.listaindici.append(index0)
-            return 0
+            return (0 , 0)
         self.ritorna_minime([self.lat[index0],self.lng[index0]],index0,n)
         self.best_lat(index1,n)
         j=self.find_index(n)
+        d=self.findthetime(index0,n,j) 
         #print(self.city[self.latmax[0][1]], self.latmax[0][1],self.lng[self.latmax[0][1]],self.latmax[0][0])
         self.listaindici.append(index0)
-        return (distcurr + self.trova_percorso_lista(self.latmax[0][1],index1,self.nmin[j][0],n))
+        tupla=self.trova_percorso_lista(self.latmax[0][1],index1,self.nmin[j][0],n)
+        return (tupla[0]+self.nmin[j][0],d+tupla[1])
 
-    
+    def findthetime(self,index0,n,j):
+        d = 0
+        if j <=n//3:
+            d = 2
+        elif (j>n//3) & (j<=(2*n)//3):
+            d = 4
+        else :
+            d = 6
+        if self.country[self.latmax[0][1]]!=self.country[index0]:
+            return d + 2
+        return d
