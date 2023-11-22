@@ -14,3 +14,11 @@ ML Algorithms for comparison and testing -
 
 In Output, we print the Clsuter Created and the Count of Elements in Each Cluster. 
 We also compare the Silhouette Score for both the clustering algorithms.
+
+
+The main Project Files are 
+ZooAnimals.py -> contains the classes used for data import.
+main.py -> contains the main project code.
+app.py -> contains the code for Streamlit instance for a brief display of data in browser.
+
+Further, the animal data is imported from the zoo.xlsx file in the data folder.
