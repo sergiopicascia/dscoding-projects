@@ -1,5 +1,8 @@
 import pandas as pd
 
+"""
+Function created to combine all 4 strategies into one, to facilitate some visualization creation.
+"""
 def combined(random, preference, price, rooms):
     random['strategy'] = 'Random'
     preference['strategy'] = 'Preference'
