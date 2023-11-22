@@ -1,6 +1,10 @@
 import pandas as pd
 import numpy as np
+import openpyxl
 from utils import satisfaction
+guests= pd.read_excel(r"C:\Users\lejda\Desktop\coding - Python\guests.xlsx")
+hotels = pd.read_excel(r"C:\Users\lejda\Desktop\coding - Python\hotels.xlsx")
+preferences = pd.read_excel(r"C:\Users\lejda\Desktop\coding - Python\preferences.xlsx")
 
 class PreferencesAllocator:
     def __init__(self, hotels, guests, preferences):

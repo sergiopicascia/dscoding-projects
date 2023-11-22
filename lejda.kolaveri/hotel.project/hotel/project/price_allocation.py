@@ -3,11 +3,8 @@ import numpy as np
 import openpyxl
 from utils import satisfaction
 guests= pd.read_excel(r"C:\Users\lejda\Desktop\coding - Python\guests.xlsx")
-guests
 hotels = pd.read_excel(r"C:\Users\lejda\Desktop\coding - Python\hotels.xlsx")
-hotels
 preferences = pd.read_excel(r"C:\Users\lejda\Desktop\coding - Python\preferences.xlsx")
-preferences
 
 class PriceBasedAllocator:
     def __init__(self, hotels, guests, preferences):
@@ -60,6 +57,3 @@ class PriceBasedAllocator:
                 allocation_entry = [row['guest'], row['hotel'], satisfaction, paid_price]
                 allocation_list.append(allocation_entry)
         return pd.DataFrame(allocation_list, columns=['guest_id', 'hotel_id', 'satisfaction', 'paid_price'])
-    
-
-random_allocation = RandomHotelAllocation(hotels, guests, preferences)

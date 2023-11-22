@@ -1,14 +1,10 @@
 import pandas as pd
 import numpy as np
 from utils import satisfaction
-
 import openpyxl
 guests= pd.read_excel(r"C:\Users\lejda\Desktop\coding - Python\guests.xlsx")
-guests
 hotels = pd.read_excel(r"C:\Users\lejda\Desktop\coding - Python\hotels.xlsx")
-hotels
 preferences = pd.read_excel(r"C:\Users\lejda\Desktop\coding - Python\preferences.xlsx")
-preferences
 
 
 class HotelAllocation:
