@@ -4,7 +4,9 @@ st.set_page_config(layout="wide")
 
 
 def introduction():
-    '''# Welcome to My Web App, please select the desired page from the sidebar.'''
+
+    st.title('Welcome to my WebApp!')
+    st.title('Please select a database from the sidebar')
 
 #the following section is used to create the different pages
 def major_cities_page():
