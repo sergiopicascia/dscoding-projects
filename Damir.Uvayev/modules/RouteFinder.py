@@ -1,32 +1,59 @@
-import geopy.distance
 from modules.utils import convert_to_decimal
+from geopy.distance import great_circle
+
 
 class RouteFinder:
     def __init__(self, data):
         self.data = data
 
-    def get_distance(self, city1, city2):
-        city_data = self.data[self.data['City'] == city1][['Latitude', 'Longitude']]
-        if city_data.empty:
-            return float('inf')
-        lat1, lon1 = city_data.values[0]
+    @staticmethod
+    def get_closest_cities(current_city, all_cities, merged_data, limit=3):
+        current_city_data = merged_data[merged_data['City'] == current_city]
+        if current_city_data.empty:
+            return []
 
-        city_data = self.data[self.data['City'] == city2][['Latitude', 'Longitude']]
-        if city_data.empty:
-            return float('inf')
-        lat2, lon2 = city_data.values[0]
+        # Convert latitude and longitude to decimal format
+        current_lat = convert_to_decimal(current_city_data.iloc[0]['Latitude'])
+        current_lon = convert_to_decimal(current_city_data.iloc[0]['Longitude'])
+        current_city_coords = (current_lat, current_lon)
 
-        lat1, lat2 = float(convert_to_decimal(lat1)), float(convert_to_decimal(lat2))
-        lon1, lon2 = float(convert_to_decimal(lon1)), float(convert_to_decimal(lon2))
+        distances = []
+        for city in all_cities:
+            if city == current_city:
+                continue
+            city_data = merged_data[merged_data['City'] == city]
+            if city_data.empty:
+                continue
 
-        return geopy.distance.distance((lat1, lon1), (lat2, lon2)).km
+            # Convert latitude and longitude to decimal format
+            city_lat = convert_to_decimal(city_data.iloc[0]['Latitude'])
+            city_lon = convert_to_decimal(city_data.iloc[0]['Longitude'])
+            city_coords = (city_lat, city_lon)
 
-    def get_closest_cities(self, current_city, all_cities):
-        distances = [(city, self.get_distance(current_city, city)) for city in all_cities if city != current_city]
-        distances.sort(key=lambda x: x[1])
-        return [city[0] for city in distances][:3]  # Returning only the top 3 closest cities
+            distance = great_circle(current_city_coords, city_coords).km
+            distances.append((city, distance))
 
-    def find_warmest_route(self, start_city="London", end_city="Cape Town"):
+        # Sort cities by distance and return the 'limit' closest ones
+        closest_cities = sorted(distances, key=lambda x: x[1])[:limit]
+        return [city for city, _ in closest_cities]
+
+    @staticmethod
+    def get_warmest_city(cities, merged_data):
+        warmest_city = None
+        highest_avg_temp = -float('inf')
+
+        for city in cities:
+            city_data = merged_data[merged_data['City'] == city]
+            if city_data.empty:
+                continue
+            avg_temp = city_data.iloc[0]['AverageTemperature']
+            if avg_temp > highest_avg_temp:
+                highest_avg_temp = avg_temp
+                warmest_city = city
+
+        return warmest_city
+
+    def find_warmest_route(self, merged_data, start_city, end_city):
         route = [start_city]
         current_city = start_city
         visited_cities = set()
@@ -38,20 +65,22 @@ class RouteFinder:
             iteration_count += 1
             visited_cities.add(current_city)
 
-            all_cities = self.data['City'].unique().tolist()
-            possible_cities = self.get_closest_cities(current_city, all_cities)
-            possible_cities = [city for city in possible_cities if city not in visited_cities]
+            # Get the three closest cities
+            all_cities = merged_data['City'].unique().tolist()
+            closest_cities = self.get_closest_cities(current_city, all_cities, merged_data, limit=3)
+            closest_cities = [city for city in closest_cities if city not in visited_cities]
 
-            if not possible_cities:
+            if not closest_cities:
                 print("No available next city. Exiting...")
                 break
 
-            closest_data = self.data[self.data['City'].isin(possible_cities)]
-            temperatures = closest_data.groupby('City')['AverageTemperature'].mean()
-            warmest_city = temperatures.idxmax()
+            # Choose the warmest city among the closest ones
+            warmest_city = self.get_warmest_city(closest_cities, merged_data)
 
-            route.append(warmest_city)
-            current_city = warmest_city
+            if warmest_city:
+                route.append(warmest_city)
+                current_city = warmest_city
+            else:
+                break
 
         return route
-
