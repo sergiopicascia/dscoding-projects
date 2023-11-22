@@ -1,6 +1,12 @@
 import pandas as pd
 import numpy as np
-
+import openpyxl
+guests= pd.read_excel(r"C:\Users\lejda\Desktop\coding - Python\guests.xlsx")
+guests
+hotels = pd.read_excel(r"C:\Users\lejda\Desktop\coding - Python\hotels.xlsx")
+hotels
+preferences = pd.read_excel(r"C:\Users\lejda\Desktop\coding - Python\preferences.xlsx")
+preferences
 class satisfaction:
     def calculate_satisfaction_percentage(preferences, guest_id, hotel_id):
         guest_preferences = preferences[preferences['guest'] == guest_id].reset_index() #filter preferences for the given guest

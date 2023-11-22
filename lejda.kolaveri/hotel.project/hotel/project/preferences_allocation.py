@@ -11,9 +11,10 @@ class PreferencesAllocator:
         - guests (pd.DataFrame): DataFrame containing information about guests.
         - preferences (pd.DataFrame): DataFrame containing guest preferences.
      """
-        self.hotels = hotels
-        self.guests = guests
-        self.preferences = preferences
+        #we use copies to avoid modifying the original dataframes
+        self.hotels = hotels.copy()
+        self.guests = guests.copy()
+        self.preferences = preferences.copy()
         
     def allocate_and_calculate(hotels, guests, preferences):
     """
