@@ -15,7 +15,13 @@ def run_clustering(data, method, **kwargs):
     if method == "affinity_propagation":
         af = AffinityPropagation(**kwargs)
         labels = af.fit_predict(X_numeric)
+        unique_labels = np.unique(labels)
+
+        if len(unique_labels) < 2:
+            st.warning("Affinity Propagation resulted in less than 2 clusters, adjust the damping value")
+            return pd.DataFrame(), 0 # This returns empty DataFrame and Silhouette Score of 0 
         cluster_centers = af.cluster_centers_
+
     elif method == "kmeans":
         kmeans = KMeans(**kwargs)
         labels = kmeans.fit_predict(X_numeric)
@@ -64,6 +70,11 @@ def main():
         fig, ax = plt.subplots(figsize=(10,10))
         sns.countplot(x='cluster_label', data=result, ax=ax)
         plt.title('Count of Animals in Each Cluster')
+        for p in ax.patches:
+            ax.annotate(f'{p.get_height()}', (p.get_x() + p.get_width() / 2., p.get_height()),
+                        ha='center', va='center', fontsize=8, color='black', xytext=(0, 5),
+                        textcoords='offset points')
+    
         st.pyplot(fig)
 
         # Plot for Count of Animals in Initial Categories
@@ -71,6 +82,11 @@ def main():
         sns.countplot(x='class_type', data=result)
         plt.title("Count of Animals in Initial CAtegories")
 
+        for p in ax.patches:
+            ax.annotate(f'{p.get_height()}', (p.get_x() + p.get_width() / 2., p.get_height()),
+                        ha='center', va='center', fontsize=8, color='black', xytext=(0, 5),
+                        textcoords='offset points')
+        
         # Comparison of the CLusters with Initial Categories with animal names
         comparison_df = result.groupby(['animal_name', 'class_type', 'cluster_label']).size().reset_index(name='count')
         st.write("Comparison of Initial Categories with Clustered Data : ")
