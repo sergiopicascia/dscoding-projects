@@ -1,5 +1,6 @@
 from opencage.geocoder import OpenCageGeocode
 from countryinfo import CountryInfo
+import numpy as np
 import pandas as pd
 
 
@@ -8,10 +9,9 @@ class Data:
     path = "C:\\Users\sangi\Desktop\Info progetto python\Datasets"
     tempByCity = pd.read_csv(path + "\GlobalLandTemperaturesByCity.csv").dropna().reset_index(drop=True)
     tempByMajorCity = pd.read_csv(path + "\GlobalLandTemperaturesByMajorCity.csv").dropna().reset_index(drop=True)
-    cities = pd.read_csv(path + "\cities.csv", index_col=0, on_bad_lines="skip")
     majorCities = pd.read_csv(path + "\majorCities.csv", index_col=0)
-    citiesWithContinents_old = pd.read_csv(path + "\citiesWithContinents_old.csv", index_col=0).drop(["Region"], axis=1)
-    citiesWithContinents = pd.read_csv(path + "\citiesWithContinents.csv", index_col=0)
+    cities = pd.read_csv(path + "\cities.csv", index_col=0)
+    cities_old = pd.read_csv(path + "\cities_old.csv", index_col=0, on_bad_lines="skip")
     months = {"01": 'January', '02': 'February', '03': 'March', '04': 'April', '05': 'May', '06': 'June', '07': 'July',
               '08': 'August', '09': 'September', '10': 'October', '11': 'November', '12': 'December'}
 
@@ -26,7 +26,7 @@ REMEMBER THAT THIS FUNCTION MUST NOT BE RUN. I INSERTED IT HERE JUST FOR INFO PU
 
 
 def add_continents():
-    cities_copied = Data.cities.copy()
+    cities_copied = Data.cities_old.copy()
     for index, row in cities_copied.iterrows():
             my_country = row["Country"]
             if my_country in ["Côte D'Ivoire", "Burma", "Congo (Democratic Republic Of The)", "Guinea Bissau", "Congo",
@@ -77,15 +77,15 @@ class DownloadNewCoordinates:
 
 class Conversion:
 
-    cities1 = Data.cities.iloc[:400, :]
-    cities2 = Data.cities.iloc[400:800, :]
-    cities3 = Data.cities.iloc[800:1200, :]
-    cities4 = Data.cities.iloc[1200:1600, :]
-    cities5 = Data.cities.iloc[1600:2000, :]
-    cities6 = Data.cities.iloc[2000:2400, :]
-    cities7 = Data.cities.iloc[2400:2800, :]
-    cities8 = Data.cities.iloc[2800:3200, :]
-    cities9 = Data.cities.iloc[3200:, :]
+    cities1 = Data.cities_old.iloc[:400, :]
+    cities2 = Data.cities_old.iloc[400:800, :]
+    cities3 = Data.cities_old.iloc[800:1200, :]
+    cities4 = Data.cities_old.iloc[1200:1600, :]
+    cities5 = Data.cities_old.iloc[1600:2000, :]
+    cities6 = Data.cities_old.iloc[2000:2400, :]
+    cities7 = Data.cities_old.iloc[2400:2800, :]
+    cities8 = Data.cities_old.iloc[2800:3200, :]
+    cities9 = Data.cities_old.iloc[3200:, :]
 
     def citiesConversion1(self):
 
@@ -93,7 +93,7 @@ class Conversion:
         geocoder = OpenCageGeocode(key)
         list_lat = []
         list_lon = []
-        for index, row in Data.cities.iterrows():
+        for index, row in Data.cities1.iterrows():
             City = row["City"]
             Country = row["Country"]
             query = str(City) + ',' + str(Country)
@@ -102,9 +102,9 @@ class Conversion:
             lon = results[0]['geometry']['lng']
             list_lat.append(lat)
             list_lon.append(lon)
-        Data.cities['Latitude'] = list_lat
-        Data.cities['Longitude'] = list_lon
-        cities1.to_csv(Data.path + "\cities1.csv")
+        Data.cities1['Latitude'] = list_lat
+        Data.cities1['Longitude'] = list_lon
+        Data.cities1.to_csv(Data.path + "\cities1.csv")
 
     def list_of_cities_corrected(self):
 
@@ -118,6 +118,6 @@ class Conversion:
         cities8 = pd.read_csv(Data.path + "\cities8.csv", index_col=0)
         cities9 = pd.read_csv(Data.path + "\cities9.csv", index_col=0)
 
-        cities = pd.concat([cities1, cities2, cities3, cities4, cities5, cities6, cities7, cities8, cities9])
-        cities.to_csv(Data.path + "\cities.csv")
+        cities_old = pd.concat([cities1, cities2, cities3, cities4, cities5, cities6, cities7, cities8, cities9])
+        cities_old.to_csv(Data.path + "\cities.csv")
 

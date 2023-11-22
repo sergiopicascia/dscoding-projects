@@ -156,7 +156,7 @@ class Quiz:
                     {'generator': self.generate_question, 'params': ('Where was this movie produced? ==> ', 'country')},
                     {'generator': self.generate_question, 'params': ('Which one of these movies has the highest score on IMDb?', 'score')}
                 ]
-
+                 
                 for i in range(10):
                     while True:
                         question_info = None

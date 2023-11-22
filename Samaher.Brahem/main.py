@@ -18,7 +18,7 @@ try:
     quiz = Quiz(movie_data)
 
     # Running the quiz game
-    quiz.quiz_game()
+    quiz.run_quiz()
 
 finally:
     # Ensuring the database connection is closed
