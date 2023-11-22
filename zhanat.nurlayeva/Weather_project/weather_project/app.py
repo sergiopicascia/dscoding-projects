@@ -1,34 +1,59 @@
 # app.py
+import sys
+import os
+
+# Assuming this is the correct path to your project root
+project_root = "/Users/zhanatnurlayeva/Documents/GitHub/dscoding-projects/zhanat.nurlayeva/Weather_project/weather_project"
+
+sys.path.append(os.path.dirname(os.path.abspath(project_root)))
 
 import streamlit as st
+from datetime import datetime  # Import the datetime module
 from modules.data_processor import DataProcessor
 from modules.visualization import Visualization
 from modules.routing import Routing
-from modules.utils import convert_to_decimal
 
 def main():
+    import matplotlib
+    matplotlib.use('Agg')  # Set the backend to 'Agg'
+
     st.title("Temperature Analysis and Routing")
 
     # Sidebar for user input
     st.sidebar.header("Date Range Selection")
-    start_date = st.sidebar.text_input("Enter the start date (YYYY-MM-DD):", "1750-01-01")
-    end_date = st.sidebar.text_input("Enter the end date (YYYY-MM-DD):", "2023-01-01")
+
+    # User input for start date
+    start_date_input = st.sidebar.text_input("Enter the start date (YYYY-MM-DD):", "1750-01-01")
+    try:
+        start_date = datetime.strptime(start_date_input, "%Y-%m-%d").date()  # Parse user input
+    except ValueError:
+        st.warning("Invalid start date format. Please use the format YYYY-MM-DD.")
+        return
+
+    # User input for end date
+    end_date_input = st.sidebar.text_input("Enter the end date (YYYY-MM-DD):", "2023-01-01")
+    try:
+        end_date = datetime.strptime(end_date_input, "%Y-%m-%d").date()  # Parse user input
+    except ValueError:
+        st.warning("Invalid end date format. Please use the format YYYY-MM-DD.")
+        return
+
+    # Check if the end date is greater than the start date
+    if end_date <= start_date:
+        st.warning("End date must be greater than the start date.")
+        return
 
     # Specify the file path for your CSV file
     file_path = 'GlobalLandTemperaturesByMajorCity.csv'
 
     data_processor = DataProcessor(file_path)
-    #data_processor.load_data()  # Pass the file path to load_data method
-    data_processor.load_data(file_path)  # Pass the file path to load_data method
+    data_processor.load_data(file_path)
     original_data = data_processor.data
     filtered_data = data_processor.filter_data_by_period(start_date, end_date)
     avg_temperatures = data_processor.compute_city_avg_temperature()
 
     visualization = Visualization()
     routing = Routing()
-
-    # ... rest of your code ...
-
 
     # Visualize temperature trends
     st.header("Temperature Trends")
