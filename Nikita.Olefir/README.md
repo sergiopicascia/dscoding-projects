@@ -52,11 +52,13 @@ I collect comments from two threads:
 - [ ] Create a wordcloud for both of the dataframes
 - [ ] Add documentation to the module with streamlit usage
 - [ ] Add a README file for the streamlit folder
-- [ ] Make a sentiment analysis over time
-- [ ] Make words embedding and visualize it
+- [X] Make a sentiment analysis over time
+- [X] Create a column to the datatable to indicate whether comment was given what Milan lost or won
+- [X] Make words embedding and visualize it
 - [ ] Add guidelines for users
 - [ ] Add requirments file
 - [ ] Redact gitigrnore file
 - [ ] Redact README file
 - [ ] Create a Jupyter Notebook to present the code
 - [ ] Redact the whole project
+- [ ] Add a list of concepts/topics/packages covered in this project

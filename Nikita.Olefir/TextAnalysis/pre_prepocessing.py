@@ -5,13 +5,14 @@ This module contains functions to hash text data and convert utc_time to a datet
 import pandas as pd
 import hashlib
 
-def hash_text(dataframe: pd.DataFrame, column_name: str):
+def hash_text(dataframe: pd.DataFrame, column_name: str, hash_length: int = 10):
     """
     This function hashes text data in a column of the dataframe.
 
     Arguments:
         dataframe (pd.DataFrame): the input pandas DataFrame containing text data.
         column_name (str): the name of the column in a pandas dataframe.
+        hash_length (int): the desired length of the hash (default is 10).
 
     Returns:
         pd.DataFrame: pandas dataframe with hashed text (in a specified column).
@@ -19,7 +20,7 @@ def hash_text(dataframe: pd.DataFrame, column_name: str):
     Examples:
         hash_text(dataframe, "column_name")
     """    
-    dataframe[column_name] = dataframe[column_name].apply(lambda x: hashlib.sha256(x.encode('utf-8')).hexdigest())
+    dataframe[column_name] = dataframe[column_name].apply(lambda x: hashlib.sha256(x.encode('utf-8')).hexdigest()[:hash_length])
     return dataframe
 
 def change_time_format(dataframe: pd.DataFrame, column_name: str):
