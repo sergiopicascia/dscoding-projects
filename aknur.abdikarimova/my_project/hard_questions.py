@@ -4,7 +4,26 @@ import tkinter as tk
 from tkinter import messagebox
 
 class Duration:
+    """    
+    The class processes movie runtime data from csv file and creates an automatically generated quiz question
+    where a user needs to guess a correct runtime of a randomly selected movie out of 4 options by clicking on button.
+    
+    Libraries:
+    pandas: used for data manipulation
+    numpy: used for random selection and shuffling of data   
+    Tkinter: used for graphical user interface interactions
+
+    """
     def __init__(self, csv_file):
+        """
+        The function initializes the class by loading necessary movie data from csv file.
+        It sets up the main Tkinter window and titles it.
+        The inital score is set to be 0.
+
+        Parameters:
+        "csv_file" (str): path to the CSV file containing movie data.
+
+        """
         self.df = pd.read_csv(csv_file)
         self.question = ""
         self.correct_answer = ""
@@ -14,6 +33,11 @@ class Duration:
         self.root.title("Movie Duration Quiz")
 
     def generate_question(self):
+        """
+        The function generates a quiz question about movie's runtime by choosing a random movie from the dataset, its respective runtime,
+        then by creating other three runtime options through numpy random method in a range between 70 and 180.
+
+        """
         movie = self.df.sample()
         movie_name = movie['name'].values[0]
         movie_runtime = movie['runtime'].values[0]
@@ -29,7 +53,17 @@ class Duration:
         np.random.shuffle(self.options)
 
     def ask_question(self):
+        """
+        The function displays the quiz question and its options in a Tkinter window 
+        and manages user interaction, scoring, and shows the result.
+
+        """
         def check_answer(user_answer):
+            """
+            The function checks if user's choice is correct and displays current score. The correct answer rises the score by 30 points.
+            If the chosen answer is incorrect it shows the correct answer.
+
+            """
             if user_answer == self.correct_answer:
                 self.score += 30
                 messagebox.showinfo("Result", f"Correct! Your score is now: {self.score}")
@@ -44,6 +78,7 @@ class Duration:
             button = tk.Button(self.root, text=f"{option} minutes", font=("Times", 14), command=lambda opt=option: check_answer(opt))
             button.pack(pady=5)
 
+        # script to set size of Tkinter window and to centralize it on the screen
         window_width = 800
         window_height = 600
         screen_width = self.root.winfo_screenwidth()
@@ -54,13 +89,33 @@ class Duration:
 
         self.root.mainloop()
 
+# usage of the class
 duration = Duration('movies.csv')
 duration.generate_question()
 duration.ask_question()
 
 
 class HigherRating:
+    """    
+    The class processes movie rating data from csv file and creates an automatically generated quiz question
+    where a user needs to guess a movie that has a higher rating than a randomly selected movie out of 4 options by clicking on button.
+    
+    Libraries:
+    pandas: used for data manipulation
+    numpy: used for random selection and shuffling of data   
+    Tkinter: used for graphical user interface interactions
+
+    """
     def __init__(self, csv_file):
+        """
+        The function initializes the class by loading necessary movie data from csv file.
+        It sets up the main Tkinter window and titles it.
+        The inital score depends on output score of the class Duration.
+
+        Parameters:
+        "csv_file" (str): path to the CSV file containing movie data.
+
+        """
         self.df = pd.read_csv(csv_file)
         self.question = ""
         self.correct_answer = ""
@@ -70,6 +125,13 @@ class HigherRating:
         self.root.title("Higher Rating Movie Quiz")
 
     def generate_question(self):
+        """
+        The function selects a random movie from the dataset and generates a quiz question. 
+        It finds movies with higher ratings than the selected movie and chooses one as the correct answer,
+        and provides other three options with movie names that have lower rating than the selected movie.
+        Raiese "ValueErroe" if no movie is found with a higher rating than the selected movie.
+
+        """
         chosen_movie_index = np.random.choice(self.df.index)
         chosen_movie = self.df.loc[chosen_movie_index]
         chosen_movie_name = chosen_movie['name']
@@ -96,7 +158,18 @@ class HigherRating:
 
 
     def ask_question(self):
+        """
+        The function displays the quiz question and its options in a Tkinter window 
+        and manages user interaction, scoring, and shows the result.
+
+        """
         def check_answer(user_answer):
+            """
+            The function checks if user's choice is correct and displays current score. 
+            The correct answer rises the score by 30 points.
+            If the chosen answer is incorrect it shows the correct answer.
+
+            """
             if user_answer == self.correct_answer:
                 self.score += 30
                 result_message = f"Correct! Your score is now: {self.score}"
@@ -113,6 +186,7 @@ class HigherRating:
             button = tk.Button(self.root, text=option, font=("Times", 14), command=lambda opt=option: check_answer(opt))
             button.pack(pady=5)
         
+        # script to set size of Tkinter window and to centralize it on the screen
         window_width = 800
         window_height = 600
         screen_width = self.root.winfo_screenwidth()
@@ -123,13 +197,33 @@ class HigherRating:
 
         self.root.mainloop()
 
+# usage of the class
 higher_rating = HigherRating('movies.csv')
 higher_rating.generate_question()
 higher_rating.ask_question()
 
 
 class OldestMovie:
+    """
+    The class processes movie year data from csv file and creates an automatically generated interactive quiz question
+    where a user needs to guess the oldest movie among a set of randomly selected movies from a dataset.
+
+    Libraries:
+    pandas: used for data manipulation
+    numpy: used for random selection and shuffling of data   
+    Tkinter: used for graphical user interface interactions
+
+    """
     def __init__(self, csv_file):
+        """
+        The function initializes the class by loading necessary movie data from csv file.
+        It sets up the main Tkinter window and titles it.
+        The inital score depends on output score of the class HigherRating.
+
+        Parameters:
+        "csv_file" (str): path to the CSV file containing movie data.
+
+        """
         self.df = pd.read_csv(csv_file)
         self.question = "Choose the oldest movie among the given options."
         self.correct_answer = ""
@@ -138,7 +232,11 @@ class OldestMovie:
         self.root = tk.Tk()
         self.root.title("Oldest Movie Quiz")
 
-    def generate_question(self):        
+    def generate_question(self):
+        """
+        The function randomly selects four movies from the dataset and sorts them by their release year to determine the oldest movie,
+        then creates a quiz question with these movies as options.
+        """   
         selected_indices = np.random.choice(self.df.index, size=4, replace=False)
         selected_movies = self.df.loc[selected_indices]       
         sorted_movies = selected_movies.sort_values(by='year')
@@ -146,13 +244,24 @@ class OldestMovie:
         self.options = sorted_movies['name'].tolist()
 
     def ask_question(self):
+        """
+        The function displays the quiz question and its options in a Tkinter window 
+        and manages user interaction, scoring, and shows the result.
+
+        """
         def check_answer(user_answer):
+            """
+            The function checks if user's choice is correct and displays current score. 
+            The correct answer rises the score by 30 points.
+            If the chosen answer is incorrect it shows the correct answer.
+
+            """
             if user_answer == self.correct_answer:
                 self.score += 30
                 result_message = f"Correct! Your score is now: {self.score}"
             else:
                 result_message = f"Incorrect! The correct answer was: '{self.correct_answer}'."
-            result_message += f"\nYour score is: {self.score}"
+                result_message += f"\nYour score is: {self.score}"
             messagebox.showinfo("Result", result_message)
             self.root.destroy()
 
@@ -163,6 +272,7 @@ class OldestMovie:
             button = tk.Button(self.root, text=option, font=("Times", 14), command=lambda opt=option: check_answer(opt))
             button.pack(pady=5)
 
+        # script to set size of Tkinter window and to centralize it on the screen
         window_width = 800
         window_height = 600
         screen_width = self.root.winfo_screenwidth()
@@ -173,13 +283,33 @@ class OldestMovie:
 
         self.root.mainloop()
 
+# usage of the class
 oldest_movie = OldestMovie('movies.csv')
 oldest_movie.generate_question()
 oldest_movie.ask_question()
 
 
-class MovieBudget:
+class HardBudget:
+    """
+    The class processes movie budget data from csv file and creates an automatically generated interactive quiz question
+    where a user needs to guess the exact budget spent on a randomly selected movie from a dataset.
+
+    Libraries:
+    pandas: used for data manipulation
+    numpy: used for random selection and shuffling of data   
+    Tkinter: used for graphical user interface interactions
+
+    """
     def __init__(self, csv_file):
+        """
+        The function initializes the class by loading necessary movie data from csv file.
+        It sets up the main Tkinter window and titles it.
+        The inital score depends on output score of the class HigherRating.
+
+        Parameters:
+        "csv_file" (str): path to the CSV file containing movie data.
+
+        """
         self.df = pd.read_csv(csv_file)
         self.question = ""
         self.correct_answer = ""
@@ -189,11 +319,18 @@ class MovieBudget:
         self.root.title("Movie Budget Quiz")
 
     def generate_question(self):
+        """
+        The function randomly selects a movie from the dataset and prepares a quiz question about its budget. 
+        It generates budget options, including the correct answer and additional options within a 50% to 150% range of the correct budget.
+        It checks if the movie budget is not a NaN (Not a Number) to choose valid data.
+    
+        """
         while True:
             movie_index = np.random.choice(self.df.index)
             movie = self.df.loc[movie_index]
             movie_name = movie['name']
             movie_budget = movie['budget']
+
 
             if pd.notna(movie_budget):
                 break
@@ -210,7 +347,18 @@ class MovieBudget:
         np.random.shuffle(self.options)
 
     def ask_question(self):
+        """
+        The function displays the quiz question and its options in a Tkinter window 
+        and manages user interaction, scoring, and shows the result.
+
+        """
         def check_answer(user_answer):
+            """
+            The function checks if user's choice is correct, displays current score and total score for hard questions section. 
+            The correct answer rises the score by 30 points.
+            If the chosen answer is incorrect it shows the correct answer.
+
+            """
             if user_answer == self.correct_answer:
                 self.score += 30
                 result_message = f"Correct! Your score is now: {self.score}"
@@ -227,6 +375,7 @@ class MovieBudget:
             button = tk.Button(self.root, text=f"${option}", font=("Times", 14), command=lambda opt=option: check_answer(opt))
             button.pack(pady=5)
 
+        # script to set size of Tkinter window and to centralize it on the screen
         window_width = 800
         window_height = 600
         screen_width = self.root.winfo_screenwidth()
@@ -237,7 +386,8 @@ class MovieBudget:
 
         self.root.mainloop()
 
-movie_budget = MovieBudget('movies.csv')
+# usage of the class
+movie_budget = HardBudget('movies.csv')
 movie_budget.generate_question()
 movie_budget.ask_question()
 
