@@ -1,19 +1,21 @@
-def calculate_satisfaction_percentage(guest_id, hotel_id, preferences):
-    guest_preferences = preferences[preferences['guest'] == guest_id].reset_index()
+import pandas as pd
+import numpy as np
+import openpyxl
+guests= pd.read_excel(r"C:\Users\lejda\Desktop\coding - Python\guests.xlsx")
+guests
+hotels = pd.read_excel(r"C:\Users\lejda\Desktop\coding - Python\hotels.xlsx")
+hotels
+preferences = pd.read_excel(r"C:\Users\lejda\Desktop\coding - Python\preferences.xlsx")
+preferences
+class satisfaction:
+    def calculate_satisfaction_percentage(preferences, guest_id, hotel_id):
+        guest_preferences = preferences[preferences['guest'] == guest_id].reset_index() #filter preferences for the given guest
+        if guest_preferences.empty:
+            return 100  # No preferences, 100% satisfaction
 
-    if guest_preferences.empty:
-        # No preferences, so 100% satisfaction
-        return 100
-
-    is_hotel_one_of_preferred = hotel_id in guest_preferences['hotel'].values
-
-    if is_hotel_one_of_preferred:
-        index_of_preference = guest_preferences['hotel'].eq(hotel_id).idxmax()
-        guest_preferences_count = len(guest_preferences)
-        return round(((guest_preferences_count - index_of_preference) / guest_preferences_count) * 100)
-    else:
-        # Guest settled for a not preferred hotel, so 0% satisfaction
-        return 0
+        index_of_preference = (guest_preferences['hotel'] == hotel_id).idxmax() # Find the index of the allocated hotel in the guest's         preferences
+        satisfaction = round(((len(guest_preferences) - index_of_preference) / len(guest_preferences)) * 100)
+        return satisfaction if satisfaction >= 0 else 0
 
 
 

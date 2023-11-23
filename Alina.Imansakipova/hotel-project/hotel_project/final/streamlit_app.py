@@ -1,12 +1,19 @@
 import pandas as pd
 import streamlit as st
 
-
 from random_allocation_class import RandomHotelAllocator
 from availability_allocation_class import HotelAvailabilityAllocator
 from preferences_allocation_class import HotelPreferenceAllocator
 from price_allocation_class import HotelPriceAllocator
 
+def allocation_analysis(allocation):
+    result = {}
+    result['Customers accommodated'] = allocation['guest_id'].count()
+    result['Number of rooms occupied'] = allocation['guest_id'].count()
+    result['Number of different hotels occupied'] = allocation['hotel_id'].nunique()
+    result['Average satisfaction'] = round(allocation['satisfaction_percentage'].mean(), 2)
+
+    return result
 
 def main():
     hotelsdata = pd.read_excel(
@@ -36,6 +43,10 @@ def main():
     else:
         final_allocation = pref_allocator.get_customer_preference_allocation()
 
+    if st.button('Perform Allocation Analysis'):
+        analysis_result = allocation_analysis(final_allocation)
+        for key, value in analysis_result.items():
+            st.write(f'{key}: {value}')
     # Display the result
     st.dataframe(final_allocation)
 
