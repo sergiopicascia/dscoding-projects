@@ -1,4 +1,5 @@
 ## BGG project
+###### _by Chi Hoang_
 
 ##### Introduction to the project
 - The project aims to propose a different method in sorting various types of board games besides focusing on the comparison between their Average scores.
@@ -12,7 +13,7 @@
     - **Prior mean:** The mean of the prior belief or information.
     - **Average score:** The average score or rating given by users.
     - **Number of votes:** The total number of votes or observations.
-- In real life, there are lots of cases in which people use Bayesian Average in costume ranking, for example on movies or a specific product.
+- In fact, there are lots of cases in which people use Bayesian Average in costume ranking, for example on movies or a specific product.
 
 ##### Brief description about the steps:
 - Sorting the data
