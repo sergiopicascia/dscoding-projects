@@ -4,7 +4,7 @@ import numpy as np
 
 
 class TravelData:
-    def __init__(self, path, admin=True, primary=True, minor=False, num_rows=0, random_state=None, num=300):
+    def __init__(self, path, admin=True, primary=True, minor=False, num=300):
         """
         Initialize the TravelData class.
 
@@ -18,8 +18,6 @@ class TravelData:
             Whether to include primary cities, by default True.
         minor : bool, optional
             Whether to include minor cities, by default False.
-        num_rows : int, optional
-            The number of rows to randomly drop from the DataFrame, by default 300.
         num : int, optional
             The number of rows to return from the head of the DataFrame, by default 300.
         """
@@ -29,7 +27,6 @@ class TravelData:
         self.load_data()
         self.add_continent_column()
         self.filter_cities(admin=admin, primary=primary, minor=minor)
-        self.drop_random_rows(num_rows=num_rows, random_state=random_state)
         self.drop_last_rows(num=num)
 
     def load_data(self):
@@ -132,31 +129,6 @@ class TravelData:
 
         # Apply the country_to_continent function to create a new 'continent' column
         self.df.loc[:, 'continent'] = self.df[country_column].apply(country_to_continent)
-
-    def drop_random_rows(self, num_rows: int = 0, random_state: int = None):
-        """
-        Drop a specific number of rows randomly from a DataFrame.
-
-        Parameters
-        ----------
-        num_rows : int
-            The number of rows to leave in the DataFrame.
-        random_state : int, optional
-            Random seed for reproducibility. If None, no seed is used.
-
-        Returns
-        -------
-        pd.DataFrame
-            The DataFrame with a specific number of rows dropped randomly.
-        """
-        if num_rows == 0:
-            return self.df
-        elif len(self.df) < num_rows:
-            raise ValueError(f"The DataFrame only has {len(self.df)} rows, which is less than the specified number "
-                             f"of rows to drop ({num_rows}).")
-        else:
-            self.df = self.df.sample(num_rows, random_state=random_state).reset_index(drop=True)
-            return self.df
 
     def drop_last_rows(self, num=300):
         """

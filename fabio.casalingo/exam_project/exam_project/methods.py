@@ -56,7 +56,7 @@ class Travel:
         input_city_id: int
             The ID associated to the starting city.
         n: int
-            The numbrer of closest cities to select.
+            The number of closest cities to select.
 
         Returns
         -------
