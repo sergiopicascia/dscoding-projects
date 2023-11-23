@@ -1,25 +1,24 @@
-# QUIZ
+# QUIZ without Streamlit
+# The following code is almost identical to the one 'with Streamlit' but there are some important differences in the
+# end. I have two different files because, once I have finished the code, I have started to turn the code in Streamlit:
+# the problem was that in the original code(this one) there are many loops and Streamlit doesn't reasonate well with
+# loops.
+# So I have decided to upload also the code without Streamlit to show how different the two are even if in the end the
+# structure of the quiz is the same.
 
-# Come prima cosa ho importato le librerie che mi servivano con degli acrononimi in modo da poter velocizzare la scrittura
+# In this quiz there are 4 more functions that differentiates the 3 quizzes: so we have an easy, medium and difficult
+# function, and they are all called in the choose_quiz function that to the concept is similar to the run_quiz function.
+
+# The real change in this quiz is the possibility to take different quizzes and store all the results and in the end
+# there is a plot that takes into account all the scores of all the quizzes played: so we have an average score.
 
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import streamlit as st
 
 
-# Questo progetto è costituito da un'unica classe chiamata 'Quiz' che racchiude tutti gli attributi e i metodi necessari
-# per creare il quiz
 class Quiz:
 
-    # come primo metodo si definisce la funzione __init__ che serve a definire gli attributi che verranno utilizzati all'interno
-    # della classe. Nella prima riga inserisco direttamente nell'argomento i path che ho utilizzato per non riscriverli poi nell'usage
-    # e farlo in modo automatizzato ma si potrebbero generalizzare lasciando nell'argomento solo la dicitura 'path' e poi inseririli
-    # nell'usage.
-
-    # all'interno del metodo costruttore ho inserito due variabile che contengono all'interno i due dataset che ho utilizzato per il
-    # quiz. I due file erano dei file tsv per cui si utilizza la funzione read_csv di pandas ma all'interno delle parentesi si mette come argomento
-    # che il separatore deve essere '\t' che è il tab per identificare questa distinzione.
     def __init__(self, title_basics_path='//Users/ariannagirotto/Desktop/dataset/title.basics.tsv',
                  info_person_path='//Users/ariannagirotto/Desktop/dataset/name.tsv'):
         self.title_basics = pd.read_csv(title_basics_path, sep="\t", quoting=3, encoding='utf-8', engine='python',
@@ -38,15 +37,15 @@ class Quiz:
 
     def filter_sort_data_tb(self, level):
         global filtered_tb
-        if level == 'EASY':
+        if level == 'easy':
             filtered_tb = self.title_basics[(self.title_basics['startYear'].astype(int) >= 1990) &
                                             (self.title_basics['startYear'].astype(int) <= 2023)]
             filtered_tb = filtered_tb.sort_values(by='startYear', ascending=False)
-        elif level == 'MEDIUM':
+        elif level == 'medium':
             filtered_tb = self.title_basics[(self.title_basics['startYear'].astype(int) >= 1940) &
                                             (self.title_basics['startYear'].astype(int) < 1990)]
             filtered_tb = filtered_tb.sort_values(by='startYear', ascending=False)
-        elif level == 'DIFFICULT':
+        elif level == 'difficult':
             filtered_tb = self.title_basics[(self.title_basics['startYear'].astype(int) >= 1800) &
                                             (self.title_basics['startYear'].astype(int) < 1940)]
             filtered_tb = filtered_tb.sort_values(by='startYear', ascending=True)
@@ -55,15 +54,15 @@ class Quiz:
 
     def filter_sort_data_ip(self, level):
         global filtered_ip
-        if level == 'EASY':
+        if level == 'easy':
             filtered_ip = self.info_person[(self.info_person['birthYear'].astype(int) >= 1960) &
                                            (self.info_person['birthYear'].astype(int) <= 1987)]
             filtered_ip = filtered_ip.sort_values(by='birthYear', ascending=False)
-        elif level == 'MEDIUM':
+        elif level == 'medium':
             filtered_ip = self.info_person[(self.info_person['birthYear'].astype(int) >= 1930) &
                                            (self.info_person['birthYear'].astype(int) < 1960)]
             filtered_ip = filtered_ip.sort_values(by='birthYear', ascending=False)
-        elif level == 'DIFFICULT':
+        elif level == 'difficult':
             filtered_ip = self.info_person[(self.info_person['birthYear'].astype(int) >= 1800) &
                                            (self.info_person['birthYear'].astype(int) < 1930)]
             filtered_ip = filtered_ip.sort_values(by='birthYear', ascending=True)
@@ -192,6 +191,7 @@ class Quiz:
     def easy(self):
         questions, answers = self.q_a('easy')
         score = 0
+
         for i, question in enumerate(questions):
             print(f"Question {i + 1}: {question}")
             answer_options = [answers[i]['correct']] + answers[i]['incorrect']
@@ -229,7 +229,7 @@ class Quiz:
             print(
                 f"Fail! You have done {perc_easy}% and you haven't passed the easy quiz. Are you living in a cave?Try "
                 f"again!")
-        return questions, answers
+        return perc_easy
 
     def medium(self):
         questions, answers = self.q_a('medium')
@@ -278,6 +278,7 @@ class Quiz:
     def difficult(self):
         questions, answers = self.q_a('difficult')
         score = 0
+
         for i, question in enumerate(questions):
             print(f"Question {i + 1}: {question}")
             answer_options = [answers[i]['correct']] + answers[i]['incorrect']
@@ -324,11 +325,11 @@ class Quiz:
         while True:
             user_answer = input("Choose the level of the quiz between 'easy', 'medium' and 'difficult': ").lower()
             if user_answer in quiz_results:
-                if user_answer == "EASY":
+                if user_answer == "easy":
                     score = self.easy()
-                elif user_answer == "MEDIUM":
+                elif user_answer == "medium":
                     score = self.medium()
-                elif user_answer == "DIFFICULT":
+                elif user_answer == "difficult":
                     score = self.difficult()
 
                 quiz_results[user_answer].append(score)
@@ -354,115 +355,6 @@ class Quiz:
         plt.legend()
         plt.show()
 
-    def run_quiz(self):
-        global color, final_score
-        # Inizializzazione dello stato del quiz
-        if 'quiz_started' not in st.session_state:
-            st.session_state.quiz_started = False
-            st.session_state.current_index = 0
-            st.session_state.score = 0
-            st.session_state.selected_level = None
-            st.session_state.user_answer = None
-
-        # Form per la selezione del livello del quiz
-        if not st.session_state.quiz_started:
-            st.title('WELCOME TO IMDB QUIZ!')
-            st.subheader(':red[DISCLAIMER!]')
-            st.write(
-                'Before you start the quiz remember that there is only 1 correct answer. Also once you click the button'
-                ' the answer is saved so beware! The quiz is composed by 8 questions and you can choose the level of the quiz.'
-                'If you play the easy one you will have movies and/or tv series that are more recent: the more difficult '
-                'the quiz is, the more obscure the titles are. Enjoy it! ')
-            selected_level = st.selectbox("Choose the level of the quiz", ['EASY', 'MEDIUM', 'DIFFICULT'])
-            start_button = st.button('Start Quiz')
-
-            if start_button:
-                st.session_state.quiz_started = True
-                st.session_state.current_index = 0
-                st.session_state.score = 0
-                st.session_state.selected_level = selected_level
-                st.session_state.user_answer = None
-
-        # Logica del quiz
-        if st.session_state.quiz_started:
-            questions, answers = self.q_a(st.session_state.selected_level)
-
-            if st.session_state.current_index < len(questions):
-                question = questions[st.session_state.current_index]
-                answer = answers[st.session_state.current_index]
-
-                st.markdown(f"**Question {st.session_state.current_index + 1}: {question}**", )
-                options = [answer['correct']] + answer['incorrect']
-                np.random.shuffle(options)
-
-                # Mostra la radio button solo se non è stata ancora data una risposta
-                if st.session_state.user_answer is None:
-                    st.session_state.user_answer = st.radio("Select your answer", options,
-                                                            key=f"question_{st.session_state.current_index}")
-                    if st.session_state.user_answer == answer['correct']:
-                        st.session_state.score += 1
-                    st.session_state.current_index += 1
-                    st.session_state.user_answer = None  # Resetta la risposta per la prossima domanda
-
-            else:
-                st.header(f"Your :red[final score]: {st.session_state.score} out of {len(questions)}")
-                final_score = (st.session_state.score / len(questions)) * 100
-
-                if st.session_state.selected_level == 'EASY':
-                    color = 'green' if final_score >= 50 else 'red'
-                    if final_score >= 50:
-                        st.write(f"Congratulations! You have passed the easy quiz with {final_score}%")
-                        if 50 <= final_score <= 80:
-                            st.write(f"Good job! You have passed the test but there is still room for improvement.")
-                        elif 80 < final_score <= 100:
-                            st.write(f"Fantastic! You have a nice knowledge of film. Too easy? Try the medium quiz")
-                    else:
-                        st.write(
-                    f"Fail! You have done {final_score}% and you haven't passed the easy quiz. Are you living in a cave?Try "
-                    f"again!")
-
-                if st.session_state.selected_level == 'MEDIUM':
-                    color = 'green' if final_score >= 60 else 'red'
-                    if final_score >= 60:
-                        st.write(f"Congratulations! You have passed the medium quiz with {final_score}%")
-                        if 60 <= final_score <= 80:
-                            st.write(
-                                f"Good job! You have passed the test but there is still room for improvement. Try again!")
-                        elif 80 < final_score <= 100:
-                            st.write(
-                                f"Fantastic! You have a very good knowledge of film. Too easy? Try the difficult quiz")
-                    else:
-                        st.write(
-                            f"Fail! You have done {final_score}% and you haven't passed the medium quiz ( at least it was the medium "
-                            f"and not the easy :) )Try again!")
-
-                if st.session_state.selected_level == 'DIFFICULT':
-                    color = 'green' if final_score >= 70 else 'red'
-                    if final_score >= 70:
-                        st.write(f"Congratulations! You have passed the difficult quiz with {final_score}%")
-                        if 70 <= final_score <= 90:
-                            st.write(
-                                f"Good job! You have passed the test but there is still room for improvement. Try again!")
-                        elif 90 < final_score <= 100:
-                            st.write(
-                                f"Fantastic! You have an extraordinary knowledge of film. Too easy? I'm sorry but no room for "
-                                f"improvement for you: you are already a God of movies! I mean you know movies from the '800...")
-                    else:
-                        st.write(
-                            f"Fail! You have done {final_score}% and you haven't passed the difficult quiz. I get it I also didn't "
-                            f"pass it")
-
-                plt.figure(facecolor='none')
-                plt.bar(st.session_state.selected_level, final_score, color=color,
-                        label=st.session_state.selected_level)
-                plt.text(st.session_state.selected_level, final_score, f'{final_score:.2f}%')
-
-                plt.ylim(0, 100)
-                plt.ylabel('FINAL SCORE',fontsize=11)
-                plt.title('RESULTS', fontweight='bold', fontsize=16)
-                plt.legend()
-                st.pyplot(plt)
-
 
 quiz = Quiz()
-quiz.run_quiz()
+quiz.choose_quiz()
