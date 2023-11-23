@@ -6,11 +6,11 @@ import seaborn as sns
 class DataVisualization:
     def __init__(self, title, x, y, z, k):
         """
-        :param title: the "title" column of the full_table in Data.py
-        :param x: the "Number of votes" column of the full_table in Data.py
-        :param y: the "Average rating score" column of the full_table in Data.py
-        :param z: the "Bayesian Average rating score" column of the full_table in Data.py
-        :param k: the "Wilson lower bound" column of the full_table in Data.py
+        :parameter title: the "title" column of the full_table in Data.py
+        :parameter x: the "Number of votes" column of the full_table in Data.py
+        :parameter y: the "Average rating score" column of the full_table in Data.py
+        :parameter z: the "Bayesian Average rating score" column of the full_table in Data.py
+        :parameter k: the "Wilson lower bound" column of the full_table in Data.py
         """
         self.title = title
         self.x = x
@@ -57,31 +57,11 @@ class DataVisualization:
         self._plot_ratings(self.x, self.k, 'c', 'Number of votes', 'Wilson scores',
                            'Game ratings based on Wilson lower bound')
 
-    def compare_rankings_table(self):
-        # Generate a table of absolute differences in ranking
-        print("Table of absolute difference in ranking")
-        rankings_df = pd.DataFrame({
-            'Game Title': self.title,
-            'Average Rating Score': self.y,
-            'Bayesian Average Rating Score': self.z,
-            'Wilson lower bound': self.k,
-            'Absolute Difference 1': abs(self.y - self.z),
-            'Absolute Difference 2': abs(self.y - self.k)
-        })
-        self._plot_absolute_differences(rankings_df)
-
-    def _plot_absolute_differences(self, rankings_df):
-        # Plot the absolute differences in rankings
-        plt.figure(figsize=(12, 6))
-        sns.barplot(x='Game Title', y='Absolute Difference 1', data=rankings_df, color='blue', label='Avg vs Bayesian')
-        sns.barplot(x='Game Title', y='Absolute Difference 2', data=rankings_df, color='green', label='Avg vs Wilson')
-
-        plt.title('Absolute Differences in Rankings Comparison')
-        plt.xlabel('Game Title')
-        plt.ylabel('Absolute Difference in Ranking')
-        plt.legend()
-        plt.xticks(rotation=45, ha='right')
-        plt.tight_layout()
+    def plot_boxplot(self):
+        # Create a boxplot to compare the distributions of the three methods
+        plt.figure(figsize=(10, 6))
+        sns.boxplot(data=[self.y, self.z, self.k], palette=['blue', 'orange', 'green'])
+        plt.title('Boxplot Comparison of Rating Methods')
+        plt.xlabel('Rating Method')
+        plt.ylabel('Scores')
         plt.show()
-
-        return rankings_df

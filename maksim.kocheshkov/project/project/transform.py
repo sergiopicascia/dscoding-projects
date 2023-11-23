@@ -7,14 +7,23 @@ class Processor:
         # Initialize class
         pass
     
-    def transform_data(self, df):
+    def transform_data(self, data):
         # Convert the 'dt' column to date format
-        df['dt'] = pd.to_datetime(df['dt'])
+        data['dt'] = pd.to_datetime(data['dt'])
 
         # Extracting year
-        df['Year'] = df['dt'].dt.year
-        
-    def change_coord(self, df):
-        df['Latitude'] = df['Latitude'].apply(fun.convert_coord)
-        df['Longitude'] = df['Longitude'].apply(fun.convert_coord)
+        data['Year'] = data['dt'].dt.year
         return data
+        
+    def change_coord(self, data):
+        data['Latitude'] = data['Latitude'].apply(fun.convert_coord)
+        data['Longitude'] = data['Longitude'].apply(fun.convert_coord)
+        return data
+    
+    def filter_period(self, data, start_year, end_year):
+        return data[(data['Year'] >= start_year) & (data['Year'] <= end_year)]
+    
+    def find_top_anomaly_cities(self, data, n=5):
+        temp_ranges = data.sort_values('temp_range', ascending=False).groupby('City').first().reset_index()
+        return temp_ranges.sort_values('temp_range', ascending=False).head(n)
+        
