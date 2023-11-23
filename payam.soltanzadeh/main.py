@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[14]:
+# In[13]:
 
 
 import pandas as pd
@@ -9,6 +9,8 @@ import os
 from IPython.display import display, HTML, FileLink
 import numpy as np
 import random
+import matplotlib.pyplot as plt
+
 
 # Function to clean data
 def clean_data(df, dataset_type):
@@ -44,6 +46,43 @@ def load_datasets(hotels_path, guests_path, preferences_path):
     preferences_df = clean_data(preferences_df, 'preferences')
 
     return hotels_df, guests_df, preferences_df
+
+# Random Allocation function 
+def random_allocation(guests_df, hotels_df, preferences_df):
+    allocation = {'guest': [], 'hotel': [], 'final_price': [], 'guest_satisfaction': []}
+    random_guest = np.random.choice(guests_df['guest'], size=len(guests_df), replace=False).tolist()
+    hotel_list = pd.Series(hotels_df['rooms'].values, index=hotels_df['hotel'])
+    random_hotel = hotel_list.sample(frac=1).to_dict()
+    
+    allocated_guests = set()  # Set to keep track of already allocated guests
+
+    for guest in random_guest:
+        if guest in allocated_guests:  # Skip if guest is already allocated
+            continue
+
+        guest_discount = guests_df[guests_df['guest'] == guest]['discount'].values[0]
+        priority_hotels = preferences_df[preferences_df['guest'] == guest].sort_values(by='priority')['hotel'].tolist()
+        
+        for hotel in random_hotel:
+            if hotel in priority_hotels and random_hotel[hotel] > 0:
+                random_hotel[hotel] -= 1
+                gross_earning = hotels_df[hotels_df['hotel'] == hotel]['price'].values[0]
+                net_earning = gross_earning * (1 - guest_discount)
+                satisfaction = 1 if priority_hotels.index(hotel) + 1 == 1 else (
+                    2 if priority_hotels.index(hotel) + 1 <= (len(priority_hotels) * 0.25) else (
+                    3 if priority_hotels.index(hotel) + 1 <= (len(priority_hotels) * 0.5) else (
+                    4 if priority_hotels.index(hotel) + 1 < (len(priority_hotels) * 0.75) else 5)))
+                allocation['guest'].append(guest)
+                allocation['hotel'].append(hotel)
+                allocation['final_price'].append(net_earning)
+                allocation['guest_satisfaction'].append(satisfaction)
+                
+                allocated_guests.add(guest)  # Mark the guest as allocated
+                break  # Move to the next guest
+
+    return pd.DataFrame(allocation)
+
+
 
 # Customer Preference Allocation function
 def customer_preference_allocation(hotels_df, guests_df, preferences_df):
@@ -127,83 +166,122 @@ def customer_preference_allocation(hotels_df, guests_df, preferences_df):
     allocation_df['guest_satisfaction'] = allocation_df['guest_satisfaction'].fillna(0).astype(int)
     return allocation_df
 
-
-# Random Allocation function
-# Random Allocation function 
-def random_allocation(guests_df, hotels_df, preferences_df):
-    allocation = {'guest': [], 'hotel': [], 'final_price': [], 'guest_satisfaction': []}
-    random_guest = np.random.choice(guests_df['guest'], size=len(guests_df), replace=False).tolist()
-    hotel_list = pd.Series(hotels_df['rooms'].values, index=hotels_df['hotel'])
-    random_hotel = hotel_list.sample(frac=1).to_dict()
+# Price Allocation function
+def price_allocation(hotels_df, guests_df, preferences_df):
     
-    allocated_guests = set()  # Set to keep track of already allocated guests
+    allocation = {'guest': [], 'hotel': [], 'final_price': [], 'guest_satisfaction': []}
+    
+    guest_list = guests_df['guest'].tolist()
 
-    for guest in random_guest:
-        if guest in allocated_guests:  # Skip if guest is already allocated
-            continue
-
+    hotel_ordered = hotels_df.sort_values(by='price') 
+    hotel_list = pd.Series(hotel_ordered['rooms'].values, index = hotel_ordered.hotel).to_dict()
+        
+    for guest in guest_list:
+            
         guest_discount = guests_df[guests_df['guest'] == guest]['discount'].values[0]
+
         priority_hotels = preferences_df[preferences_df['guest'] == guest].sort_values(by='priority')['hotel'].tolist()
         
-        for hotel in random_hotel:
-            if hotel in priority_hotels and random_hotel[hotel] > 0:
-                random_hotel[hotel] -= 1
+        for hotel in hotel_list:
+            if hotel in priority_hotels and hotel_list[hotel]>0:
+                hotel_list[hotel] -=1
+    
                 gross_earning = hotels_df[hotels_df['hotel'] == hotel]['price'].values[0]
-                net_earning = gross_earning * (1 - guest_discount)
-                satisfaction = 1 if priority_hotels.index(hotel) + 1 == 1 else (
-                    2 if priority_hotels.index(hotel) + 1 <= (len(priority_hotels) * 0.25) else (
-                    3 if priority_hotels.index(hotel) + 1 <= (len(priority_hotels) * 0.5) else (
-                    4 if priority_hotels.index(hotel) + 1 < (len(priority_hotels) * 0.75) else 5)))
+                net_earning = gross_earning*(1-guest_discount)
+        
+                satisfaction = 1 if priority_hotels.index(hotel)+1 == 1 else(
+                    2 if priority_hotels.index(hotel)+1 <= (len(priority_hotels) * 0.25) else(
+                    3 if priority_hotels.index(hotel)+1 <= (len(priority_hotels) * 0.5) else(
+                    4 if priority_hotels.index(hotel)+1 < (len(priority_hotels) * 0.75) else 5)))
+        
                 allocation['guest'].append(guest)
                 allocation['hotel'].append(hotel)
                 allocation['final_price'].append(net_earning)
                 allocation['guest_satisfaction'].append(satisfaction)
-                
-                allocated_guests.add(guest)  # Mark the guest as allocated
-                break  # Move to the next guest
+                break
 
-    return pd.DataFrame(allocation)
+    price_allocation = pd.DataFrame(allocation)
+    return price_allocation
+
+def availability_allocation(hotels_df, guests_df, preferences_df):
+    
+    allocation = {'guest': [], 'hotel': [], 'final_price': [], 'guest_satisfaction': []}
+    
+    guest_list = guests_df['guest'].tolist()
+
+    hotel_ordered = hotels_df.sort_values(by='rooms') 
+    hotel_list = pd.Series(hotel_ordered['rooms'].values, index = hotel_ordered.hotel).to_dict()
+        
+    for guest in guest_list:
+            
+        guest_discount = guests_df[guests_df['guest'] == guest]['discount'].values[0]
+
+        priority_hotels = preferences_df[preferences_df['guest'] == guest].sort_values(by='priority')['hotel'].tolist()
+        
+        for hotel in hotel_list:
+            if hotel in priority_hotels and hotel_list[hotel]>0:
+                hotel_list[hotel] -=1
+    
+                gross_earning = hotels_df[hotels_df['hotel'] == hotel]['price'].values[0]
+                net_earning = gross_earning*(1-guest_discount)
+        
+                satisfaction = 1 if priority_hotels.index(hotel)+1 == 1 else(
+                    2 if priority_hotels.index(hotel)+1 <= (len(priority_hotels) * 0.25) else(
+                    3 if priority_hotels.index(hotel)+1 <= (len(priority_hotels) * 0.5) else(
+                    4 if priority_hotels.index(hotel)+1 < (len(priority_hotels) * 0.75) else 5)))
+        
+                allocation['guest'].append(guest)
+                allocation['hotel'].append(hotel)
+                allocation['final_price'].append(net_earning)
+                allocation['guest_satisfaction'].append(satisfaction)
+                break
+
+    allocation_df = pd.DataFrame(allocation)
+    return allocation_df
+
+
 # Function to calculate metrics
-def calculate_metrics_random(allocation_df, hotels_df):
+def calculate_metrics(allocation_df, hotels_df):
+    # Ensure 'guest_satisfaction' column exists and handle if not
+    if 'guest_satisfaction' not in allocation_df.columns:
+        allocation_df['guest_satisfaction'] = np.nan  # Fill with NaN if column doesn't exist
+
     allocated_room_counts = allocation_df['hotel'].value_counts()
     hotels_fully_occupied = sum(
         allocated_room_counts.get(hotel, 0) == room_count
         for hotel, room_count in hotels_df.set_index('hotel')['rooms'].items()
     )
 
+    # For 'Total Guests Allocated', count only non-null allocations if 'hotel' column can be null
+    total_guests_allocated = allocation_df[allocation_df['hotel'].notnull()].shape[0]
+
+    # For 'Total Rooms Filled', sum the filled rooms, considering only non-null hotel allocations
+    total_rooms_filled = allocated_room_counts.sum()
+
+    # Calculating metrics with rounding applied uniformly for consistency
     results = {
-        "Total Guests Allocated": len(allocation_df),
-        "Total Rooms Filled": len(allocation_df),
+        "Total Guests Allocated": total_guests_allocated,
+        "Total Rooms Filled": total_rooms_filled,
         "Number of Hotels Utilized": allocation_df['hotel'].nunique(),
         "Full Capacity Hotels Count": hotels_fully_occupied,
         "Overall Revenue Earned": round(allocation_df['final_price'].sum(), 2),
         "Average Earnings Per Hotel": round(allocation_df.groupby('hotel')['final_price'].sum().mean(), 2),
-        "Average Guest Satisfaction": round(allocation_df['guest_satisfaction'].mean(), 2)
+        "Average Guest Satisfaction": round(allocation_df['guest_satisfaction'].mean(), 2) if not allocation_df['guest_satisfaction'].isna().all() else np.nan
     }
 
     return pd.DataFrame(list(results.items()), columns=['Metric', 'Value'])
 
-def calculate_metrics_customer_preference(allocation_df, hotels_df):
-    # Calculate the number of fully occupied hotels
-    allocated_room_counts = allocation_df['hotel'].value_counts()
-    hotels_fully_occupied = sum(
-        allocated_room_counts.get(hotel, 0) == room_count
-        for hotel, room_count in hotels_df.set_index('hotel')['rooms'].items()
-    )
 
-    # Calculating the metrics
-    results = {
-        "Total Guests Allocated": allocation_df[allocation_df['hotel'].notnull()].shape[0],
-        "Total Rooms Filled": allocation_df[allocation_df['hotel'].notnull()].shape[0],  # Same as Guests Allocated
-        "Number of Hotels Utilized": allocation_df['hotel'].nunique(),
-        "Full Capacity Hotels Count": hotels_fully_occupied,
-        "Overall Revenue Earned": allocation_df['final_price'].sum(),
-        "Average Earnings Per Hotel": allocation_df.groupby('hotel')['final_price'].sum().mean(),
-        "Average Guest Satisfaction": allocation_df['guest_satisfaction'].mean(),
+def extract_metrics(df):
+    return {
+        'Total Guests Allocated': df.loc[df['Metric'] == 'Total Guests Allocated', 'Value'].values[0],
+        'Total Rooms Filled': df.loc[df['Metric'] == 'Total Rooms Filled', 'Value'].values[0],
+        'Number of Hotels Utilized': df.loc[df['Metric'] == 'Number of Hotels Utilized', 'Value'].values[0],
+        'Full Capacity Hotels Count': df.loc[df['Metric'] == 'Full Capacity Hotels Count', 'Value'].values[0],
+        'Overall Revenue Earned': df.loc[df['Metric'] == 'Overall Revenue Earned', 'Value'].values[0],
+        'Average Earnings Per Hotel': df.loc[df['Metric'] == 'Average Earnings Per Hotel', 'Value'].values[0],
+        'Average Guest Satisfaction': df.loc[df['Metric'] == 'Average Guest Satisfaction', 'Value'].values[0]
     }
-
-    return pd.DataFrame(list(results.items()), columns=['Metric', 'Value'])
-
 
 
 
@@ -267,6 +345,64 @@ def display_download_links(csv_path, txt_path):
         display(FileLink(txt_path, result_html_prefix="Download Summary Report: "))
 
 
+
+
+def plot_Satisfaction(comparison_df):
+    strategies = comparison_df['Strategy']
+    total_guests = comparison_df['Total Guests Allocated']
+    total_rooms = comparison_df['Total Rooms Filled']
+    avg_satisfaction = comparison_df['Average Guest Satisfaction']
+
+    x = np.arange(len(strategies))  # Label locations
+
+    fig, ax = plt.subplots()
+    ax.bar(strategies, total_guests, label='Total Guests Allocated')
+    ax.bar(strategies, total_rooms, bottom=total_guests, label='Total Rooms Filled')
+    ax.plot(strategies, avg_satisfaction * max(total_guests) / 5, color='red', marker='o', label='Average Guest Satisfaction (scaled)')
+
+    ax.set_xlabel('Strategy')
+    ax.set_title('Average Satisfaction of Guests For each Strategy ')
+    ax.legend()
+
+    plt.show()
+
+
+
+def plot_revenue_chart(comparison_df):
+    strategies = comparison_df['Strategy']
+    overall_revenue = comparison_df['Overall Revenue Earned']
+    avg_earnings = comparison_df['Average Earnings Per Hotel']
+
+    fig, ax1 = plt.subplots()
+
+    # Plotting the bar chart for overall revenue
+    ax1.bar(strategies, overall_revenue, color='blue', alpha=0.6, label='Overall Revenue Earned')
+
+    # Adding labels and title
+    ax1.set_xlabel('Strategy')
+    ax1.set_ylabel('Overall Revenue Earned')
+    ax1.set_title('Strategy Comparison: Revenue and Earnings')
+    ax1.legend(loc='upper left')
+
+    # Plotting the line chart for average earnings
+    ax2 = ax1.twinx()
+    ax2.plot(strategies, avg_earnings, color='green', marker='o', label='Average Earnings Per Hotel')
+    ax2.set_ylabel('Average Earnings Per Hotel (€)')
+    ax2.legend(loc='upper right')
+    
+    plt.show()
+
+def shorten_strategy_names(comparison_df):
+    # Shorten or modify strategy names as desired
+    comparison_df['Strategy'] = comparison_df['Strategy'].replace({
+        'Random Allocation': 'Random',
+        'Customer Preference Allocation': 'Customer Preference',
+        'Price Allocation': 'Price',
+        'Availability Allocation': 'Availability'
+    })
+    return comparison_df
+
+
 # Main execution block
 def main():
     # Paths to the data files
@@ -277,36 +413,99 @@ def main():
     # Load and clean datasets
     hotels_df, guests_df, preferences_df = load_datasets(hotels_path, guests_path, preferences_path)
 
-    # Execute Random_allocation strategy
+    # Execute Random Allocation Strategy
     random_allocation_df = random_allocation(guests_df, hotels_df, preferences_df)
-    random_results_df = calculate_metrics_random(random_allocation_df, hotels_df)
-    
-    # Execute customer_preference_allocation strategy
+    random_results_df = calculate_metrics(random_allocation_df, hotels_df)
+
+
+    # Execute Customer Preference Allocation Strategy
     customer_preference_allocation_df = customer_preference_allocation(hotels_df, guests_df, preferences_df)
-    customer_preference_results_df = calculate_metrics_customer_preference(customer_preference_allocation_df, hotels_df)
+    customer_preference_results_df = calculate_metrics(customer_preference_allocation_df, hotels_df)
+    
+    # Execute Price Allocation Strategy
+    price_allocation_df = price_allocation(hotels_df, guests_df, preferences_df)
+    price_allocation_results_df = calculate_metrics(price_allocation_df, hotels_df)
+    
+    # Execute Availability  Allocation Strategy
+    availability_allocation_df = availability_allocation(hotels_df, guests_df, preferences_df)
+    availability_allocation_results_df = calculate_metrics(availability_allocation_df, hotels_df)
+        
+
+    # Descriptions and post-descriptions for Allocation and Metrics tables
+    allocation_description = "<b>Table {table_number}: {strategy_name} Allocation Results Summary</b><br>This table shows the distribution of guests across various hotels, the price paid, and their satisfaction scores."
+    allocation_post_description = "*Note: Only the first 5 rows are displayed for brevity. For the complete data, please use the download link below.*"
+    metrics_description = "<b>Table {table_number}: {strategy_name} Allocation Performance Metrics</b><br>This table provides key metrics summarizing the allocation's effectiveness, including total guests allocated, revenue earned, and average guest satisfaction."
+    metrics_post_description = "*Note: Guest satisfaction scores range from 1 to 5, with 1 being the guest's top choice and 5 being around their last preference.*"
+
     # Display and save results for Random Allocation Strategy
     display(HTML("<h2>Random Allocation Strategy Results</h2>"))
-    display_with_description("<b>Table 1: Random Allocation Results Summary</b>", random_allocation_df.head())
-    display_with_description("<b>Table 2: Random Allocation Performance Metrics</b>", random_results_df)
+    display_with_description(allocation_description.format(table_number="1", strategy_name="Random"), random_allocation_df.head(), allocation_post_description)
+    display_with_description(metrics_description.format(table_number="2", strategy_name="Random"), random_results_df, metrics_post_description)
     csv_path, txt_path = save_files(random_allocation_df, random_results_df, 'results', 'random_allocation')
     display_download_links(csv_path, txt_path)
 
     # Display and save results for Customer Preference Allocation Strategy
     display(HTML("<h2>Customer Preference Allocation Strategy Results</h2>"))
-    display_with_description("<b>Table 3: Customer Preference Allocation Results Summary</b>", customer_preference_allocation_df.head())
-    display_with_description("<b>Table 4: Customer Preference Allocation Performance Metrics</b>", customer_preference_results_df)
+    display_with_description(allocation_description.format(table_number="3", strategy_name="Customer Preference"), customer_preference_allocation_df.head(), allocation_post_description)
+    display_with_description(metrics_description.format(table_number="4", strategy_name="Customer Preference"), customer_preference_results_df, metrics_post_description)
     csv_path, txt_path = save_files(customer_preference_allocation_df, customer_preference_results_df, 'results', 'customer_preference')
     display_download_links(csv_path, txt_path)
+    
+    # Display and save results for Price  Allocation Strategy
+    display(HTML("<h2>Price Allocation Strategy Results</h2>"))
+    display_with_description(allocation_description.format(table_number="5", strategy_name="Price Allocation"), price_allocation_df.head(), allocation_post_description)
+    display_with_description(metrics_description.format(table_number="6", strategy_name="Price Allocation"), price_allocation_results_df, metrics_post_description)
+    csv_path, txt_path = save_files(price_allocation_df, price_allocation_results_df, 'results', 'Price Allocation')
+    display_download_links(csv_path, txt_path)
+
+    # Display and save results for availability Allocation Strategy
+    display(HTML("<h2>Availability Allocation Strategy Results</h2>"))
+    display_with_description(allocation_description.format(table_number="7", strategy_name="Availability Allocation"), availability_allocation_df.head(), allocation_post_description)
+    display_with_description(metrics_description.format(table_number="8", strategy_name="Availability Allocation"), availability_allocation_results_df, metrics_post_description)
+    csv_path, txt_path = save_files(availability_allocation_df, availability_allocation_results_df, 'results', 'availability_allocation')
+
+    display_download_links(csv_path, txt_path)
+    
+    # Extract metrics for each strategy- TABLE 
+    random_metrics = extract_metrics(random_results_df)
+    customer_preference_metrics = extract_metrics(customer_preference_results_df)
+    price_allocation_metrics = extract_metrics(price_allocation_results_df)
+    availability_allocation_metrics = extract_metrics(availability_allocation_results_df)
+   
+
+    # Create the comparison dataframe- TABLE 
+    #  the comparison dataframe
+    comparison_df = pd.DataFrame(columns=[
+        'Strategy', 
+        'Total Guests Allocated', 
+        'Total Rooms Filled', 
+        'Number of Hotels Utilized', 
+        'Full Capacity Hotels Count', 
+        'Overall Revenue Earned', 
+        'Average Earnings Per Hotel', 
+        'Average Guest Satisfaction'
+    ])
+
+    # Create dataframes for each strategy and concatenate them- TABLE 
+    df_random = pd.DataFrame([{**{'Strategy': 'Random Allocation'}, **random_metrics}])
+    df_customer_preference = pd.DataFrame([{**{'Strategy': 'Customer Preference Allocation'}, **customer_preference_metrics}])
+    df_price_allocation = pd.DataFrame([{**{'Strategy': 'Price Allocation'}, **price_allocation_metrics}])
+    df_availability_allocation = pd.DataFrame([{**{'Strategy': 'Availability Allocation'}, **availability_allocation_metrics}])
+
+    comparison_df = pd.concat([comparison_df, df_random, df_customer_preference, df_price_allocation, df_availability_allocation], ignore_index=True)
+
+
+
+    # Display the comparison table
+    display(comparison_df)
+    
+    comparison_df = shorten_strategy_names(comparison_df)
+    plot_Satisfaction(comparison_df)
+    plot_revenue_chart(comparison_df)
 
 
 if __name__ == "__main__":
     main()
-
-
-# In[ ]:
-
-
-
 
 
 # In[ ]:

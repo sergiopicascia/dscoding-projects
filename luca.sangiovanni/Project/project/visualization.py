@@ -1,28 +1,33 @@
-import numpy as np
 import pandas as pd
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
+from geopy.distance import geodesic
 from countryinfo import CountryInfo
 from project.utils import Data
 
 
 class CityCountry:
-    numCities = Data.cities.drop(["Latitude", "Longitude"], axis=1).groupby("Country").count().sort_values(by="City",
-                                                                                                           ascending=
-                                                                                                           False)
+    numCities = Data.cities.drop(["Latitude", "Longitude", "Continent", "Subregion"], axis=1).groupby(
+        "Country").count().sort_values(by="City", ascending=False)
+
+    # The following function prints a small dataframe containing the countries that have most cities in the dataset.
 
     def byCountry_List(self):
         count_cities = CityCountry.numCities.copy()
         count_cities.columns = ["Number of cities"]
         return count_cities.head(15)
 
+    # The function below plots the data of the previous function, using a bar plot.
+
     def byCountry_Plot(self):
         plt.figure(figsize=(12, 5))
         plt.bar(CityCountry.numCities.index[:15], CityCountry.numCities.City[:15], color="brown")
         plt.xticks(rotation=70)
         plt.title("Number of cities in the dataset, by country\n", fontsize=18)
+
+    # The following function generates a map of a chosen country, showing all the cities that are part of it.
 
     def byCountry_Map(self, nation):
         byCountry = Data.cities[Data.cities["Country"] == nation]
@@ -32,11 +37,13 @@ class CityCountry:
         else:
             mapTitle = str("There are " + number + " cities in " + nation)
         fig = px.scatter_geo(byCountry, lat=byCountry["Latitude"], lon=byCountry["Longitude"],
-                             hover_name=byCountry["City"], color_discrete_sequence=["darkred"])
+                             hover_name=byCountry["City"], color_discrete_sequence=["DarkRed"])
         fig.update_geos(showocean=True, oceancolor="LightBlue", fitbounds="locations", showcountries=True,
                         showland=True, landcolor="LightGreen")
         fig.update_layout(title_text=mapTitle, title_x=0.5)
         fig.show()
+
+    # The function below creates a bar plot containing the cities of the dataset, divided by continent.
 
     def byContinent_Plot(self):
         byContinent = Data.cities.value_counts("Continent")
@@ -45,6 +52,8 @@ class CityCountry:
         plt.xlabel("")
         plt.ylabel("")
         plt.show()
+
+    # The following function generates a plot containing subplots of the cities divided by continent and by subregion.
 
     def bySubregion_plot(self):
         grouped_asia = Data.cities[Data.cities["Continent"] == "Asia"]
@@ -72,8 +81,22 @@ class CityCountry:
         sns.barplot(subregions_oceania, ax=ax5, color="Teal")
         fig.show()
 
+    # The function below calculates the distance between two cities, by using the geodesic function.
+
+    def cities_distance(self, city1, city2):
+        c1 = Data.cities[Data.cities["City"] == str(city1)]
+        c2 = Data.cities[Data.cities["City"] == str(city2)]
+        c1_coord = (c1[["Latitude", "Longitude"]]).values.flatten().tolist()
+        c2_coord = (c2[["Latitude", "Longitude"]]).values.flatten().tolist()
+        distance = round(geodesic(c1_coord, c2_coord).km, 2)
+        phrase = "The distance between " + str(city1) + " and " + str(city2) + " is " + str(distance) + " kilometers."
+        return phrase
+
 
 class BigCities:
+
+    # This function generates a map which shows all the major cities in the dataset (100 cities). Based on the user
+    # input, the map will be 3D or 2D.
 
     def majorCitiesMap(self, projection):
         geo_df = gpd.read_file(r"C:\Users\sangi\Desktop\Info progetto python\Datasets\majorCities.csv", index_col=0)
@@ -85,6 +108,8 @@ class BigCities:
 
 
 class Temperatures:
+
+    # The function below shows the temperatures in january and august during the years, given a city name.
 
     def tempJanAug(self, city_name):
         temp = Data.tempByCity[Data.tempByCity["City"] == city_name]
@@ -101,6 +126,8 @@ class Temperatures:
         fig.supylabel("Temperatures (°C)", fontsize=14)
         plt.subplots_adjust(bottom=0.15, top=0.85, hspace=0.8)
         plt.show()
+
+    # The following function shows a comparison between the temperatures in 2012 and in 1900, given a city name.
 
     def tempMonths(self, city_name):
         temp = Data.tempByCity[Data.tempByCity["City"] == city_name]
@@ -122,6 +149,9 @@ class Temperatures:
         plt.grid(True)
         plt.show()
 
+    # This function creates a bubble map, which contains the data of the temperatures of the major world cities in a
+    # given year and month.
+
     def bubbleMap(self, selected_date):
         titleText = "Average temperature in " + Data.months[selected_date[-2:]] + " " + selected_date[:4]
         tempMonthYear = Data.tempByMajorCity[Data.tempByMajorCity["dt"] == selected_date + "-01"]
@@ -135,6 +165,11 @@ class Temperatures:
         fig.update_geos(showocean=True, oceancolor="Lightblue", fitbounds="locations")
         fig.update_layout(title_text=titleText, title_x=0.47)
         fig.show()
+
+    # The function below shows some information about a chosen country. In the first part, the data is taken from the
+    # temperatures dataset, while the other info are obtained using the CountryInfo package, which contains a
+    # database of all the world countries. I inserted the exception in the case in which there is some country not
+    # recognised by the library (maybe because it has a different name).
 
     def countryStats(self, nation):
         byNation = Data.tempByCity[Data.tempByCity["Country"] == nation]
@@ -169,6 +204,8 @@ class Temperatures:
         except KeyError:
             print("Please choose another country")
 
+    # This function creates a bar plot which contains the cities with the highest temperature shock in a chosen year.
+
     def tempShock(self, chosen_year):
         tempYear = Data.tempByCity[Data.tempByCity["dt"].str.contains(chosen_year)].drop(
             ["Latitude", "Longitude", "AverageTemperatureUncertainty"], axis=1)
@@ -189,6 +226,9 @@ class Temperatures:
         plt.xticks(fontsize=12)
         plt.yticks(fontsize=12)
         plt.show()
+
+    # The function below generates a plot showing the number of cities that have a temperature shock greater than 49
+    # degrees, by year.
 
     def shockByYear(self):
         temp = Data.tempByCity.drop(["AverageTemperatureUncertainty", "Latitude", "Longitude"], axis=1)

@@ -1,21 +1,44 @@
 import pandas as pd
+import json
 from city import City
 
 
 class Traveler:
-    def __init__(self, path):
+    def __init__(self, path, json_path=None):
         '''
 
+        :param json_path: str, path to Json where ids of cities and their neighbours are saved
         :param path: str
         '''
-        self.cities_data = pd.read_excel(path, engine='openpyxl')
+        self.cities_data = pd.read_excel(path, engine='openpyxl')#.iloc[:10]
         self.cities = {}
-        self.build_city_graph()
+        if json_path:
+            self.build_city_graph_from_json(json_path)
+        else:
+            self.build_city_graph()
+
+    def build_city_graph_from_json(self, json_path):
+        '''
+
+        :param json_path: str, path to Json where ids of cities and their neighbours are saved
+        :return:
+        '''
+        with open(json_path, 'r') as json_file:
+            loaded_data = json.load(json_file)
+        for value in loaded_data.keys():
+            row_curr_city = self.cities_data[self.cities_data['id'] == int(value)].iloc[0]
+            curr_city = self.row_to_city(row_curr_city)
+            for neighbour in loaded_data[value]:
+                neighbour_city_row = self.cities_data[self.cities_data['id'] == neighbour['city']].iloc[0]
+                neighbour_city = self.row_to_city(neighbour_city_row)
+                curr_city.add_neighbor(neighbour_city, neighbour['travel_time'])
+
+            self.cities[int(value)] = curr_city
 
     def row_to_city(self, row):
         '''
 
-        :param row: Series, row of DataFrame
+        :param row: Series, row of DataFrame with cities
         :return: City
         '''
         return City(row['city_ascii'], row['lat'], row['lng'],
@@ -33,7 +56,7 @@ class Traveler:
         # 'id' is a unique identifier for each city
         ind = 0
         for index, row in self.cities_data.iterrows():
-
+            # TODO delete
             print(ind)
             ind += 1
 
@@ -62,9 +85,11 @@ class Traveler:
 
         return closest_neighbors
 
+
+
 # Code for testing
 # TODO delete
-x = Traveler('worldcities.xlsx')
+# x = Traveler('worldcities.xlsx')
 
 # data = pd.read_excel('worldcities.xlsx', engine='openpyxl')
 # #London
@@ -77,5 +102,15 @@ x = Traveler('worldcities.xlsx')
 # print(x.find_closest_neighbors(source_city, 4).head())
 
 # Tokyo - 1392685764
-print(x.cities[1826645935].neighbors)
+# print(x.cities[1826645935].neighbors)
+# print(x.cities)
 #
+# my_dict = {}
+# for i in x.cities.keys():
+#     my_dict[i] = x.cities[i].neighbors
+#
+# print(my_dict)
+#
+
+# with open('data_full.json', 'w') as json_file:
+#     json.dump(my_dict, json_file)
