@@ -4,68 +4,7 @@ import seaborn as sns
 import pandas as pd
 import geopandas as gpd
 import functions as fun
-
-def load_data(file_path):
-    data = pd.read_csv(file_path)
-    return data
-
-def clean_and_transform_data(data):
-    # Convert the 'dt' column to datetime type
-    data['dt'] = pd.to_datetime(data['dt'])
-
-    # Extract the year from the 'dt' column
-    data['Year'] = data['dt'].dt.year
-
-    # Remove rows with any missing values
-    data_cleaned = data.dropna()
-
-    return data_cleaned
-
-
-
-
-def transform_coordinates(data):
-    data['Latitude'] = data['Latitude'].apply(fun.convert_coordinates)
-    data['Longitude'] = data['Longitude'].apply(fun.convert_coordinates)
-    return data
-
-def filter_data_by_year_range(data, start_year, end_year):
-    return data[(data['Year'] >= start_year) & (data['Year'] <= end_year)]
-
-def find_top_cities_with_temp_ranges(data, n=10):
-    temp_ranges = data.sort_values('temp_range', ascending=False).groupby('City').first().reset_index()
-    return temp_ranges.sort_values('temp_range', ascending=False).head(n)
-
-def merge_with_geographical_data(data, city_data):
-    return data.merge(city_data[['City', 'temp_range']], on='City').drop_duplicates(subset=['City'])
-
-
-
-# Function to calculate the distance between two coordinates using the Haversine formula
-def haversine(lon1, lat1, lon2, lat2):
-   # Convert coordinates in radians
-    lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
-
-   # Longitude and latitude differences
-    dlon = lon2 - lon1
-    dlat = lat2 - lat1
-
-    # Haversine formula
-    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
-    c = 2 * asin(sqrt(a))
-    r = 6371  # Earth's radius (in km)
-    return c * r
-
-def find_nearest_cities(current_coords, cities_data, n=3):
-    # Calculate distances with Haversine formula
-    distances = cities_data.apply(
-        lambda row: haversine(current_coords['Longitude'], current_coords['Latitude'], row['Longitude'], row['Latitude']),
-        axis=1
-    )
-    
-   # When returning nearest cities, exclude current location (at 0 distance)
-    nearest_cities = cities_data.loc[distances.nlargest(len(distances) - 1).nsmallest(n).index]
-    return nearest_cities
+import TemperatureDataProcessor as dp
 
 def convert_coordinates(coord):
     # Function to convert coordinate data to numerical value.
@@ -118,16 +57,8 @@ def suggest_route(start_record, end_record, cities_data):
 
 
 
+
 def plot_temperature_range(city_data, top_cities, start_year, end_year):
-    """
-    Plot the temperature range over time for the top cities.
-    
-    Args:
-    city_data (DataFrame): DataFrame containing city, year, and temperature data.
-    top_cities (list): List of top cities to be plotted.
-    start_year (int): The starting year for the plot.
-    end_year (int): The ending year for the plot.
-    """
     # Filter data for the specified period
     city_data_period = city_data[(city_data['Year'] >= start_year) & (city_data['Year'] <= end_year)]
     
@@ -149,18 +80,9 @@ def plot_temperature_range(city_data, top_cities, start_year, end_year):
     plt.tight_layout()
     plt.show()
 
-# Bu fonksiyonu kullanarak, örneğin 1920-1970 yılları arasında sıcaklık aralığı en yüksek 10 şehrin grafiğini çizebilirsiniz.
-# Örnek kullanım: plot_temperature_range(city_yearly_temps, top_10_cities, 1920, 1970)
-
 
 def plot_temperature_range_bar(city_data, top_cities):
-    """
-    Plot a bar graph showing the top cities with the largest temperature ranges.
-    
-    Args:
-    city_data (DataFrame): DataFrame containing city and temperature range data.
-    top_cities (list): List of top cities to be plotted.
-    """
+
     plt.figure(figsize=(14, 8))
     barplot = sns.barplot(
         x='temp_range',
@@ -183,26 +105,7 @@ def plot_temperature_range_bar(city_data, top_cities):
     plt.show()
 
 
-
-def calculate_city_yearly_temperature_ranges(data):
-    # Create a copy of the DataFrame to avoid SettingWithCopyWarning
-    data = data.copy()
-
-    # Extract year from date
-    data['Year'] = pd.to_datetime(data['dt']).dt.year
-
-    # Calculate max and min temperatures for each city and year
-    yearly_temps = data.groupby(['City', 'Year'])['AverageTemperature'].agg(['max', 'min']).reset_index()
-
-    # Calculate temperature range
-    yearly_temps['temp_range'] = yearly_temps['max'] - yearly_temps['min']
-
-    return yearly_temps
-
 def plot_temperature_range_map(top_cities, top_n=10):
-   
-    import geopandas as gpd
-    import matplotlib.pyplot as plt
 
     # Create a GeoDataFrame for the top cities
     top_cities_gdf = gpd.GeoDataFrame(
@@ -231,3 +134,33 @@ def plot_temperature_range_map(top_cities, top_n=10):
     plt.title(f'Top {top_n} Cities with the Widest Temperature Range', fontsize=14)
     ax.set_axis_off()
     plt.show()
+
+def haversine(lon1, lat1, lon2, lat2):
+    # Convert coordinates in radians
+    lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+
+    # Longitude and latitude differences
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+
+    # Haversine formula
+    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+    c = 2 * asin(sqrt(a))
+    r = 6371  # Earth's radius in kilometers
+    return c * r
+
+
+def find_nearest_cities(current_coords, cities_data, n=3):
+    # Create a copy of the data to avoid SettingWithCopyWarning
+    cities_data = cities_data.copy()
+
+    # Exclude the current city from the dataset
+    cities_data = cities_data[cities_data['City'] != current_coords['City']]
+
+    # Calculate distances using the Haversine formula
+    distances = cities_data.apply(
+        lambda row: haversine(current_coords['Longitude'], current_coords['Latitude'], row['Longitude'], row['Latitude']),
+        axis=1
+    )
+    cities_data['Distance'] = distances
+    return cities_data.sort_values('Distance').head(n)

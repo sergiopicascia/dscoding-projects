@@ -1,0 +1,3 @@
+# IMDBest Quiz
+
+Quiz built using an imdb database, the question is not a standard one, but an aggregae of elements regarding the film, (ex. genre, year, director, main actor, etc.), the number of elements given depends on the difficulty chosen by the player. Instead of the standard imdb database i used a Keggle .... (www......) consisting of the top 1000 rated films in order to have only decently famous films mostly recognizable by the player. 
