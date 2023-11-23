@@ -3,6 +3,7 @@ import os
 import pandas as pd
 import plotly.express as px
 
+
 # Funzione per caricare i dati in base ai file selezionati e al periodo selezionato
 def load_data(selected_files, selected_folder_path, selected_year):
     data = pd.DataFrame()
@@ -19,12 +20,33 @@ def load_data(selected_files, selected_folder_path, selected_year):
 
     return data
 
+
 # Funzione per calcolare la media mensile per ogni colonna e file
 def calculate_monthly_mean(data):
     return data.groupby(['File', pd.Grouper(freq='M')]).mean().reset_index()
 
+
+# Funzione per ottenere la descrizione del file
+def get_file_description(selected_file, symbols_meta_df):
+    # Estrai il nome del file (senza estensione)
+    file_name = os.path.splitext(selected_file)[0]
+
+    # Cerca la riga corrispondente nel file 'symbols_valid_meta.csv'
+    description_row = symbols_meta_df[symbols_meta_df['NASDAQ Symbol'] == file_name]
+
+    # Restituisci la descrizione dalla colonna 'Security Name'
+    if not description_row.empty:
+        return description_row['Security Name'].values[0]
+    else:
+        return "Description not available"
+
+
 # Percorso della cartella "Data"
 data_folder = "Data"
+
+# Carica il file 'symbols_valid_meta.csv'
+symbols_meta_path = "symbols_valid_meta.csv"
+symbols_meta_df = pd.read_csv(symbols_meta_path)
 
 # Lista delle cartelle all'interno di "Data"
 subfolders = [f.name for f in os.scandir(data_folder) if f.is_dir()]
@@ -41,6 +63,14 @@ files = [f.name for f in os.scandir(selected_folder_path) if f.is_file()]
 # Selezione multipla dei file
 selected_files = st.multiselect("Select securities", files)
 
+# Ottieni la descrizione del file
+file_descriptions = [get_file_description(file, symbols_meta_df) for file in selected_files]
+
+# Visualizza la descrizione dei file selezionati
+st.write("File Descriptions:")
+for description in file_descriptions:
+    st.write(description)
+
 # Selezionatore per il tipo di grafico
 chart_type = st.selectbox("Choose your analysis", ["Returns", "Returns and Volatility", "Volume", "Volatility"])
 
@@ -56,7 +86,7 @@ data = load_data(selected_files, selected_folder_path, selected_year)
 monthly_data = calculate_monthly_mean(data)
 
 # Aggiungi un titolo
-st.title("Your First Financial Analysis")
+st.title("Financial Analysis")
 
 # Aggiungi una breve descrizione
 st.markdown("This dashboard provides a visual analysis of financial data, including returns, volatility, and volume.")
@@ -68,26 +98,21 @@ if chart_type == "Returns":
     fig.update_xaxes(title_text='Date')
     fig.update_yaxes(title_text='monthly returns')
     st.plotly_chart(fig)
-
-
 elif chart_type == "Returns and Volatility":
     fig = px.scatter(monthly_data, x='monthly_mean', y='RMSE', color='File', title='Returns and Volatility')
     # Personalizza il nome degli assi x e y
     fig.update_xaxes(title_text='monthly returns')
     fig.update_yaxes(title_text='Volatility')
     st.plotly_chart(fig)
-
 elif chart_type == "Volatility":
     fig = px.area(monthly_data, x='Date', y='RMSE', color='File', title='Volatility')
     # Personalizza il nome degli assi x e y
     fig.update_xaxes(title_text='Date')
     fig.update_yaxes(title_text='Volatility')
     st.plotly_chart(fig)
-
 elif chart_type == "Volume":
     fig = px.bar(monthly_data, x='Date', y='Vol_month_mean', color='File', title='Volume')
     # Personalizza il nome degli assi x e y
     fig.update_xaxes(title_text='Date')
     fig.update_yaxes(title_text='monthly volume')
     st.plotly_chart(fig)
-
