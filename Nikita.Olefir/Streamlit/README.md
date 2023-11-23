@@ -35,7 +35,7 @@ This Streamlit app combines sentiment analysis and word cloud generation to prov
 
 There might appear some problems with the opening of this app. I describe problems that I've encountered and how to deal with them to open the app without any problems.
 
-1) Streamlit does not allow to open the app simply by writing <mark style="background-color: #e6e6e3">streamlit run sent_analysis_and_wordcloud.py</mark>. Instead of the name of the file insert the path to the file. It worked for me.
-2) Streamlit might also say that some packages (in my case it was <mark style="background-color: #e6e6e3">wordcloud</mark>) are not imported. Just close the app by shuting donwn the app, writning <mark style="background-color: #e6e6e3">pip install name_of_the_package</mark>, and opening app once again.
+1) Streamlit does not allow to open the app simply by writing `streamlit run sent_analysis_and_wordcloud.py`. Instead of the name of the file insert the path to the file. It worked for me.
+2) Streamlit might also say that some packages (in my case it was `wordcloud`) are not imported. Just close the app by shuting donwn the app, writning `pip install name_of_the_package`, and opening app once again.
 
-In case you do not want to open the app or you encounter problems, I add another Markdown file with screenshots of the app so you can view how it works.
+In case you do not want to open the app or you encounter problems, I add another Markdown file (`Results.md`) with screenshots of the app so you can view how it works.
