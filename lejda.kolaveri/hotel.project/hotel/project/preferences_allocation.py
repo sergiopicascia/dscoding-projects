@@ -6,7 +6,7 @@ guests= pd.read_excel(r"C:\Users\lejda\Desktop\coding - Python\guests.xlsx")
 hotels = pd.read_excel(r"C:\Users\lejda\Desktop\coding - Python\hotels.xlsx")
 preferences = pd.read_excel(r"C:\Users\lejda\Desktop\coding - Python\preferences.xlsx")
 
-class PreferencesAllocator:
+class PreferencesAllocator(HotelAllocation):
     def __init__(self, hotels, guests, preferences):
         """Initialize the AvailabilityBasedAllocator.
 
@@ -20,15 +20,7 @@ class PreferencesAllocator:
         self.guests = guests.copy()
         self.preferences = preferences.copy()
         
-    def calculate_satisfaction_percentage(self, guest_id, hotel_id):
-        guest_preferences = self.preferences[self.preferences['guest'] == guest_id].reset_index() #filter preferences for the given guest
-        if guest_preferences.empty:
-            return 100  # No preferences, 100% satisfaction
 
-        index_of_preference = (guest_preferences['hotel'] == hotel_id).idxmax() # Find the index of the allocated hotel in the guest's         preferences
-        satisfaction = round(((len(guest_preferences) - index_of_preference) / len(guest_preferences)) * 100)
-        return satisfaction if satisfaction >= 0 else 0
-        
 
     def allocate_and_calculate(self):
         """Allocate guests to their preferred hotels, calculate paid price and satisfaction.
@@ -56,12 +48,11 @@ class PreferencesAllocator:
                     paid_price_coefficient = 1 - guest_row['discount']
                     paid_price = preferred_hotel_row['price'] * paid_price_coefficient
 
-                    satisfaction = self.calculate_satisfaction_percentage(guest_id, preferred_hotel_id, self.preferences)
+                    satisfaction = self.calculate_satisfaction_percentage(f"guest_{guest_id}", preferred_hotel_id)
 
-                    allocation_entry = [guest_id, preferred_hotel_id, satisfaction, paid_price]
+                    allocation_entry = [f"guest_{guest_id}", preferred_hotel_id, satisfaction, paid_price]
                     allocation_list.append(allocation_entry)
 
                     break
 
         return pd.DataFrame(allocation_list, columns=['guest_id', 'hotel_id', 'satisfaction', 'paid_price'])
-       

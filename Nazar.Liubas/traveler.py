@@ -4,13 +4,16 @@ from city import City
 
 
 class Traveler:
+    '''
+    A class that makes a simulation of a travel around the world
+    '''
+
     def __init__(self, path, json_path=None):
         '''
-
         :param json_path: str, path to Json where ids of cities and their neighbours are saved
-        :param path: str
+        :param path: str, path to excel with data
         '''
-        self.cities_data = pd.read_excel(path, engine='openpyxl')#.iloc[:10]
+        self.cities_data = pd.read_excel(path, engine='openpyxl')
         self.cities = {}
         if json_path:
             self.build_city_graph_from_json(json_path)
@@ -19,9 +22,9 @@ class Traveler:
 
     def build_city_graph_from_json(self, json_path):
         '''
-
+        Parses json file with data about neighbours and creates graph of cities
         :param json_path: str, path to Json where ids of cities and their neighbours are saved
-        :return:
+        :return: None, creates city graph with closest neighbours
         '''
         with open(json_path, 'r') as json_file:
             loaded_data = json.load(json_file)
@@ -32,12 +35,11 @@ class Traveler:
                 neighbour_city_row = self.cities_data[self.cities_data['id'] == neighbour['city']].iloc[0]
                 neighbour_city = self.row_to_city(neighbour_city_row)
                 curr_city.add_neighbor(neighbour_city, neighbour['travel_time'])
-
             self.cities[int(value)] = curr_city
 
     def row_to_city(self, row):
         '''
-
+        Creates a city object from a line on original dataframe
         :param row: Series, row of DataFrame with cities
         :return: City
         '''
@@ -46,7 +48,7 @@ class Traveler:
 
     def build_city_graph(self):
         '''
-
+        Creates a graph of cities, where each city has linked 3 closest neighbours and time to get there
         :return:
         '''
         for index, row in self.cities_data.iterrows():
@@ -57,7 +59,8 @@ class Traveler:
         ind = 0
         for index, row in self.cities_data.iterrows():
             # TODO delete
-            print(ind)
+            if ind % 10000000 == 0:
+                print(ind)
             ind += 1
 
             current_city = self.cities[row['id']]
@@ -71,46 +74,82 @@ class Traveler:
                     current_city.add_neighbor(neighbor, travel_time)
                     n_closest += 1
 
-    def find_closest_neighbors(self, city, n=4):
+    def find_closest_neighbors(self, city, n=3):
         '''
-
+        Finds an n closest eastern neighbours to the given city and returns dataframe with n lines
         :param city: City
-        :param n: int, number of closest city including the current one
-        :return:
+        :param n: int, number of closest cities
+        :return: pd.DataFrame
         '''
-        # TODO optimize
+        # applying a logic that we can only move to east;
+        # assuming that there will not be any closest cities farer away than 30 longitude and +- 20 latitude
+        lat_shift = 25
+        long_shift = 30
+        if city.longitude > 150:
+            filter_condition = (
+                    ((self.cities_data['lng'] > city.longitude) &
+                     (self.cities_data['lng'] > city.longitude + long_shift)) |
+                    ((self.cities_data['lng'] > -180) &
+                     (self.cities_data['lng'] < -150))
+            )
+        else:
+            filter_condition = (self.cities_data['lng'] > city.longitude) & \
+                               (self.cities_data['lng'] < city.longitude + long_shift)
+        filter_condition = filter_condition & ((self.cities_data['lng'] < city.latitude + lat_shift) |
+                                               (self.cities_data['lng'] > city.latitude - lat_shift))
+        temp_df = self.cities_data[filter_condition]
         # Find the n closest neighbors based on latitude and longitude
-        distances = self.cities_data.apply(lambda row: city.calculate_distance(self.row_to_city(row)), axis=1)
-        closest_neighbors = self.cities_data.iloc[distances.argsort()[:n]]
-
+        distances = temp_df.apply(lambda row: city.calculate_distance(self.row_to_city(row)), axis=1)
+        closest_neighbors = temp_df.iloc[distances.argsort()[:n]]
         return closest_neighbors
 
+    def travel_around_world(self, current_city, hours_left, path, total_distance):
+        '''
+        Recursive function that finds a way to around the world to reach current city
+        :param current_city: City
+        :param hours_left: int
+        :param path: list
+        :param total_distance: int
+        :return:
+        '''
+        if hours_left < 0:
+            # return path, total_distance
+            return None
+        if current_city == self.start_city and len(path) > 1:
+            # Return to start
+            return path, total_distance
 
+        min_path = None
+        # TODO REMOVE?
+        if self.i % 10000000 == 0:
+            print(self.i)
+        self.i += 1
 
-# Code for testing
-# TODO delete
-# x = Traveler('worldcities.xlsx')
+        for neighbor in current_city.neighbors:
+            next_city = self.cities[neighbor['city'].id]
+            distance = neighbor['travel_time']
 
-# data = pd.read_excel('worldcities.xlsx', engine='openpyxl')
-# #London
-# source_city_row = data[data['id']==1826645935]
-# source_city = City(source_city_row['city_ascii'].iloc[0], source_city_row['lat'].iloc[0],
-#                    source_city_row['lng'].iloc[0], source_city_row['country'].iloc[0],
-#                    source_city_row['population'].iloc[0], source_city_row['id'].iloc[0])
-# print(source_city)
+            if next_city not in path:
+                new_path = path + [next_city]
+                new_distance = total_distance + distance
+                result = self.travel_around_world(next_city, hours_left - distance, new_path, new_distance)
+                if result and (min_path is None or result[1] < min_path[1]):
+                    min_path = result
+        return min_path
 
-# print(x.find_closest_neighbors(source_city, 4).head())
+    def start_travel(self, start_city):
+        '''
+        Starts a travel around world from the given city
+        :param start_city: City
+        :return:
+        '''
+        self.start_city = start_city
+        self.i = 0
+        initial_path = [start_city]
+        initial_distance = 0
+        result = self.travel_around_world(start_city, 80 * 24, initial_path, initial_distance)
 
-# Tokyo - 1392685764
-# print(x.cities[1826645935].neighbors)
-# print(x.cities)
-#
-# my_dict = {}
-# for i in x.cities.keys():
-#     my_dict[i] = x.cities[i].neighbors
-#
-# print(my_dict)
-#
-
-# with open('data_full.json', 'w') as json_file:
-#     json.dump(my_dict, json_file)
+        if result:
+            return result
+        else:
+            return "It's not possible to travel around the world in 80 days."

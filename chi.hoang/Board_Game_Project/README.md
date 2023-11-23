@@ -7,24 +7,28 @@
   - Link to the dataset: https://island.ricerca.di.unimi.it/~alfio/shared/bgg.csv.zip
 
 ##### The idea on the project
-- Instead of creating a ranking table based on the Average scores of the games, the project is using the Bayesian Average to make comparisons.
+- Besides, creating a ranking table based on the Average scores of the games, the Geek rating is using the Bayesian Average to make comparisons, which can be seen here: https://boardgamegeek.com/browse/boardgame
   - `Bayesian Average = (Prior weight * Prior mean + Average score * Number of votes) / (Prior weight + Number of votes)`
     - **Prior weight:** The weight assigned to the prior belief or information.
     - **Prior mean:** The mean of the prior belief or information.
     - **Average score:** The average score or rating given by users.
     - **Number of votes:** The total number of votes or observations.
-- In fact, there are lots of cases in which people use Bayesian Average in costume ranking, for example on movies or a specific product.
+- Another method is using **`Wilson's lower bound`**, which considers  the observed proportion of successes (p), the sample size (n), and a Z-score corresponding to the desired confidence level. 
 
 ##### Brief description about the steps:
 - Sorting the data
-  - The goal is to sort the data which is necessary for calculating Prior weight, Prior mean, Average score, Number of votes and thus, The Bayesian Average score of each game. 
+  - The goal is to sort the data which is necessary for calculating Average score, The Bayesian Average score of each game, Wilson score and thus create a table of ranking for each method
 - Visualizing the data
   - The goal is to graphically spot the difference between using Average scores and Bayesian Average scores in sorting the ranking.
 
 ##### Structure of the project:
 - **`Data.py`:** This python file contains the dataset sorted that is used during the project
-- **`Data_visualization.py`:** This file contains the data visualization of the dataset
+- **`Data_visualization.py`:** This file contains the data visualization of the dataset, which includes:
+  - The **scatter plots** displaying the relationship between number of votes and each type of rating score
+  - The **histograms** showing the distribution of each type of rating score
+  - The **box plots** showing the differences in score distribution of the three methods
 - **`App.py`:** This file provides codes to run Streamlit app
+  -   Run the app in the Terminal: `streamlit run App.py`
 
 
 

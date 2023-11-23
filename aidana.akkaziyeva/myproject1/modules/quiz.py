@@ -72,7 +72,7 @@ class NetflixQuiz:
         show_row = non_empty.sample(n=1).iloc[0]
 
         show, cast = show_row["title"], show_row["cast"]
-        question = f"Who played one of the main characters in '{show}'?"
+        question = f"Who starred in '{show}'?"
 
         cast_list = [actor.strip() for actor in cast.split(",")]
         correct_opt = cast_list[0]
