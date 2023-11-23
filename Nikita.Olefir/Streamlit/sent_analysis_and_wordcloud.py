@@ -13,45 +13,52 @@ with st.expander("Analyze Text"):
     text = st.text_input("Text here: ")
     if text:
         blob = TextBlob(text)
-        st.write("Polarity: ",round(blob.sentiment.polarity, 2))
+        st.write("Polarity: ", round(blob.sentiment.polarity, 2))
         st.write("Subjectivity: ", round(blob.sentiment.subjectivity, 2))
 
 with st.expander("Analyze CSV"):
     upl = st.file_uploader('Upload file')
 
-    def score(x):
-         if pd.notna(x) and isinstance(x, str):
-            blob1 = TextBlob(x)
-            return blob1.sentiment.polarity
-         else:
-              return 0
-    
-    def analyze(x):
-         if x >=0.5:
-               return 'Positive'
-         elif x <= -0.5:
-            return 'Negative'
-         else:
-             return 'Neutral'
-    
-    if upl:
-        df = pd.read_csv(upl)
-        df['score'] = df['body'].apply(score)
-        df['analysis'] = df['score'].apply(analyze)
-        st.write(df.head(10))
+    if upl is not None:
+        try:
+            df = pd.read_csv(upl)
+            selected_column = st.selectbox("Select a text column for sentiment analysis", df.columns)
 
-        @st.cache
-        def convert_df(df):
-            return df.to_csv().encode('utf-8')
-        
-        csv = convert_df(df)
+            def score(x):
+                if pd.notna(x) and isinstance(x, str):
+                    blob1 = TextBlob(x)
+                    return blob1.sentiment.polarity
+                else:
+                    return 0
 
-        st.download_button(
-            label = "Download a CSV file",
-            data=csv,
-            file_name='sentiment_analysis_results.csv',
-            mime='text/csv',
-        )
+            def analyze(x):
+                if x >= 0.5:
+                    return 'Positive'
+                elif x <= -0.5:
+                    return 'Negative'
+                else:
+                    return 'Neutral'
+
+            df['score'] = df[selected_column].apply(score)
+            df['analysis'] = df['score'].apply(analyze)
+
+            st.write(df.head(10))
+
+            @st.cache_data
+            def convert_df(df):
+                return df.to_csv().encode('utf-8')
+
+            csv = convert_df(df)
+
+            st.download_button(
+                label="Download a CSV file",
+                data=csv,
+                file_name='sentiment_analysis_results.csv',
+                mime='text/csv',
+            )
+
+        except pd.errors.EmptyDataError:
+            st.error("The uploaded CSV file is empty.")
 
 def generate_colored_wordcloud(dataframe, text_column, shape_image):
      text = ' '.join(dataframe[text_column].astype(str).fillna(''))
@@ -59,10 +66,10 @@ def generate_colored_wordcloud(dataframe, text_column, shape_image):
      colormap = ImageColorGenerator(mask)
      wordcloud = WordCloud(mask=mask, background_color='white', width=800, height=400).generate(text)
      wordcloud.recolor(color_func=colormap)
-     plt.figure(figsize=(10, 5))
-     plt.imshow(wordcloud, interpolation='bilinear')
-     plt.axis('off')
-     st.pyplot()
+     fig, ax = plt.subplots(figsize=(10, 5))
+     ax.imshow(wordcloud, interpolation='bilinear')
+     ax.axis('off')
+     st.pyplot(fig)
 
 st.subheader("WordCloud")
 with st.expander("Generate a WordCloud"):

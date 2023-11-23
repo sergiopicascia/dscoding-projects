@@ -1,3 +1,6 @@
+"""
+This module contains a function to extract comments from a thread in a subreddit.
+"""
 from API_Reddit.Reddit_API_Wrapper import reddit
 import pandas as pd
 
