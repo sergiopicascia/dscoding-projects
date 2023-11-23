@@ -2,10 +2,34 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 from board_game_project.Data import DataSet
-from board_game_project.Data_Visualization import DataVisualization
+
+
+def plot_scatter(ax, data_table, x_col, y_col, label, color='blue', marker='o'):
+    ax.scatter(data_table[x_col], data_table[y_col], label=label, alpha=0.5, color=color)
+    ax.set_xlabel('Number of votes')
+    ax.set_ylabel(y_col)
+    ax.legend()
+
+
+def display_data(search_game, data_table, score_result, title):
+    st.subheader(f"{title} Ranking")
+    if search_game != '':
+        st.write(f"**The game's ranking based on the {title}:**")
+        st.dataframe(score_result[['Game', 'Number of votes', title]], width=2000)
+    else:
+        st.warning(f"No data found for {search_game}")
+
+    # Plot ranking with the searched game highlighted in red
+    fig, ax = plt.subplots()
+    plot_scatter(ax, data_table, 'Number of votes', title, 'All Games')
+    if not score_result.empty:
+        score_result = score_result.head(5)
+        plot_scatter(ax, score_result, 'Number of votes', title, f'Searched Game: {search_game}', 'red', 'o')
+    st.pyplot(fig)
+
 
 df = pd.read_csv('bgg.csv')
-full_table, average_table, bayesian_table = DataSet(df).calculate_game_statistics()
+full_table, average_table, bayesian_table, wilson_table = DataSet(df).calculate_game_statistics()
 
 st.title('Board Games ranking')
 st.markdown("#### Game list:\n "
@@ -15,19 +39,15 @@ full_table.rename(columns={'title': 'Game'}, inplace=True)
 full_table.index += 1
 st.dataframe(full_table['Game'], width=2000)
 
-viz = DataVisualization(x=full_table['Number of votes'], y=full_table['Average rating score'],
-                        z=full_table['Bayesian Average rating score'], title=full_table['Game'])
 
-title = full_table['Game']
-x = full_table['Number of votes']
-y = full_table['Average rating score']
-z = full_table['Bayesian Average rating score']
+average_table.rename(columns={'title': 'Game'}, inplace=True)
+average_table.index += 1
 
 bayesian_table.rename(columns={'title': 'Game'}, inplace=True)
 bayesian_table.index += 1
 
-st.set_option('deprecation.showPyplotGlobalUse', False)
-st.pyplot(viz.plot_bayesian_ranking())
+wilson_table.rename(columns={'title': 'Game'}, inplace=True)
+wilson_table.index += 1
 
 search_game = st.text_input(
     label="Search for your game's ranking",
@@ -38,29 +58,9 @@ search_game = st.text_input(
 search_game = search_game.lower()
 
 bayesian_score_result = bayesian_table[bayesian_table['Game'].str.lower().str.contains(search_game)]
+average_score_result = average_table[average_table['Game'].str.lower().str.contains(search_game)]
+wilson_score_result = wilson_table[wilson_table['Game'].str.lower().str.contains(search_game)]
 
-
-def display_data(search_game, bayesian_table, bayesian_score_result):
-    st.subheader("Bayesian Average score ranking")
-    if search_game != '':
-        st.write(f"**The game's ranking based on the Bayesian Average rating score:**")
-        st.dataframe(bayesian_score_result[['Game', 'Number of votes', 'Bayesian Average rating score']], width=2000)
-    else:
-        st.warning(f"No data found for {search_game}")
-
-    fig_bayesian, ax_bayesian = plt.subplots()
-    ax_bayesian.scatter(bayesian_table['Number of votes'], bayesian_table['Bayesian Average rating score'],
-                        label='All Games', alpha=0.5)
-    if not bayesian_score_result.empty:
-        bayesian_score_result = bayesian_score_result.head()
-        ax_bayesian.scatter(bayesian_score_result['Number of votes'],
-                            bayesian_score_result['Bayesian Average rating score'],
-                            color='red', label=f'Searched Game: {search_game}', marker='o')
-    ax_bayesian.set_xlabel('Number of votes')
-    ax_bayesian.set_ylabel('Bayesian Average rating score')
-    ax_bayesian.legend()
-    st.pyplot(fig_bayesian)
-
-
-display_data(search_game, bayesian_table, bayesian_score_result)
-
+display_data(search_game, bayesian_table, bayesian_score_result, 'Bayesian Average rating score')
+display_data(search_game, average_table, average_score_result, 'Average rating score')
+display_data(search_game, wilson_table, wilson_score_result, 'Wilson lower bound')
