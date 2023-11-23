@@ -5,7 +5,7 @@ import pandas as pd
 from textblob import TextBlob
 import matplotlib.pyplot as plt
 
-def analyze_sentiment(dataframe: pd.DataFrame, date_str: str, start_hour: int, end_hour: int, interval_minutes=5):
+def analyze_sentiment_over_time(dataframe: pd.DataFrame, date_str: str, start_hour: int, end_hour: int, interval_minutes=5):
     """
     This functions calculates the sentiment of the comments using TextBlob on the specified date and time range, 
     and draws a graph with 5-minutes intervals when Milan was playing
@@ -21,7 +21,7 @@ def analyze_sentiment(dataframe: pd.DataFrame, date_str: str, start_hour: int, e
         A matplotlib plot with the sentiment analysis results over time.
 
     Example:
-        analyze_sentimet(dataframe, '2023-10-10', 20, 23, interval_minutes=10)  
+        analyze_sentiment_over_time(dataframe, '2023-10-10', 20, 23, interval_minutes=10)  
     
     """    
 
@@ -33,6 +33,7 @@ def analyze_sentiment(dataframe: pd.DataFrame, date_str: str, start_hour: int, e
         (dataframe['created_datetime'].dt.hour < end_hour)
     ]
 
+    filtered_data = filtered_data[filtered_data['body'].apply(lambda x: TextBlob(str(x)).sentiment.polarity != 0)]
     filtered_data = filtered_data.assign(sentiment=filtered_data['body'].apply(lambda x: TextBlob(str(x)).sentiment.polarity))
 
     minute_sentiment = filtered_data.groupby(

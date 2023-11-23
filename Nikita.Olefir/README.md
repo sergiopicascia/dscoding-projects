@@ -49,3 +49,7 @@ There are three folders that contains code.
 1) `API_Reddit`: how to use Reddit API + function to extract comments from a thread in a subreddit. There is a READMI file inside, so follow it if something is unclear.
 2) `TextAnalysis`: contains numerous functions for preprocessing and analyzing text data. It does not has a README file, but the usage of functions is described in the `Main.ipynb`. Anyway, for each module and function there is documentation written.
 3) `Streamlit`: contains the script for streamlit app for analyzing sentiment of the text data and for generating wordclouds. README file describes everything.
+
+## Note
+
+I have not added the dataframes here in the repository as during classes it was said not to do so. However, if they are needed, I can provide them by email. Tell me if you need them.
