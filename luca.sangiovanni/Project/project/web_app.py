@@ -5,18 +5,30 @@ import pandas as pd
 import requests
 from countryinfo import CountryInfo
 from PIL import Image
+from geopy.distance import geodesic
 from project.visualization import CityCountry, BigCities, Temperatures
 from project.utils import Data
+
+
+# The Sidebar class contains the data related to the creation of the sidebar menu, from which the user can choose to
+# select different pages. I created the sidebar using an external additional library available on the streamlit
+# website.
 
 
 class Sidebar:
     st.set_option('deprecation.showPyplotGlobalUse', False)
     st.set_page_config(page_title="Weather data project", layout="wide", initial_sidebar_state="expanded", )
     with st.sidebar:
-        options = option_menu("Weather data project", ["Main menu", "Cities overview", "Country informations",
+        options = option_menu("Weather data project", ["Main menu", "Cities overview", "Country information",
                                                        "Temperatures charts and map", "Temperatures shock"],
                               menu_icon="umbrella",
                               icons=["house", "pin-map", "book", "graph-up-arrow", "cloud-lightning-rain"])
+
+
+# The MainMenu class contains one function, which generates the first page that the user sees when he opens the app.
+# It only contains some text and images; because of this, I decided to use a streamlit property which allows to save
+# the data to a cache, so that the program doesn't run every time the user goes to the main menu, but only the first
+# time, with the information being cached. This thing strongly speeds up the process.
 
 
 class MainMenu:
@@ -30,7 +42,7 @@ class MainMenu:
         st.write("Have fun!")
         st.write("")
         col1, col2, col3 = st.columns(
-            [0.27, 0.38, 0.35])  # Percentage of occupation of each column (to fit the images correclty)
+            [0.27, 0.38, 0.35])  # Percentage of occupation of each column (to fit the images correctly)
         url1 = "https://www.weather.gov/images/ffc/events/severe_011114/500mb_140112.png"
         url2 = ("https://image.cnbcfm.com/api/v1/image/106140709-1568982403673gettyimages-1169784640.jpeg?v=1568992875"
                 "&w=740&h=416&ffmt=webp&vtcrop=y")
@@ -42,6 +54,12 @@ class MainMenu:
         col1.image(img1)
         col2.image(img2)
         col3.image(img3)
+
+
+# The following class contains three functions. The first one refers to the three charts related to the cities,
+# the second one refers to the function which allows to calculate the distance between two cities, and the third one
+# allows to generate the map of the major cities in the dataset. Also here, the first function is cached, as it contains
+# data that doesn't change (the charts are always the same).
 
 
 class CitiesOverview:
@@ -63,19 +81,63 @@ class CitiesOverview:
         st.write("Here instead we can see how cities are distributed among the sub-regions of each continent.\n")
         st.write("")
         st.pyplot(CityCountry.bySubregion_plot(any))
+
+    def distance_calculator(self):
         st.divider()
+        st.write("Here, you can calculate the distance between two cities:")
+        st.write("")
+        col1, col2 = st.columns([0.5, 0.5])
+        col1.subheader("Choose a starting city:\n")
+        col2.subheader("Choose an arriving city:\n")
+        col1.continent1 = col1.selectbox("In which continent is the city located?", sorted(list(Data.cities["Continent"].unique())), index=None, placeholder="Click here to select a continent...", key="distcont1")
+        col2.continent2 = col2.selectbox("In which continent is the city located?", sorted(list(Data.cities["Continent"].unique())), index=None, placeholder="Click here to select a continent...", key="distcont2")
+        col1.subregion1 = col1.selectbox("In which sub-region is the city located?", sorted(list(Data.cities[Data.cities["Continent"] == col1.continent1]["Subregion"].unique())), index=None, placeholder="Click here to select a sub-region...", key="distsubr1")
+        col2.subregion2 = col2.selectbox("In which sub-region is the city located?", sorted(list(Data.cities[Data.cities["Continent"] == col2.continent2]["Subregion"].unique())), index=None, placeholder="Click here to select a sub-region...", key="distsubr2")
+        col1.country1 = col1.selectbox("In which country is the city located?", sorted(list(Data.cities[Data.cities["Subregion"] == col1.subregion1]["Country"].unique())), index=None, placeholder="Click here to select a country...", key="distcoun1")
+        col2.country2 = col2.selectbox("In which country is the city located?", sorted(list(Data.cities[Data.cities["Subregion"] == col2.subregion2]["Country"].unique())), index=None, placeholder="Click here to select a country...", key="distcoun2")
+        col1.city1 = col1.selectbox("What is the starting city?", sorted(list(Data.cities[Data.cities["Country"] == col1.country1]["City"].unique())), index=None, placeholder="Click here to select a city...", key="distcity1")
+        col2.city2 = col2.selectbox("What is the arriving city?", sorted(list(Data.cities[Data.cities["Country"] == col2.country2]["City"].unique())), index=None, placeholder="Click here to select a city...", key="distcity2")
+        if col1.toggle("Choose a random starting city"):
+            col1.city1 = str(np.random.choice(Data.cities["City"]))
+        if col2.toggle("Choose a random arriving city"):
+            col2.city2 = str(np.random.choice(Data.cities["City"]))
+        c1 = Data.cities[Data.cities["City"] == str(col1.city1)]
+        c2 = Data.cities[Data.cities["City"] == str(col2.city2)]
+        c1_coord = (c1[["Latitude", "Longitude"]]).values.flatten().tolist()
+        c2_coord = (c2[["Latitude", "Longitude"]]).values.flatten().tolist()
+        st.write("")
+        if st.button("Calculate distance", type="primary"):
+            if (col1.city1 and col2.city2) is not None:
+                if col1.city1 != col2.city2:
+                    distance = round(geodesic(c1_coord, c2_coord).km, 2)
+                    phrase = "The distance between " + str(col1.city1) + " and " + str(col2.city2) + " is " + str(distance) + " kilometers."
+                    st.write("")
+                    st.write(phrase)
+                else:
+                    st.write("")
+                    st.write("The starting city must be different from the arriving city.")
+            else:
+                st.write("")
+                st.write("You need to select both the starting and the arriving city.")
 
     def major_map(self):
-        st.write("""The data shown above is referring to the bigger dataset, which contains thousands of cities. I also 
-                used a smaller dataset, which contains only 100 cities. Click the button below to show the map of only
-                 the major cities.""")
+        st.divider()
+        st.write("""All the data shown above is referring to the bigger dataset, which contains thousands of cities. 
+        I also used a smaller dataset, which contains only 100 cities. Click the button below to show the map of only 
+        the major cities.""")
         st.write("")
         projection = st.radio("Choose a map type", ["Equirectangular", "Orthographic"], captions=["2D map", "3D map"])
         if st.button("Show map", help="Click here to show the map of major cities", type="primary"):
             BigCities.majorCitiesMap(any, projection.lower())
 
 
-class CountryInformations:
+# The class below contains only one function, which prints the information about a chosen country, and creates a
+# map of the country. The information of each country are obtained using the library CountryInfo, which retrieves the
+# data from its database; this was extremely useful, as I didn't have to store the data in a dataset, and allowed me to
+# have interesting information about all the countries.
+
+
+class CountryInformation:
     def country_info(self):
         random_country = np.random.choice(Data.cities["Country"].unique())
         st.header("COUNTRY INFORMATIONS")
@@ -138,20 +200,26 @@ class CountryInformations:
             CityCountry.byCountry_Map(any, nation=str(selected_country))
 
 
+# In the following class, I created two functions: the first one allows the user to select a city, and returns two
+# charts: one containing the temperatures in both january and august during the years, and one comparing the
+# temperatures in 2012 to the ones in 1900. The second function, instead, given a year and a month from the user,
+# generates a world map containing the temperatures of the major cities on the selected date.
+
+
 class TempChartsMap:
-    def temp_charts_map(self):
-        months_codes = list(Data.months.keys())
-        months_names = list(Data.months.values())
+    months_codes = list(Data.months.keys())
+
+    def temp_charts(self):
         Data.tempByMajorCity["dt"] = pd.to_datetime(Data.tempByMajorCity["dt"])
         Data.tempByMajorCity["Month"] = Data.tempByMajorCity["dt"].dt.month
         st.header("TEMPERATURES CHARTS AND MAP")
         st.divider()
-        st.write("""One thing that can be done to see how temperatures change in time is to plot the average temperature
-                registered in a city in a certain month during the years. Below, we can see the difference in temperature 
-                registered in the cities present in the dataset, both in january and august.""")
-        st.write("""It is also interesting to noctice how temperatures change during different times of the year. You can see
-                this in the second chart, where there is a comparison between the average temperature registered in the chosen
-                 city in 1900 and in 2012.""")
+        st.write("""One thing that can be done to see how temperatures change in time is to plot the average 
+        temperature registered in a city in a certain month during the years. Below, we can see the difference in 
+        temperature registered in the cities present in the dataset, both in january and august.""")
+        st.write("""It is also interesting to notice how temperatures change during different times of the year. You 
+        can see this in the second chart, where there is a comparison between the average temperature registered in 
+        the chosen city in 1900 and in 2012.""")
         st.write("")
         st.write("")
         chosen_continent = st.selectbox("In which continent is the city located?",
@@ -183,6 +251,8 @@ class TempChartsMap:
             st.pyplot(Temperatures.tempJanAug(any, chosen_city))
             st.divider()
             st.pyplot(Temperatures.tempMonths(any, chosen_city))
+
+    def temp_map(self):
         st.divider()
         st.write("""Another useful thing to do is viewing the difference of temperatures between cities around the 
         world in the same time period. Below, you can choose a specific year and month, or let the randomness choose 
@@ -192,24 +262,24 @@ class TempChartsMap:
         selected_year = st.slider("Choose a year", min_value=1891, max_value=2013)
         if st.toggle("Choose a random year"):
             selected_year = np.random.randint(1891, 2013)
-        selected_month = st.selectbox("Choose a month", months_codes, placeholder="Click here to select a month...")
+        selected_month = st.selectbox("Choose a month", TempChartsMap.months_codes, placeholder="Click here to select a month...")
         if st.toggle("Choose a random month"):
-            selected_month = np.random.choice(months_codes)
+            selected_month = np.random.choice(TempChartsMap.months_codes)
         st.write("")
-        st.info("""Keep in mind that the location of the following cities is wrongly displayed on the map below, although 
-                the coordinates in the dataset are correct:\n
-                - São Paulo (Brasil) -> shown in Russia\n
-                - Saint Petersburg (Russia) -> shown in Brasil\n
-                - Salvador (Brasil) -> shown in Chile\n
-                - Sydney (Australia) -> shown in Brasil\n
-                - Surat (India) -> shown in Australia\n
-                - Santo Domingo (Dominican Republic) -> shown in South Korea\n
-                - Surabaya (Indonesia) -> shown in India\n
-                - Shenyang (China) -> shown in Indonesia""", icon="ℹ️")
+        st.info("""Keep in mind that the location of the following cities is wrongly displayed on the map below, 
+        although the coordinates in the dataset are correct:\n - São Paulo (Brasil) -> shown in Russia\n - Saint 
+        Petersburg (Russia) -> shown in Brasil\n - Salvador (Brasil) -> shown in Chile\n - Sydney (Australia) -> 
+        shown in Brasil\n - Surat (India) -> shown in Australia\n - Santo Domingo (Dominican Republic) -> shown in 
+        South Korea\n - Surabaya (Indonesia) -> shown in India\n - Shenyang (China) -> shown in Indonesia""", icon="ℹ️")
         st.write("")
         full_date = (str(selected_year) + "-" + str(selected_month))
         if st.button("Show me the map", type="primary"):
             st.pyplot(Temperatures.bubbleMap(any, full_date))
+
+
+# The TemperaturesShock class contains one functions, which generates two charts that refer to temperature shock: the
+# first one shows the cities with the biggest tempretures shock, given a chosen year, and the second one describes
+# how temperatures shock has changed during the years.
 
 
 class TemperaturesShock:
@@ -235,14 +305,20 @@ class TemperaturesShock:
             st.pyplot(Temperatures.shockByYear(any))
 
 
+# This last part of the code is very important: it allows the user to show a certain page and its functions,
+# based on the one he selects from the sidebar menu.
+
+
 if Sidebar.options == "Main menu":
     MainMenu.main_menu(any)
 elif Sidebar.options == "Cities overview":
     CitiesOverview.cities_overview(any)
+    CitiesOverview.distance_calculator(any)
     CitiesOverview.major_map(any)
-elif Sidebar.options == "Country informations":
-    CountryInformations.country_info(any)
+elif Sidebar.options == "Country information":
+    CountryInformation.country_info(any)
 elif Sidebar.options == "Temperatures charts and map":
-    TempChartsMap.temp_charts_map(any)
+    TempChartsMap.temp_charts(any)
+    TempChartsMap.temp_map(any)
 elif Sidebar.options == "Temperatures shock":
     TemperaturesShock.temp_shock(any)

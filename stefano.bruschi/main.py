@@ -1,112 +1,205 @@
-offset = 0
-limit = 3000
-period = 'max' # valid periods: 1d,5d,1mo,3mo,6mo,1y,2y,5y,10y,ytd,max
-
-import pandas as pd
-
-data = pd.read_csv("http://www.nasdaqtrader.com/dynamic/SymDir/nasdaqtraded.txt", sep='|')
-data_clean = data[data['Test Issue'] == 'N']
-symbols = data_clean['NASDAQ Symbol'].tolist()
-print('total number of symbols traded = {}'.format(len(symbols)))
-
-import yfinance as yf
-import os, contextlib
-
-limit = None
-offset = 10.0
-limit = limit if limit else len(symbols)
-end = min(offset + limit, len(symbols))
-is_valid = [False] * len(symbols)
-# force silencing of verbose API
-with open(os.devnull, 'w') as devnull:
-    with contextlib.redirect_stdout(devnull):
-        for i in range(offset, end):
-            s = symbols[i]
-            data = yf.download(s, period=period)
-            if len(data.index) == 0:
-                continue
-
-            is_valid[i] = True
-            data.to_csv('hist/{}.csv'.format(s))
-
-print('Total number of valid symbols downloaded = {}'.format(sum(is_valid)))
-
-alid_data = data_clean[is_valid]
-valid_data.to_csv('symbols_valid_meta.csv', index=False)
-# %%
-etfs = valid_data[valid_data['ETF'] == 'Y']['NASDAQ Symbol'].tolist()
-stocks = valid_data[valid_data['ETF'] == 'N']['NASDAQ Symbol'].tolist()
-# %%
-import shutil
-from os.path import isfile, join
-
-
-def move_symbols(symbols, dest):
-    for s in symbols:
-        filename = '{}.csv'.format(s)
-        shutil.move(join('Data', filename), join(dest, filename))
-
-
-move_symbols(etfs, "etfs")
-move_symbols(stocks, "stocks")
-
+# Import necessary libraries
 import os
 import pandas as pd
+import numpy as np
 
-class RendimentoGiornaliero:
-    def __init__(self, cartella_input):
-        self.cartella_input = cartella_input
-        self.cartella_rendimenti = os.path.join(cartella_input, "rendimenti giornalieri")
-        os.makedirs(self.cartella_rendimenti, exist_ok=True)
+# Define a class for processing ETF data
+class ETFProcessor:
+    def __init__(self, folder_path):
+        self.folder_path = folder_path
 
-    def calcola_rendimento_giornaliero(self, nome_file_input):
-        # Carica il file CSV
-        percorso_file_input = os.path.join(self.cartella_input, nome_file_input)
-        df = pd.read_csv(percorso_file_input)
+    def daily_return_calculation(self):
+        # Loop through all files in the specified folder
+        for filename in os.listdir(self.folder_path):
+            # Check if the file has a '.csv' extension
+            if filename.endswith(".csv"):
+                # Construct the full file path
+                file_path = os.path.join(self.folder_path, filename)
+                # Read the ETF data from the CSV file into a Pandas DataFrame
+                df = pd.read_csv(file_path)
 
-        # Calcola il rendimento giornaliero
-        df['rendimento_giornaliero'] = ((df['Open'] / df['Adj Close']) - 1) * 100
+                # Calculate the 'daily_return' column and multiply by 100
+                df['daily_return'] = (df['Adj Close'].shift(0) / df['Adj Close'].shift(1) - 1) * 100
 
-        # Salva solo la colonna del rendimento in un nuovo file nella cartella "rendimenti giornalieri"
-        nome_file_output = f"rendimento_{nome_file_input}"
-        percorso_file_output = os.path.join(self.cartella_rendimenti, nome_file_output)
-        df['rendimento_giornaliero'].to_csv(percorso_file_output, index=False, header=['rendimento_giornaliero'])
+                # Save the updated DataFrame back to the CSV file without including the index
+                df.to_csv(file_path, index=False)
 
-    def elabora_files_csv(self):
-        # Itera attraverso i file nella cartella di input
-        for file_csv in os.listdir(self.cartella_input):
-            if file_csv.endswith(".csv"):
-                # Calcola il rendimento giornaliero e salva il risultato nella cartella "rendimenti giornalieri"
-                self.calcola_rendimento_giornaliero(file_csv)
+    def calculate_monthly_mean(self):
+        # Loop through all files in the specified folder
+        for filename in os.listdir(self.folder_path):
+            # Check if the file has a '.csv' extension
+            if filename.endswith(".csv"):
+                # Construct the full file path
+                file_path = os.path.join(self.folder_path, filename)
+                # Read the ETF data from the CSV file into a Pandas DataFrame
+                df = pd.read_csv(file_path)
 
+                # Convert the 'Date' column to datetime format
+                df['Date'] = pd.to_datetime(df['Date'])
+
+                # Calculate the monthly average of daily returns for each month
+                monthly_mean = df.groupby(df['Date'].dt.to_period('M'))['daily_return'].mean()
+
+                # Create a new 'monthly_mean' column in the original DataFrame and assign the monthly average values
+                df['monthly_mean'] = df['Date'].dt.to_period('M').map(monthly_mean)
+
+                # Save the modified DataFrame back to the original CSV file
+                df.to_csv(file_path, index=False)
+
+    def calculate_rmse(self):
+        # Loop through all files in the specified folder
+        for filename in os.listdir(self.folder_path):
+            # Check if the file has a '.csv' extension
+            if filename.endswith(".csv"):
+                # Construct the full file path
+                file_path = os.path.join(self.folder_path, filename)
+                # Read the ETF data from the CSV file into a Pandas DataFrame
+                df = pd.read_csv(file_path)
+
+                # Convert the 'Date' column to datetime format
+                df['Date'] = pd.to_datetime(df['Date'])
+
+                # Group the data by month
+                monthly_group = df.groupby(df['Date'].dt.to_period("M"))
+
+                # Calculate the Root Mean Squared Error (RMSE) for each month and add the 'RMSE' column
+                for month_name, month_data in monthly_group:
+                    rmse_month = np.sqrt(np.mean((month_data['daily_return'] - month_data['monthly_mean'])**2))
+                    df.loc[df['Date'].dt.to_period("M") == month_name, 'RMSE'] = rmse_month
+
+                # Save the updated DataFrame back to the CSV file
+                df.to_csv(file_path, index=False)
+
+    def calculate_volume_monthly_mean(self):
+        # Loop through all files in the specified folder
+        for filename in os.listdir(self.folder_path):
+            # Check if the file has a '.csv' extension
+            if filename.endswith(".csv"):
+                # Construct the full file path
+                file_path = os.path.join(self.folder_path, filename)
+                # Read the ETF data from the CSV file into a Pandas DataFrame
+                df = pd.read_csv(file_path)
+
+                # Convert the 'Date' column to datetime format
+                df['Date'] = pd.to_datetime(df['Date'])
+
+                # Calculate the monthly average of daily volume for each month
+                vol_monthly_mean = df.groupby(df['Date'].dt.to_period('M'))['Volume'].mean()
+
+                # Create a new 'Vol_month_mean' column in the original DataFrame and assign the monthly average values
+                df['Vol_month_mean'] = df['Date'].dt.to_period('M').map(vol_monthly_mean)
+
+                # Save the modified DataFrame back to the original CSV file
+                df.to_csv(file_path, index=False)
+
+
+# Example of using the ETFProcessor class
 if __name__ == "__main__":
-    # Specifica la cartella di input
-    cartella_input = r"C:\Users\stebr\DireDSCoding\dscoding-projects\stefano.bruschi\etfs"
-
-    # Crea un'istanza della classe
-    rendimento_giornaliero = RendimentoGiornaliero(cartella_input)
-
-    # Elabora i file CSV
-    rendimento_giornaliero.elabora_files_csv()
-
-#%%
-def calcola_rendimento_medio(self):
-    # Lista dei percorsi dei file nella cartella "rendimenti giornalieri"
-    percorsi_rendimenti = [os.path.join(self.cartella_rendimenti, file) for file in os.listdir(self.cartella_rendimenti) if file.endswith(".csv")]
-
-    # DataFrame per contenere tutti i rendimenti giornalieri
-    df_complessivo = pd.DataFrame()
-
-    # Itera attraverso i file e li unisce in un unico DataFrame
-    for percorso_rendimento in percorsi_rendimenti:
-        df_file = pd.read_csv(percorso_rendimento)
-        df_complessivo = pd.concat([df_complessivo, df_file['rendimento_giornaliero']], axis=1)
-
-    # Calcola la media dei rendimenti giornalieri
-    df_complessivo['rendimento_medio'] = df_complessivo.mean(axis=1)
-
-    # Salva il risultato nel file "risultati.csv"
-    percorso_risultati = os.path.join(self.cartella_input, "risultati.csv")
-    df_complessivo.to_csv(percorso_risultati, index=False)
+    # Replace 'path_della_tua_cartella' with the actual path to your 'etfs' folder
+    processor = ETFProcessor('C:\\Users\\stebr\\DireDSCoding\\dscoding-projects\\stefano.bruschi\\Data\\etfs')
+    # Call the methods to process the ETF data
+    processor.daily_return_calculation()
+    processor.calculate_monthly_mean()
+    processor.calculate_rmse()
+    processor.calculate_volume_monthly_mean()
 
 
+# Define a class for processing stock data
+class STOCKProcessor:
+    def __init__(self, folder_path):
+        self.folder_path = folder_path
+
+    def daily_return_calculation(self):
+        # Loop through all files in the specified folder
+        for filename in os.listdir(self.folder_path):
+            # Check if the file has a '.csv' extension
+            if filename.endswith(".csv"):
+                # Construct the full file path
+                file_path = os.path.join(self.folder_path, filename)
+                # Read the stock data from the CSV file into a Pandas DataFrame
+                df = pd.read_csv(file_path)
+
+                # Calculate the 'daily_return' column and multiply by 100
+                df['daily_return'] = (df['Adj Close'].shift(0) / df['Adj Close'].shift(1) - 1) * 100
+
+                # Save the updated DataFrame back to the CSV file without including the index
+                df.to_csv(file_path, index=False)
+
+    def calculate_monthly_mean(self):
+        # Loop through all files in the specified folder
+        for filename in os.listdir(self.folder_path):
+            # Check if the file has a '.csv' extension
+            if filename.endswith(".csv"):
+                # Construct the full file path
+                file_path = os.path.join(self.folder_path, filename)
+                # Read the stock data from the CSV file into a Pandas DataFrame
+                df = pd.read_csv(file_path)
+
+                # Convert the 'Date' column to datetime format
+                df['Date'] = pd.to_datetime(df['Date'])
+
+                # Calculate the monthly average of daily returns for each month
+                monthly_mean = df.groupby(df['Date'].dt.to_period('M'))['daily_return'].mean()
+
+                # Create a new 'monthly_mean' column in the original DataFrame and assign the monthly average values
+                df['monthly_mean'] = df['Date'].dt.to_period('M').map(monthly_mean)
+
+                # Save the modified DataFrame back to the original CSV file without including the index
+                df.to_csv(file_path, index=False)
+
+    def calculate_rmse(self):
+        # Loop through all files in the specified folder
+        for filename in os.listdir(self.folder_path):
+            # Check if the file has a '.csv' extension
+            if filename.endswith(".csv"):
+                # Construct the full file path
+                file_path = os.path.join(self.folder_path, filename)
+                # Read the stock data from the CSV file into a Pandas DataFrame
+                df = pd.read_csv(file_path)
+
+                # Convert the 'Date' column to datetime format
+                df['Date'] = pd.to_datetime(df['Date'])
+
+                # Group the data by month
+                monthly_group = df.groupby(df['Date'].dt.to_period("M"))
+
+                # Calculate the Root Mean Squared Error (RMSE) for each month and add the 'RMSE' column
+                for month_name, month_data in monthly_group:
+                    rmse_month = np.sqrt(np.mean((month_data['daily_return'] - month_data['monthly_mean'])**2))
+                    df.loc[df['Date'].dt.to_period("M") == month_name, 'RMSE'] = rmse_month
+
+                # Save the updated DataFrame back to the CSV file without including the index
+                df.to_csv(file_path, index=False)
+
+    def calculate_volume_monthly_mean(self):
+        # Loop through all files in the specified folder
+        for filename in os.listdir(self.folder_path):
+            # Check if the file has a '.csv' extension
+            if filename.endswith(".csv"):
+                # Construct the full file path
+                file_path = os.path.join(self.folder_path, filename)
+                # Read the stock data from the CSV file into a Pandas DataFrame
+                df = pd.read_csv(file_path)
+
+                # Convert the 'Date' column to datetime format
+                df['Date'] = pd.to_datetime(df['Date'])
+
+                # Calculate the monthly average of daily volume for each month
+                vol_monthly_mean = df.groupby(df['Date'].dt.to_period('M'))['Volume'].mean()
+
+                # Create a new 'Vol_month_mean' column in the original DataFrame and assign the monthly average values
+                df['Vol_month_mean'] = df['Date'].dt.to_period('M').map(vol_monthly_mean)
+
+                # Save the modified DataFrame back to the original CSV file without including the index
+                df.to_csv(file_path, index=False)
+
+
+# Example of using the STOCKProcessor class
+if __name__ == "__main__":
+    # Replace 'path_della_tua_cartella' with the actual path to your 'stocks' folder
+    processor = STOCKProcessor('C:\\Users\\stebr\\DireDSCoding\\dscoding-projects\\stefano.bruschi\\Data\\stocks')
+    # Call the methods to process the stock data
+    processor.daily_return_calculation()
+    processor.calculate_monthly_mean()
+    processor.calculate_rmse()
+    processor.calculate_volume_monthly_mean()

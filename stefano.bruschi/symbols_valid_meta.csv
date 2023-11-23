@@ -251,6 +251,7 @@ Y,AGNG,Global X Aging Population ETF,Q,G,Y,100.0,N,N,,AGNG,N
 Y,AGO,Assured Guaranty Ltd. Common Stock,N, ,N,100.0,N,,AGO,AGO,N
 Y,AGOX,Adaptive Alpha Opportunities ETF,P, ,Y,100.0,N,,AGOX,AGOX,N
 Y,AGQ,ProShares Ultra Silver,P, ,Y,100.0,N,,AGQ,AGQ,N
+Y,AGQI,First Trust Exchange-Traded Fund VIII First Trust Active Global Quality Income ETF,P, ,Y,100.0,N,,AGQI,AGQI,N
 Y,AGR,"Avangrid, Inc. Common Stock",N, ,N,100.0,N,,AGR,AGR,N
 Y,AGRH,iShares U.S. ETF Trust iShares Interest Rate Hedged U.S. Aggregate Bond ETF,P, ,Y,100.0,N,,AGRH,AGRH,N
 Y,AGRI,AgriFORCE  Growing Systems Ltd. - Common Shares,Q,S,N,100.0,N,N,,AGRI,N
@@ -848,10 +849,8 @@ Y,AXGN,"Axogen, Inc. - Common Stock",Q,S,N,100.0,N,N,,AXGN,N
 Y,AXL,"American Axle & Manufacturing Holdings, Inc. Common Stock",N, ,N,100.0,N,,AXL,AXL,N
 Y,AXLA,Axcella Health Inc. - Common Stock,Q,G,N,100.0,N,D,,AXLA,N
 Y,AXNX,"Axonics, Inc. - Common Stock",Q,Q,N,100.0,N,N,,AXNX,N
-Y,AXON,"Axon Enterprise, Inc. - Common Stock",Q,Q,N,100.0,N,N,,AXON,N
 Y,AXP,American Express Company Common Stock,N, ,N,100.0,N,,AXP,AXP,N
 Y,AXR,AMREP Corporation Common Stock,N, ,N,100.0,N,,AXR,AXR,N
-Y,AXS,Axis Capital Holdings Limited Common Stock,N, ,N,100.0,N,,AXS,AXS,N
 Y,AXSM,"Axsome Therapeutics, Inc. - Common Stock",Q,G,N,100.0,N,N,,AXSM,N
 Y,AXTA,Axalta Coating Systems Ltd. Common Shares,N, ,N,100.0,N,,AXTA,AXTA,N
 Y,AXTI,AXT Inc - Common Stock,Q,Q,N,100.0,N,N,,AXTI,N
@@ -1729,6 +1728,7 @@ Y,CETUR,Cetus Capital Acquisition Corp. - Right to receive 1/6 of one share of C
 Y,CETUU,Cetus Capital Acquisition Corp. - Unit,Q,S,N,100.0,N,N,,CETUU,N
 Y,CETUW,Cetus Capital Acquisition Corp. - Warrant,Q,S,N,100.0,N,N,,CETUW,N
 Y,CETX,Cemtrex Inc. - Common Stock,Q,S,N,100.0,N,N,,CETX,N
+Y,CETXP,Cemtrex Inc. - Series 1 Preferred Stock,Q,S,N,100.0,N,D,,CETXP,N
 Y,CETY,"Clean Energy Technologies, Inc. - Common Stock",Q,S,N,100.0,N,N,,CETY,N
 Y,CEV,Eaton Vance California Municipal Income Trust Shares of Beneficial Interest,A, ,N,100.0,N,,CEV,CEV,N
 Y,CEVA,"CEVA, Inc. - Common Stock",Q,Q,N,100.0,N,N,,CEVA,N
@@ -2794,5 +2794,3 @@ Y,EAR,"Eargo, Inc. - Common Stock",Q,Q,N,100.0,N,N,,EAR,N
 Y,EARN,Ellington Residential Mortgage REIT Common Shares of Beneficial Interest,N, ,N,100.0,N,,EARN,EARN,N
 Y,EASG,Xtrackers MSCI EAFE ESG Leaders Equity ETF,P, ,Y,100.0,N,,EASG,EASG,N
 Y,EAST,"Eastside Distilling, Inc. - Common Stock",Q,S,N,100.0,N,N,,EAST,N
-Y,EAT,"Brinker International, Inc. Common Stock",N, ,N,100.0,N,,EAT,EAT,N
-Y,EATV,Advisors Series Trust VegTech Plant-based Innovation & Climate ETF,P, ,Y,100.0,N,,EATV,EATV,N

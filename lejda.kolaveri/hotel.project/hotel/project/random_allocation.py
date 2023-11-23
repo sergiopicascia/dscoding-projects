@@ -8,18 +8,20 @@ preferences = pd.read_excel(r"C:\Users\lejda\Desktop\coding - Python\preferences
 
 
 class HotelAllocation:
-    def __init__(self, hotels, guests):
-        """Initialize the HotelAllocation.
+    def __init__(self, hotels, guests, preferences):
+        """
+        Initialize the HotelAllocation.
 
         Parameters:
         - hotels (pd.DataFrame): DataFrame containing information about hotels.
         - guests (pd.DataFrame): DataFrame containing information about guests.
         """
-        #we use copy to avoid modifying the original dataframes
+        #we use copies to avoid modifying the original dataframes
         self.hotels = hotels.copy()
         self.guests = guests.copy()
-    
-    def accomodate_single_guest():
+        self.preferences = preferences.copy()
+        
+    def accomodate_single_guest(self, guest_row):
         pass
 
     def accomodate_guests(self):
@@ -34,14 +36,24 @@ class HotelAllocation:
         return allocation_df
 
 class RandomHotelAllocation(HotelAllocation):
-    """ Allocate a guest to a random available hotel based on availability.
+    """ 
+    Allocate a guest to a random available hotel based on availability.
 
-        Parameters:
-        - guest_row (pd.Series): A row from the guests DataFrame.
+    Parameters:
+    - guest_row (pd.Series): A row from the guests DataFrame.
 
-        Returns:
-        - dict: Allocation information with keys 'guest_id', 'hotel_id', and 'paid_price'.
+    Returns:
+    - dict: Allocation information with keys 'guest_id', 'hotel_id', and 'paid_price'.
     """
+    def calculate_satisfaction_percentage(self, guest_id, hotel_id):
+        guest_preferences = self.preferences[self.preferences['guest'] == guest_id].reset_index() #filter preferences for the given guest
+        if guest_preferences.empty:
+            return 100  # No preferences, 100% satisfaction
+
+        index_of_preference = (guest_preferences['hotel'] == hotel_id).idxmax() # Find the index of the allocated hotel in the guest's         preferences
+        satisfaction = round(((len(guest_preferences) - index_of_preference) / len(guest_preferences)) * 100)
+        return satisfaction if satisfaction >= 0 else 0
+    
     def accomodate_single_guest(self, guest_row):
         available_hotels = self.hotels[self.hotels['rooms'] > 0]
         if available_hotels.empty:
@@ -53,6 +65,6 @@ class RandomHotelAllocation(HotelAllocation):
         #we calculate the discounted price that a guest will pay for staying in the randomly allocated hotel,
         #taking into account both the original price of the hotel and the guest's discount.
         price_paid = round(available_hotels.loc[random_hotel_id, 'price'] * (1 - guest_row['discount']), 2)
-        satisfaction = calculate_satisfaction_percentage(guest_id, random_available_hotel_id, preferences)
+        satisfaction = self.calculate_satisfaction_percentage(guest_id, random_hotel_id, preferences)
 
         return {'guest_id': guest_row.name, 'hotel_id': random_hotel_id, 'paid_price': price_paid, 'satisfaction': satisfaction}
