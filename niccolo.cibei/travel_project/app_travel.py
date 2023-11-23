@@ -95,5 +95,8 @@ else:
     plot2 = plotting.plot_population_by_continent()
     st.plotly_chart(plot2)
 
-    plot3 = plotting.plot_density_map()
+    plot3 = plotting.plot_population_by_country()
     st.plotly_chart(plot3)
+
+    plot4 = plotting.plot_density_map()
+    st.plotly_chart(plot4)
