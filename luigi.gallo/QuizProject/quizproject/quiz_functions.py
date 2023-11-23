@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 
 earnings_ranges = {
  1: (200000000, float('inf')), # Easy
- 2: (500000000, 200000000), # Medium
+ 2: (50000000, 200000000), # Medium
  3: (10000000, 50000000), # Hard
  4: (0, 10000000) # Extreme
 }
