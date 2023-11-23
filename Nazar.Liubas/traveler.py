@@ -56,16 +56,9 @@ class Traveler:
             self.cities[row['id']] = city
 
         # 'id' is a unique identifier for each city
-        ind = 0
         for index, row in self.cities_data.iterrows():
-            # TODO delete
-            if ind % 10000000 == 0:
-                print(ind)
-            ind += 1
-
             current_city = self.cities[row['id']]
-            closest_neighbors = self.find_closest_neighbors(current_city, n=4)
-
+            closest_neighbors = self.find_closest_neighbors(current_city, n=3)
             n_closest = 1
             for neighbor_row in closest_neighbors.itertuples(index=False):
                 neighbor = self.cities[neighbor_row.id]
@@ -113,22 +106,14 @@ class Traveler:
         :return:
         '''
         if hours_left < 0:
-            # return path, total_distance
             return None
         if current_city == self.start_city and len(path) > 1:
             # Return to start
             return path, total_distance
-
         min_path = None
-        # TODO REMOVE?
-        if self.i % 10000000 == 0:
-            print(self.i)
-        self.i += 1
-
         for neighbor in current_city.neighbors:
             next_city = self.cities[neighbor['city'].id]
             distance = neighbor['travel_time']
-
             if next_city not in path:
                 new_path = path + [next_city]
                 new_distance = total_distance + distance
@@ -144,11 +129,9 @@ class Traveler:
         :return:
         '''
         self.start_city = start_city
-        self.i = 0
         initial_path = [start_city]
         initial_distance = 0
         result = self.travel_around_world(start_city, 80 * 24, initial_path, initial_distance)
-
         if result:
             return result
         else:
