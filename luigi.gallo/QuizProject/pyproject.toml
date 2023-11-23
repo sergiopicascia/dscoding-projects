@@ -1,12 +1,16 @@
 [tool.poetry]
 name = "quizproject"
 version = "0.1.0"
-description = ""
-authors = ["Your Name <you@example.com>"]
+description = "Quiz using Imdb database"
+authors = ["Luigi Gallo <luigi.gallo1@studenti.unimi.it>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
+numpy = "^1.26.0"
+pandas = "^2.1.1"
+plotly = "^5.9.0"
+nbformat = "^5.9.2"
 
 
 [build-system]

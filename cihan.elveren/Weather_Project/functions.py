@@ -7,117 +7,69 @@ import functions as fun
 import TemperatureDataProcessor as dp
 
 def convert_coordinates(coord):
-    # Validate the input format
-    if not isinstance(coord, str) or len(coord) < 2 or coord[-1] not in 'NSEW':
-        raise ValueError("Invalid coordinate format. Expected format 'DD.DD[D]'.")
-
-    # Separate the numerical value and direction
-    numeric_part, direction = coord[:-1], coord[-1]
-
-    # Try converting the numeric part to float, raise ValueError if conversion fails
-    try:
-        numeric_value = float(numeric_part)
-    except ValueError:
-        raise ValueError("Invalid numeric value in the coordinate.")
-
-    # Make the value negative if direction is West or South
-    if direction in ['W', 'S']:
+    # Function to convert coordinate data to numerical value.
+    # Example: "41.23N" -> 41.23, "41.23W" -> -41.23
+    
+    # Separate the numerical value and direction of the coordinate.
+    parts = coord[:-1], coord[-1]
+    # Convert the numeric value to float type.
+    numeric_value = float(parts[0])
+    # If the direction is west or south, make it negative.
+    if parts[1] in ['W', 'S']:
         numeric_value *= -1
-
     return numeric_value
 
-
 def suggest_route(start_record, end_record, cities_data):
-    """
-    Suggest a route from a start city to an end city based on the nearest unvisited cities with the highest 
-    average temperature.
-
-    The function iterates through cities, selecting the nearest unvisited city with the highest average temperature, 
-    until it reaches the destination city or runs out of unvisited cities.
-
-    Parameters:
-    start_record (dict): A dictionary containing data of the starting city, including the 'City' key.
-    end_record (dict): A dictionary containing data of the destination city, including the 'City' key.
-    cities_data (DataFrame): A pandas DataFrame containing city data, including 'City' and 'AverageTemperature'.
-
-    Returns:
-    list: A list of cities representing the suggested route.
-
-    Raises:
-    ValueError: If the start or end records are not in the expected format or if cities_data is not a DataFrame.
-    """
-
-    # Validate input data
-    if not isinstance(start_record, dict) or not isinstance(end_record, dict):
-        raise ValueError("Start and end records must be dictionaries.")
-    if 'City' not in start_record or 'City' not in end_record:
-        raise ValueError("Start and end records must contain a 'City' key.")
-    if not isinstance(cities_data, pd.DataFrame):
-        raise ValueError("cities_data must be a pandas DataFrame.")
-
+    # Start with the initial city
     route = [start_record['City']]
     current_record = start_record
     visited_cities = set(route)
 
+    # Loop until the current city is the destination city
     while current_record['City'] != end_record['City']:
+        # Exclude visited cities and the current city from the search
         unvisited_cities = cities_data[~cities_data['City'].isin(visited_cities)]
+
+        # Find the nearest cities that have not been visited
         nearest_cities = find_nearest_cities(current_record, unvisited_cities, n=3)
 
+        # If there are no unvisited cities left, break the loop (to avoid an infinite loop)
         if nearest_cities.empty:
             print("No more unvisited cities to go to. Ending route search.")
             break
 
+        # Select the nearest city with the highest average temperature
         next_city_record = nearest_cities.loc[nearest_cities['AverageTemperature'].idxmax()]
 
+        # If the destination city is the next city, add it to the route and break the loop
         if next_city_record['City'] == end_record['City']:
             route.append(next_city_record['City'])
             break
 
+        # Add the selected city to the route and mark it as visited
         route.append(next_city_record['City'])
         visited_cities.add(next_city_record['City'])
+        
+        # Update the current city record
         current_record = next_city_record
 
     return route
 
 
 
+
 def plot_temperature_range(city_data, top_cities, start_year, end_year):
-    """
-    Plot the temperature range for top cities over a specified period.
-
-    This function filters the city data for the specified period and plots the temperature range 
-    for each city. It creates subplots for each city showing the trend of temperature range over time.
-
-    Parameters:
-    city_data (DataFrame): A pandas DataFrame containing city temperature data.
-    top_cities (list or Series): A list or pandas Series of top cities to be plotted.
-    start_year (int): The starting year for the period.
-    end_year (int): The ending year for the period.
-
-    Raises:
-    ValueError: If the input data is not in the expected format or if the years are not valid.
-    """
-
-    # Validate input data
-    if not isinstance(city_data, pd.DataFrame):
-        raise ValueError("city_data must be a pandas DataFrame.")
-    if not (isinstance(top_cities, list) or isinstance(top_cities, pd.Series)):
-        raise ValueError("top_cities must be a list or a pandas Series.")
-    if not isinstance(start_year, int) or not isinstance(end_year, int):
-        raise ValueError("start_year and end_year must be integers.")
-    if start_year > end_year:
-        raise ValueError("start_year must be less than or equal to end_year.")
-
-    # Convert top_cities to list if it is not already
-    if isinstance(top_cities, pd.Series):
-        top_cities = top_cities.tolist()
-
+    # Filter data for the specified period
     city_data_period = city_data[(city_data['Year'] >= start_year) & (city_data['Year'] <= end_year)]
+    
+    # Sort the data by city and year
     city_data_sorted = city_data_period.sort_values(['City', 'Year'])
 
+    # Create subplots
     fig, axes = plt.subplots(5, 2, figsize=(15, 20), sharex=True)
     axes = axes.flatten()
 
+    # Plot for each city
     for i, city in enumerate(top_cities):
         city_specific_data = city_data_sorted[city_data_sorted['City'] == city]
         sns.lineplot(x='Year', y='temp_range', data=city_specific_data, ax=axes[i], color="m", marker="o")
@@ -129,36 +81,7 @@ def plot_temperature_range(city_data, top_cities, start_year, end_year):
     plt.show()
 
 
-
-# Bu fonksiyonu kullanarak, örneğin 1920-1970 yılları arasında sıcaklık aralığı en yüksek 10 şehrin grafiğini çizebilirsiniz.
-# Örnek kullanım: plot_temperature_range(city_yearly_temps, top_10_cities, 1920, 1970)
-
-
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-
 def plot_temperature_range_bar(city_data, top_cities):
-    """
-    Plot a bar chart showing the temperature range for top cities.
-
-    Parameters:
-    city_data (DataFrame): A pandas DataFrame containing city temperature data.
-    top_cities (list or Series): A list or pandas Series of top cities to be plotted.
-
-    Raises:
-    ValueError: If the input data is not in the expected format.
-    """
-
-    # Validate input data
-    if not isinstance(city_data, pd.DataFrame):
-        raise ValueError("city_data must be a pandas DataFrame.")
-    if not (isinstance(top_cities, list) or isinstance(top_cities, pd.Series)):
-        raise ValueError("top_cities must be a list or a pandas Series.")
-
-    # Convert top_cities to list if it is not already
-    if isinstance(top_cities, pd.Series):
-        top_cities = top_cities.tolist()
 
     plt.figure(figsize=(14, 8))
     barplot = sns.barplot(
@@ -182,24 +105,7 @@ def plot_temperature_range_bar(city_data, top_cities):
     plt.show()
 
 
-
-
 def plot_temperature_range_map(top_cities, top_n=10):
-    """
-    Plot a map showing the top cities with the largest temperature ranges.
-
-    Args:
-    top_cities (DataFrame): DataFrame containing the top cities with their temperature range and geographical coordinates.
-    top_n (int): Number of top cities to be plotted.
-
-    Raises:
-    ValueError: If the input data is not in the expected format or if top_n is not a valid number.
-    """
-    # Validate input data
-    if not isinstance(top_cities, pd.DataFrame):
-        raise ValueError("top_cities must be a pandas DataFrame.")
-    if not isinstance(top_n, int) or top_n <= 0:
-        raise ValueError("top_n must be a positive integer.")
 
     # Create a GeoDataFrame for the top cities
     top_cities_gdf = gpd.GeoDataFrame(
@@ -230,59 +136,28 @@ def plot_temperature_range_map(top_cities, top_n=10):
     plt.show()
 
 def haversine(lon1, lat1, lon2, lat2):
-    """
-    Calculate the great circle distance in kilometers between two points 
-    on the earth (specified in decimal degrees).
-
-    Args:
-    lon1, lat1: Longitude and latitude of the first point.
-    lon2, lat2: Longitude and latitude of the second point.
-
-    Returns:
-    float: Distance between the two points in kilometers.
-    """
-    # Validate input data
-    for value in [lon1, lat1, lon2, lat2]:
-        if not isinstance(value, (int, float)):
-            raise ValueError("Longitude and latitude values must be numeric.")
-
-    # Convert coordinates from decimal degrees to radians
+    # Convert coordinates in radians
     lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
 
-    # Haversine formula
+    # Longitude and latitude differences
     dlon = lon2 - lon1
     dlat = lat2 - lat1
+
+    # Haversine formula
     a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
     c = 2 * asin(sqrt(a))
     r = 6371  # Earth's radius in kilometers
     return c * r
 
+
 def find_nearest_cities(current_coords, cities_data, n=3):
-    """
-    Find the nearest cities to the given coordinates.
-
-    Args:
-    current_coords (dict): A dictionary containing 'City', 'Longitude', and 'Latitude' of the current city.
-    cities_data (DataFrame): A pandas DataFrame containing city data with 'City', 'Longitude', and 'Latitude'.
-    n (int): Number of nearest cities to return.
-
-    Returns:
-    DataFrame: A DataFrame of the n nearest cities.
-
-    Raises:
-    ValueError: If the input data is not in the expected format.
-    """
-    # Validate input data
-    if 'City' not in current_coords or 'Longitude' not in current_coords or 'Latitude' not in current_coords:
-        raise ValueError("current_coords must contain 'City', 'Longitude', and 'Latitude'.")
-    if not isinstance(cities_data, pd.DataFrame):
-        raise ValueError("cities_data must be a pandas DataFrame.")
-    if not isinstance(n, int) or n <= 0:
-        raise ValueError("n must be a positive integer.")
-
+    # Create a copy of the data to avoid SettingWithCopyWarning
     cities_data = cities_data.copy()
+
+    # Exclude the current city from the dataset
     cities_data = cities_data[cities_data['City'] != current_coords['City']]
 
+    # Calculate distances using the Haversine formula
     distances = cities_data.apply(
         lambda row: haversine(current_coords['Longitude'], current_coords['Latitude'], row['Longitude'], row['Latitude']),
         axis=1
