@@ -12,6 +12,14 @@ def plot_scatter(ax, data_table, x_col, y_col, label, color='blue', marker='o'):
 
 
 def display_data(search_game, data_table, score_result, title):
+    """
+    Display game rankings and plot scatter plots.
+
+    :parameter search_game: Game title to search for
+    :parameter data_table: Pandas DataFrame containing the full data
+    :parameter score_result: Pandas DataFrame containing the search results
+    :parameter title: Title for the ranking
+    """
     st.subheader(f"{title} Ranking")
     if search_game != '':
         st.write(f"**The game's ranking based on the {title}:**")
@@ -28,6 +36,7 @@ def display_data(search_game, data_table, score_result, title):
     st.pyplot(fig)
 
 
+# Load the dataset and calculate game statistics
 df = pd.read_csv('bgg.csv')
 full_table, average_table, bayesian_table, wilson_table = DataSet(df).calculate_game_statistics()
 
@@ -38,7 +47,6 @@ st.markdown("#### Game list:\n "
 full_table.rename(columns={'title': 'Game'}, inplace=True)
 full_table.index += 1
 st.dataframe(full_table['Game'], width=2000)
-
 
 average_table.rename(columns={'title': 'Game'}, inplace=True)
 average_table.index += 1
