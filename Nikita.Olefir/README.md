@@ -27,17 +27,17 @@ I collect comments from two threads:
 
 ### Libraries
 
-Data Manipulation and Analysis: `numpy`, `pandas`
-Natural Language Processing: `nltk`, `gensim`, `spacy`, `textblob`
-Data Visualization: `matplotlib`
-Text Vizualization: `wordcloud`
-Web Scrapping:`praw`
-Image processing: `Pillow`
-Web Application Development: `streamlit`
+Data Manipulation and Analysis: `numpy`, `pandas`. 
+Natural Language Processing: `nltk`, `gensim`, `spacy`, `textblob`. 
+Data Visualization: `matplotlib`. 
+Text Vizualization: `wordcloud`. 
+Web Scrapping:`praw`. 
+Image processing: `Pillow`. 
+Web Application Development: `streamlit`. 
 
 ### Topics covered
 
-`Git`, `OOP`, `Miodularization`, `Data Manipulation`, `Data Analysis`, `Data Visualization`, `Text Preprocessing`, `Web Application Development`, `API`, `Sentiment Analysis`, `WordCloud`, `Word Embedding`, `Natural Language Processing`.
+`Git`, `OOP`, `Modularization`, `Data Manipulation`, `Data Analysis`, `Data Visualization`, `Text Preprocessing`, `Web Application Development`, `API`, `Sentiment Analysis`, `WordCloud`, `Word Embedding`, `Natural Language Processing`.
 
 All the requirments are met.
 
