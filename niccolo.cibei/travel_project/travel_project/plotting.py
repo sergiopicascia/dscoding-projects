@@ -165,13 +165,6 @@ class Plotting:
 
             fig = go.Figure(data=[path], layout=layout)
 
-            fig.update_layout(
-                title_text='The shortest path on the 3D globe',
-                title_x=0.5,
-                title_font=dict(size=20),
-                title_xanchor='center'
-            )
-
             fig.update_layout(height=900, margin={"r": 0, "t": 0, "l": 0, "b": 0})
 
             return fig
