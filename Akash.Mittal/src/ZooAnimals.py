@@ -61,7 +61,7 @@ class DataProcessor():                    # DataProcessor class for importing th
 # In[4]:
 
 
-class DataValidation():                    # Class to load the class types for comaprison with our output
+class DataValidation():                    # Class to load the class types for comaprison with our output, not part of current project, will use later on.
     def __init__(self, file_path):
         self.file_path = file_path
         self.data = None
