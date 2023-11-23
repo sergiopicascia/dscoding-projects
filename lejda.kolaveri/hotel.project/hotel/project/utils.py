@@ -7,9 +7,24 @@ hotels = pd.read_excel(r"C:\Users\lejda\Desktop\coding - Python\hotels.xlsx")
 hotels
 preferences = pd.read_excel(r"C:\Users\lejda\Desktop\coding - Python\preferences.xlsx")
 preferences
+
+
 class satisfaction:
-    def calculate_satisfaction_percentage(preferences, guest_id, hotel_id):
-        guest_preferences = preferences[preferences['guest'] == guest_id].reset_index() #filter preferences for the given guest
+     def __init__(self, hotels, guests, preferences):
+        """Initialize the AvailabilityBasedAllocator.
+
+            Parameters:
+          - hotels (pd.DataFrame): DataFrame containing information about hotels.
+          - guests (pd.DataFrame): DataFrame containing information about guests.
+          - preferences (pd.DataFrame): DataFrame containing guest preferences.
+        """
+        #we use copies to avoid modifying the original dataframes   
+        self.hotels = hotels.copy()
+        self.guests = guests.copy()
+        self.preferences = preferences.copy()
+        
+    def calculate_satisfaction_percentage(self, guest_id, hotel_id):
+        guest_preferences = self.preferences[self.preferences['guest'] == guest_id].reset_index() #filter preferences for the given guest
         if guest_preferences.empty:
             return 100  # No preferences, 100% satisfaction
 
