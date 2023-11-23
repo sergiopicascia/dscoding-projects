@@ -1,0 +1,9 @@
+# Around the World in XXX Days
+
+This repository contains my project for coding course.
+
+## Initial task setting
+
+Consider the [dataset](http://island.ricerca.di.unimi.it/~alfio/shared/worldcities.xlsx) describing some of the world's major cities. Assume that it is always possible to travel from each city to the 3 nearest cities and that such travel takes 2 hours to the nearest city, 4 hours to the second nearest city, and 8 hours to the third nearest city. In addition, the trip takes an additional 2 hours if the destination city is in another country than the starting city and an additional 2 hours if the destination city has more than 200,000 inhabitants.
+
+Starting in London and always traveling east, is it possible to travel around the world by returning to London in 80 days? How long does this take at a minimum?

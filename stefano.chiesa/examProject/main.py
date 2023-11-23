@@ -1,26 +1,21 @@
-import functions as fun
+from map import Map
 import pandas as pd
 import geopandas as gpd
-import numpy as np
-import matplotlib.pyplot as plt
+from matplotlib import pyplot as plt
+from matplotlib.animation import FuncAnimation
+import math
 
-tem_dataframe = pd.read_csv('venv/data/data_cities.csv', sep=',')  # import the data
+path = 'venv/data/data_cities.csv'
+tem_dataframe = pd.read_csv(path, sep=',')  # import the data
 gpd_cities = gpd.GeoDataFrame(
     tem_dataframe, geometry=gpd.points_from_xy(tem_dataframe.Longitude, tem_dataframe.Latitude)
 )
-# 'dt', 'AverageTemperature', 'City', 'Latitude', 'Longitude', 'geometry'
 
-
-# import a built-in dataset (deprecate from 2024)
 gpd_world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
-# removing antarctica
 gpd_world = gpd_world[gpd_world.continent != "Antarctica"]  # removing antartica
 
-# fun.create_map(gpd_cities, gpd_world)
+# let's create the base object
+my_map = Map(gpd_cities, gpd_world)
 
-# fun.create_map_date(gpd_cities, gpd_world, '1990-01-01')
-# dates = gpd_cities['dt'].unique()
-
-#fun.date_map_gif(gpd_cities, gpd_world, '2001-04-01', '2001-12-01')
-
+my_map.avg_temperature_graph('Peking', 11)
 
