@@ -26,4 +26,10 @@ class Processor:
     def find_top_anomaly_cities(self, data, n=5):
         temp_ranges = data.sort_values('temp_range', ascending=False).groupby('City').first().reset_index()
         return temp_ranges.sort_values('temp_range', ascending=False).head(n)
+    
+    def calculate_city_temp_ranges(self, data):
+        # Calculate yearly maximum and minimum temperatures for each city
+        city_yearly_temps = data.groupby(['City', 'Year'])['AverageTemperature'].agg(['min', 'max'])
+        city_yearly_temps['temp_range'] = city_yearly_temps['max'] - city_yearly_temps['min']
+        return city_yearly_temps.reset_index()
         
