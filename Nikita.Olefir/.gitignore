@@ -1,4 +1,4 @@
-# Custom ignore
+# Custom ignores
 *.csv
 credentials.py
 Pictures/
