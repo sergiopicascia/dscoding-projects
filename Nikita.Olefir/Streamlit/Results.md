@@ -1,4 +1,4 @@
-# The Results of the Streamlit APP Usage
+# The Results of the Streamlit App Usage
 
 Here I just paste screenshots of the streamlit app to show you how it generally works.
 
@@ -6,19 +6,19 @@ Here I just paste screenshots of the streamlit app to show you how it generally 
 
 Here you can basically see all the sections of the app:
 
-![ ](../Pictures/Starting_page.png)
+![](Pictures/Starting_page.png)
 
 ## Analyze Text Section
 
 We can check that the sentiment analysis of a custom text works:
 
-![ ](../Pictures/Analyze_text.png)
+![ ](Pictures/Analyze_text.png)
 
 ## Analyze CSV Section
 
 Here is how we can analyze CSV file. We can choose the file, column name, and also download the CSV file with the results.
 
-![ ](../Pictures/Analyze_CSV.png)
+![ ](Pictures/Analyze_CSV.png)
 
 As we can see, not all of the comments have correct sentiment score, but i think that it has more to do with the machine that do not unserstand football slang.
 
@@ -26,11 +26,14 @@ As we can see, not all of the comments have correct sentiment score, but i think
 
 Lastly, there are two wordclouds that appear after we use the Streamlit App:
 
-When Milan Won
-![ ](../Pictures/Wordcloud_win.png)
+When Milan won:
 
-And when it Lost
-![](../Pictures/Wordcloud_lose.png)
+![ ](Pictures/Wordcloud_win.png)
+
+And when it lost:
+
+![](Pictures/Wordcloud_lose.png)
+
 
 
 **THAT IS IT!**

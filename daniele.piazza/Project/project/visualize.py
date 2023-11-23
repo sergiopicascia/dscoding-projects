@@ -169,8 +169,18 @@ class Visualize:
         up = up.groupby(up['dt'].dt.month)['AverageTemperature'].mean().round(2).reset_index()
         month = place['dt'].dt.month
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x = month, y = up['AverageTemperature'], mode = 'lines+markers', name = place[upper].iloc[0], line = dict(color = self.secondaryBackgroundColor)))
-        fig.add_trace(go.Scatter(x = month, y = place['AverageTemperature'].round(2), mode = 'lines+markers', name = selected, line = dict(color = self.primaryColor)))
+        fig.add_trace(go.Scatter(x = month,
+                                y = up['AverageTemperature'],
+                                mode = 'lines+markers',
+                                name = place[upper].iloc[0],
+                                line = dict(color = self.secondaryBackgroundColor)
+                                ))
+        fig.add_trace(go.Scatter(x = month,
+                                 y = place['AverageTemperature'].round(2),
+                                 mode = 'lines+markers',
+                                 name = selected,
+                                 line = dict(color = self.primaryColor)
+                                 ))
         fig.update_xaxes(title_text = 'Month', showgrid = False)
         fig.update_layout(xaxis = {'tickmode': 'array', 
                                 'tickvals':month.unique(), 
