@@ -52,4 +52,4 @@ There are three folders that contains code.
 
 ## Note
 
-I have not added the csv files here in the repository as during classes it was said not to do so. However, if they are needed, I can provide them by email. Tell me if you need them.
+I have not added the csv files of the comments that I get after using Reddit API here in the repository as during classes it was said not to do so. However, if they are needed, I can provide them by email. Tell me if you need them.
