@@ -19,7 +19,7 @@ class Sidebar:
     st.set_option('deprecation.showPyplotGlobalUse', False)
     st.set_page_config(page_title="Weather data project", layout="wide", initial_sidebar_state="expanded", )
     with st.sidebar:
-        options = option_menu("Weather data project", ["Main menu", "Cities overview", "Country informations",
+        options = option_menu("Weather data project", ["Main menu", "Cities overview", "Country information",
                                                        "Temperatures charts and map", "Temperatures shock"],
                               menu_icon="umbrella",
                               icons=["house", "pin-map", "book", "graph-up-arrow", "cloud-lightning-rain"])
@@ -108,7 +108,7 @@ class CitiesOverview:
         st.write("")
         if st.button("Calculate distance", type="primary"):
             if (col1.city1 and col2.city2) is not None:
-                if (col1.city1 != col2.city2):
+                if col1.city1 != col2.city2:
                     distance = round(geodesic(c1_coord, c2_coord).km, 2)
                     phrase = "The distance between " + str(col1.city1) + " and " + str(col2.city2) + " is " + str(distance) + " kilometers."
                     st.write("")
@@ -119,7 +119,6 @@ class CitiesOverview:
             else:
                 st.write("")
                 st.write("You need to select both the starting and the arriving city.")
-
 
     def major_map(self):
         st.divider()
@@ -132,13 +131,13 @@ class CitiesOverview:
             BigCities.majorCitiesMap(any, projection.lower())
 
 
-# The class below contains only one function, which prints the informations about a chosen country, and creates a
-# map of the country. The informations of each country are obtained using the library CountryInfo, which retrieves the
+# The class below contains only one function, which prints the information about a chosen country, and creates a
+# map of the country. The information of each country are obtained using the library CountryInfo, which retrieves the
 # data from its database; this was extremely useful, as I didn't have to store the data in a dataset, and allowed me to
-# have interesting informations about all the countries.
+# have interesting information about all the countries.
 
 
-class CountryInformations:
+class CountryInformation:
     def country_info(self):
         random_country = np.random.choice(Data.cities["Country"].unique())
         st.header("COUNTRY INFORMATIONS")
@@ -209,18 +208,18 @@ class CountryInformations:
 
 class TempChartsMap:
     months_codes = list(Data.months.keys())
-    months_names = list(Data.months.values())
+
     def temp_charts(self):
         Data.tempByMajorCity["dt"] = pd.to_datetime(Data.tempByMajorCity["dt"])
         Data.tempByMajorCity["Month"] = Data.tempByMajorCity["dt"].dt.month
         st.header("TEMPERATURES CHARTS AND MAP")
         st.divider()
-        st.write("""One thing that can be done to see how temperatures change in time is to plot the average temperature
-                registered in a city in a certain month during the years. Below, we can see the difference in temperature 
-                registered in the cities present in the dataset, both in january and august.""")
-        st.write("""It is also interesting to noctice how temperatures change during different times of the year. You can see
-                this in the second chart, where there is a comparison between the average temperature registered in the chosen
-                 city in 1900 and in 2012.""")
+        st.write("""One thing that can be done to see how temperatures change in time is to plot the average 
+        temperature registered in a city in a certain month during the years. Below, we can see the difference in 
+        temperature registered in the cities present in the dataset, both in january and august.""")
+        st.write("""It is also interesting to notice how temperatures change during different times of the year. You 
+        can see this in the second chart, where there is a comparison between the average temperature registered in 
+        the chosen city in 1900 and in 2012.""")
         st.write("")
         st.write("")
         chosen_continent = st.selectbox("In which continent is the city located?",
@@ -267,16 +266,11 @@ class TempChartsMap:
         if st.toggle("Choose a random month"):
             selected_month = np.random.choice(TempChartsMap.months_codes)
         st.write("")
-        st.info("""Keep in mind that the location of the following cities is wrongly displayed on the map below, although 
-                the coordinates in the dataset are correct:\n
-                - São Paulo (Brasil) -> shown in Russia\n
-                - Saint Petersburg (Russia) -> shown in Brasil\n
-                - Salvador (Brasil) -> shown in Chile\n
-                - Sydney (Australia) -> shown in Brasil\n
-                - Surat (India) -> shown in Australia\n
-                - Santo Domingo (Dominican Republic) -> shown in South Korea\n
-                - Surabaya (Indonesia) -> shown in India\n
-                - Shenyang (China) -> shown in Indonesia""", icon="ℹ️")
+        st.info("""Keep in mind that the location of the following cities is wrongly displayed on the map below, 
+        although the coordinates in the dataset are correct:\n - São Paulo (Brasil) -> shown in Russia\n - Saint 
+        Petersburg (Russia) -> shown in Brasil\n - Salvador (Brasil) -> shown in Chile\n - Sydney (Australia) -> 
+        shown in Brasil\n - Surat (India) -> shown in Australia\n - Santo Domingo (Dominican Republic) -> shown in 
+        South Korea\n - Surabaya (Indonesia) -> shown in India\n - Shenyang (China) -> shown in Indonesia""", icon="ℹ️")
         st.write("")
         full_date = (str(selected_year) + "-" + str(selected_month))
         if st.button("Show me the map", type="primary"):
@@ -321,8 +315,8 @@ elif Sidebar.options == "Cities overview":
     CitiesOverview.cities_overview(any)
     CitiesOverview.distance_calculator(any)
     CitiesOverview.major_map(any)
-elif Sidebar.options == "Country informations":
-    CountryInformations.country_info(any)
+elif Sidebar.options == "Country information":
+    CountryInformation.country_info(any)
 elif Sidebar.options == "Temperatures charts and map":
     TempChartsMap.temp_charts(any)
     TempChartsMap.temp_map(any)

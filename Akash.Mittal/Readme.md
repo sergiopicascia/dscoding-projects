@@ -22,3 +22,15 @@ main.py -> contains the main project code.
 app.py -> contains the code for Streamlit instance for a brief display of data in browser.
 
 Further, the animal data is imported from the zoo.xlsx file in the data folder.
+
+References :
+
+https://scikit-learn.org/stable/modules/clustering.html#affinity-propagation
+https://scikit-learn.org/stable/modules/generated/sklearn.cluster.AffinityPropagation.html
+https://scikit-learn.org/stable/auto_examples/cluster/plot_affinity_propagation.html#sphx-glr-auto-examples-cluster-plot-affinity-propagation-py
+https://www.youtube.com/shorts/qvtaazr6Ph0
+https://scikit-learn.org/stable/auto_examples/cluster/plot_cluster_iris.html
+https://scikit-learn.org/stable/auto_examples/cluster/plot_kmeans_digits.html#sphx-glr-auto-examples-cluster-plot-kmeans-digits-py
+ChatGPT
+
+

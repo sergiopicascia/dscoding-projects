@@ -9,9 +9,8 @@ from project.utils import Data
 
 
 class CityCountry:
-    numCities = Data.cities.drop(["Latitude", "Longitude", "Continent", "Subregion"], axis=1).groupby("Country").count().sort_values(by="City",
-                                                                                                           ascending=
-                                                                                                           False)
+    numCities = Data.cities.drop(["Latitude", "Longitude", "Continent", "Subregion"], axis=1).groupby(
+        "Country").count().sort_values(by="City", ascending=False)
 
     # The following function prints a small dataframe containing the countries that have most cities in the dataset.
 
@@ -38,7 +37,7 @@ class CityCountry:
         else:
             mapTitle = str("There are " + number + " cities in " + nation)
         fig = px.scatter_geo(byCountry, lat=byCountry["Latitude"], lon=byCountry["Longitude"],
-                             hover_name=byCountry["City"], color_discrete_sequence=["darkred"])
+                             hover_name=byCountry["City"], color_discrete_sequence=["DarkRed"])
         fig.update_geos(showocean=True, oceancolor="LightBlue", fitbounds="locations", showcountries=True,
                         showland=True, landcolor="LightGreen")
         fig.update_layout(title_text=mapTitle, title_x=0.5)

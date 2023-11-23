@@ -1,0 +1,119 @@
+Aknur's Quiz Results:
+Difficulty Level  Score
+            Easy     10
+          Medium     20
+            Hard     30
+Total Quiz Score: 60 out of 240
+
+
+Aknur's Quiz Results:
+Difficulty Level  Score
+            Easy     40
+          Medium     60
+            Hard     90
+Total Quiz Score: 190 out of 240
+
+Abby's Quiz Results:
+Difficulty Level  Score
+            Easy     30
+          Medium      0
+            Hard      0
+Total Quiz Score: 30 out of 240
+
+Lol's Quiz Results:
+Difficulty Level  Score
+            Easy     10
+          Medium     20
+            Hard      0
+Total Quiz Score: 30 out of 240
+
+Dana's Quiz Results:
+Difficulty Level  Score
+            Easy     10
+          Medium     40
+            Hard     30
+Total Quiz Score: 80 out of 240
+
+'s Quiz Results:
+Difficulty Level  Score
+            Easy      0
+          Medium      0
+            Hard      0
+Total Quiz Score: 0 out of 240
+
+fff's Quiz Results:
+Difficulty Level  Score
+            Easy     20
+          Medium     20
+            Hard     60
+Total Quiz Score: 100 out of 240
+
+Pringles's Quiz Results:
+Difficulty Level  Score
+            Easy     20
+          Medium     40
+            Hard     60
+Total Quiz Score: 120 out of 240
+
+Me's Quiz Results:
+Difficulty Level  Score
+            Easy     30
+          Medium      0
+            Hard     30
+Total Quiz Score: 60 out of 240
+
+Rus's Quiz Results:
+Difficulty Level  Score
+            Easy     30
+          Medium     20
+            Hard     60
+Total Quiz Score: 110 out of 240
+
+Butter's Quiz Results:
+Difficulty Level  Score
+            Easy     20
+          Medium     20
+            Hard      0
+Total Quiz Score: 40 out of 240
+
+Snake's Quiz Results:
+Difficulty Level  Score
+            Easy     20
+          Medium     20
+            Hard     90
+Total Quiz Score: 130 out of 240
+
+Aidar 1's Quiz Results:
+Difficulty Level  Score
+            Easy     30
+          Medium     40
+            Hard     30
+Total Quiz Score: 100 out of 240
+
+Aidar 2's Quiz Results:
+Difficulty Level  Score
+            Easy     30
+          Medium     40
+            Hard     30
+Total Quiz Score: 100 out of 240
+
+Aidar 3's Quiz Results:
+Difficulty Level  Score
+            Easy     20
+          Medium     20
+            Hard     90
+Total Quiz Score: 130 out of 240
+
+Aidar 4's Quiz Results:
+Difficulty Level  Score
+            Easy     30
+          Medium     60
+            Hard     60
+Total Quiz Score: 150 out of 240
+
+Aidar 5's Quiz Results:
+Difficulty Level  Score
+            Easy     20
+          Medium     60
+            Hard    120
+Total Quiz Score: 200 out of 240
