@@ -34,7 +34,6 @@ travel_data = TravelData(path=path,
                          admin=True,
                          primary=True,
                          minor=False,
-                         num_rows=0,
                          num=300
                          )
 df_city = travel_data.df
