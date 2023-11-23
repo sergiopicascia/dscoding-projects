@@ -24,7 +24,6 @@ It contains the following methods:
     - display_specific: display the specific information of the dataset
 """
 
-update = False # Set to True if you want to update the coordinates of the cities in the csv files
 st.set_page_config(layout='wide', initial_sidebar_state='collapsed', page_title='Global Climate Data Analysis', page_icon='🌍')
 API_KEY = pd.read_csv('/Users/dani/Desktop/api_key.txt',header=None)[0][0] #change with your google api key
 ALL_PATH = 'Data/GlobalLandTemperaturesByCity.csv'
@@ -49,8 +48,6 @@ location : Location
 @st.cache_data
 def load_location(path, API_KEY):
     location = Location(path, API_KEY)
-    if update:
-        location.update_file()
     return location
 
 _="""

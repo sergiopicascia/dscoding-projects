@@ -1,18 +1,21 @@
-import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.neighbors import KNeighborsClassifier
+import pandas as pd
+from sklearn import svm
+from sklearn.cluster import KMeans
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import GaussianNB
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn import svm
-from sklearn.naive_bayes import GaussianNB
-import seaborn as sns
-from sklearn.cluster import KMeans
 
+# importing datasets
+from animals_project.animals.functions import data_import
+importing = data_import()
+importing.import_zoo()
+importing.import_class_types()
 
-#importing datasets
 zoo = pd.read_csv('C:/Users/admin/Downloads/animal_DB/zoo.csv')
 class_types = pd.read_csv('C:/Users/admin/Downloads/animal_DB/class.csv')
 df = pd.merge(zoo, class_types, how='left', left_on='class_type', right_on='Class_Number')
@@ -31,13 +34,11 @@ X = zoo.iloc[:, 1:17]
 Y = zoo.iloc[:, 17]
 X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.3, random_state=42, stratify=Y)
 np.array(X_train)
-np.array(X_test) #to check if I can put everything in one bracket
+np.array(X_test)
 
 sc = StandardScaler()
 X_train = sc.fit_transform(X_train)
 X_test = sc.transform(X_test)
-from animals.functions import scaling
-
 
 #K Nearest Neighbor
 classifier_knn = KNeighborsClassifier()
@@ -152,38 +153,45 @@ from animals_project.animals.functions import Visualizations
 plot = Visualizations()
 plot.correlation_plot()
 
+#which feature(s) are the most relevant?
+df.iloc[:, 1:19].groupby("Class_Number").mean()
 
 #K Means Clustering
 ##elbow method
-animal_features = zoo[['hair', 'feathers', 'eggs', 'milk', 'airborne',
-                        'aquatic', 'predator', 'toothed', 'backbone', 'breathes',
-                        'venomous', 'fins', 'legs', 'tail', 'domestic', 'catsize']]
-wcss = []
-for i in range(1, 11):
-    kmeans = KMeans(n_clusters = i, random_state = 42)
-    kmeans.fit(animal_features)
-    wcss.append(kmeans.inertia_)
-plt.plot(range(1, 11), wcss)
-plt.title('The Elbow Method')
-plt.xlabel('Number of clusters')
-plt.ylabel('WCSS')
-plt.show()
+from animals_project.animals.functions import Visualizations
+plot = Visualizations()
+plot.elbow_plot()
 
+#KMeans
+
+# Selecting the features for clustering
+zoo = pd.read_csv('C:/Users/admin/Downloads/animal_DB/zoo.csv')
+animal_features = zoo[['hair', 'feathers', 'eggs', 'milk', 'airborne',
+                               'aquatic', 'predator', 'toothed', 'backbone', 'breathes',
+                               'venomous', 'fins', 'legs', 'tail', 'domestic', 'catsize']]
+
+# Perform k-means clustering
 num_clusters = 4
 kmeans = KMeans(n_clusters=num_clusters, random_state=42)
 y_kmeans = kmeans.fit_predict(animal_features)
 
-# Visualize the clusters
+# Plot the clusters
 plt.figure(figsize=(10, 6))
 for cluster_num in range(num_clusters):
     cluster_data = zoo[y_kmeans == cluster_num]
     plt.scatter(cluster_data['eggs'], cluster_data['hair'], label=f'Cluster {cluster_num}')
-    plt.scatter(kmeans.cluster_centers_[:, 0], kmeans.cluster_centers_[:, 1], s = 200, c = 'yellow', label = 'Centroids')
-    plt.title('Clustering of Animals Based on Features')
-    plt.xlabel('eggs')
-    plt.ylabel('hair')
-    plt.legend()
-    plt.show()
+
+# Plot centroids
+plt.scatter(kmeans.cluster_centers_[:, 2], kmeans.cluster_centers_[:, 0], s=100, c='yellow', label='Centroids')
+# Set plot
+plt.title('Clustering of Animals Based on Features')
+plt.xlabel('eggs')
+plt.ylabel('hair')
+plt.legend()
+plt.show()
+
+from animals_project.animals.functions import kmeans
+kmeans()
 
 
 

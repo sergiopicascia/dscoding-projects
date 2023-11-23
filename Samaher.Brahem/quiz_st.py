@@ -135,7 +135,7 @@ class Quiz:
 
         st.pyplot(fig)
 
-    def quiz_game(self):
+    def run_quiz(self):
         total_score = 0
         used_questions = []
 
@@ -143,7 +143,7 @@ class Quiz:
         player_name = st.text_input("What do you want us to call you?")
 
         if player_name:
-            difficulty_level = st.radio("Choose a difficulty level:", ('Easy', 'Medium', 'Hard'), index=None)
+            difficulty_level = st.radio("Choose a difficulty level: ", ('Easy', 'Medium', 'Hard'), index=None)
             start = st.button("Start Quiz")
             if difficulty_level and start:
                 st.write(f"Alright, {player_name}! Get ready to play!")

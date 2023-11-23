@@ -17,5 +17,6 @@ In file "dataI.py" I created functions:
  - drop_column() that deletes specified column
  - show_incorrect_rows() that shows all rows with '0' or 'NaN' in specified column
  -  delete_incorrect_rows() that deletes all rows with '0' or 'NaN' in specified column
- - new_csv() that creates new cleaned dataset
+ - new_csv() that creates new cleaned dataset.
+
 After several calls of functions attributes of columns were cleaned, 1431 rows were deleted. Modified dataset was saved as new .csv file.
