@@ -1,7 +1,6 @@
-# Custom ignores
+# Custom ignore
 *.csv
 credentials.py
-Pictures/
 
 # Logs
 logs
