@@ -1,6 +1,6 @@
 import joblib
 import streamlit as st
-from UDFs import TextClassifier
+from UDFs import AppTextClassifier
 
 # Load pre-trained vectorizers and classifiers
 count_vectorizer = joblib.load('count_vectorizer.joblib')
@@ -27,17 +27,8 @@ st.markdown("""
 # App title and description
 st.title('Humor Detection App')
 st.markdown('''
-            This app uses machine learning classifiers to predict if your text is humorous or not.  
-            You can choose between two classifiers:  
-            - [Logistic Regression with Stochastic Gradient Descent](https://scikit-learn.org/stable/modules/sgd.html),  
-            - [Multinomial Naive Bayes](https://scikit-learn.org/stable/modules/generated/sklearn.naive_bayes.MultinomialNB.html),
-            ''')
-st.markdown('''
-            and two vectorizers:  
-            - [Count Vectorizer](https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html),  
-            - [TF-IDF Vectorizer](https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html).
-            ''')
-st.markdown('''
+            This app uses a machine learning classifier to predict if your text is humorous or not.  
+            You can choose between two classifiers and two vectorizers.  
             Both classifiers and vectorizers were trained using a set of 200,000 humorous and unhumorous texts.
             ''')
 
@@ -69,14 +60,14 @@ classifiers = {
 # Select the classifier based on user choices
 selected_classifier = classifiers[user_classifier][user_vectorizer]
 
-# Create TextClassifier instance with the selected classifier and vectorizer
-classifier_instance = TextClassifier(
+# Create AppTextClassifier instance with the selected classifier and vectorizer
+classifier_instance = AppTextClassifier(
     selected_classifier,
     count_vectorizer if user_vectorizer == 'Count Vectorizer' else tfidf_vectorizer
 )
 
 # User enters text for classification
-user_text_input = st.text_input(label = 'Enter text:')
+user_input = st.text_input(label = 'Enter text:')
 
 # Section header for classification results
 st.header('Classification Results')
@@ -85,9 +76,19 @@ st.header('Classification Results')
 result_placeholder = st.empty()
 
 # Check if the user has entered text for classification
-if user_text_input:
+if user_input:
     # If yes, perform classification and display results
-    classifier_instance.classify_and_display(user_text_input)
+    classifier_instance.classify_and_display(user_input)
 else:
-    # If no text, display an informational message
+    # If no, display an informational message
     result_placeholder.info('Please select a classifier, vectorizer, and enter text for classification.')
+
+# Section header for sample texts
+st.header('Sample Texts')
+
+st.markdown('''
+            (H) Why don't Calculus majors throw house parties? Because you should never drink and derive.  
+            (H) What did the shark say when he ate the clownfish? This tastes a little funny.  
+            (NH) There were some heated exchanges on Ukraine and China, but strict moderation limited direct clashes.  
+            (NH) Brazilian authorities made two arrests and carried out raids in key cities, including Sao Paulo and Brasilia.
+            ''')

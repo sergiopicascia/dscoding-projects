@@ -135,9 +135,7 @@ class Quiz:
 
         st.pyplot(fig)
 
-
-    def quiz_game(self):
-        difficulty_levels = ['easy', 'medium', 'hard']
+    def run_quiz(self):
         total_score = 0
         used_questions = []
 
@@ -145,7 +143,7 @@ class Quiz:
         player_name = st.text_input("What do you want us to call you?")
 
         if player_name:
-            difficulty_level = st.radio("Choose a difficulty level:", ('Easy', 'Medium', 'Hard'), index=None)
+            difficulty_level = st.radio("Choose a difficulty level: ", ('Easy', 'Medium', 'Hard'), index=None)
             start = st.button("Start Quiz")
             if difficulty_level and start:
                 st.write(f"Alright, {player_name}! Get ready to play!")
@@ -158,7 +156,7 @@ class Quiz:
                     {'generator': self.generate_question, 'params': ('Where was this movie produced? ==> ', 'country')},
                     {'generator': self.generate_question, 'params': ('Which one of these movies has the highest score on IMDb?', 'score')}
                 ]
-
+                 
                 for i in range(10):
                     while True:
                         question_info = None
@@ -172,33 +170,38 @@ class Quiz:
 
                         if question_info is not None and question_info['question'] not in used_questions:
                             used_questions.append(question_info['question'])
+                        
                             break
 
                     st.write(question_info['question'])
 
                     for letter, option in question_info['options'].items():
                         st.write(f"{letter}. {option}")
+                    
 
                     # Providing a unique key for st.radio
                     radio_key = f"radio_{i}"  # Using a unique identifier for each iteration
-                    user_choice = st.radio("Choose your answer:", list(question_info['options'].keys()), key=radio_key, index= None)
+                    user_choice = st.radio("Choose your answer:", list(question_info['options'].keys()), key=radio_key, horizontal=True)
+
+                    st.write("----------------------------")
                     
                     # Convert correct answer to letter format
                     correct_answer_index = list(question_info['options'].keys()).index(question_info['correct_answer'])
                     correct_answer_letter = chr(ord('A') + correct_answer_index)
 
-                    is_correct = user_choice == correct_answer_letter
+                    if user_choice is not None:
+                        is_correct = user_choice == correct_answer_letter
 
-                    if is_correct:
-                        st.write("Correct!")
-                    else:
-                        st.write(f"Wrong! The correct answer is: {question_info['correct_answer']}")
+                        if is_correct:
+                            st.write("Correct!")
+                        else:
+                            st.write(f"Wrong! The correct answer is: {question_info['correct_answer']}")
 
-                    score = self.calculate_score(question_info['difficulty_level'], is_correct)
-                    total_score += score
-                    
-                    st.write(f"Your score for this question: {score}")
-                    st.write("----------------------------")
+                        score = self.calculate_score(question_info['difficulty_level'], is_correct)
+                        total_score += score
+
+                        st.write(f"Your score for this question: {score}")
+                        st.write("----------------------------")
 
                 game_score = (player_name, total_score)
                 self.load_scores('game_scores.json')  # Load existing scores
@@ -214,10 +217,12 @@ class Quiz:
                 if not player_exists:
                     self.game_scores.append(game_score)
 
-                st.write(f"Total score: {total_score}")
+                st.subheader(f"Total score: {total_score}")
+                st.write("----------------------------")
                 st.write(f"Here's how you performed, {player_name}:")
                 self.display_histogram(player_name)
 
-                self.save_scores('game_scores.json') 
+                self.save_scores('game_scores.json')
 
                 return self.game_scores
+

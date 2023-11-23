@@ -14,11 +14,11 @@ try:
     # Getting the movie data from the database
     movie_data = imdb_data.get_movie()
 
-    # Creating a Quiz instance with the retrieved movie data
+    # Creating a Quiz instance with the movie data
     quiz = Quiz(movie_data)
 
-    # Running the quiz game
-    quiz.quiz_game()
+    # Running the quiz
+    quiz.run_quiz()
 
 finally:
     # Ensuring the database connection is closed
