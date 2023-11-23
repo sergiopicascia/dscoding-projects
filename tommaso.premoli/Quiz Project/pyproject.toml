@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "Quiz Project"
+version = "0.1.0"
+description = ""
+authors = ["Tommaso Premoli <tommaso.premoli@studenti.unimi.it>]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "3.11.4"
+pandas = "2.1.3"
+numpy "1.26.2"
+matplotlib = "1.28.1"
+toml = "0.10.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

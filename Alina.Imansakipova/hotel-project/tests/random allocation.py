@@ -1,12 +1,13 @@
 import pandas as pd
 import random
 
-import openpyxl
 hotelsdata = pd.read_excel(r"/Users/menimalina/Desktop/uni_due/coding/python/python-project/hotels/hotels.xlsx").set_index('hotel')
 guestdata = pd.read_excel(r"/Users/menimalina/Desktop/uni_due/coding/python/python-project/hotels/guests.xlsx").set_index('guest')
 preferencesdata=pd.read_excel(r"/Users/menimalina/Desktop/uni_due/coding/python/python-project/hotels/preferences.xlsx").drop_duplicates(subset=['guest','hotel'])
-from satisfactionpercentage import calculate_satisfaction_percentage
-from vizualization import visualize_allocation
+from tests.satisfactionpercentage import calculate_satisfaction_percentage
+from hotel_project.final.vizualization import visualize_allocation
+from hotel_project.final.output import allocation_analysis
+
 def allocate_random_hotel(guest_id, guest_row, hotelsdata, preferencesdata):
     available_hotels = hotelsdata[hotelsdata['rooms'] > 0]
     if available_hotels.empty:
@@ -41,4 +42,5 @@ def get_random_allocation(hotelsdata, guestdata, preferencesdata):
 
 print('Start calculate random allocation')
 random_allocation = get_random_allocation(hotelsdata.copy(), guestdata, preferencesdata)
+allocation_analysis(random_allocation)
 visualize_allocation(random_allocation.head(20))

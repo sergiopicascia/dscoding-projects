@@ -1,54 +1,66 @@
-import pandas as pd
 import streamlit as st
-from PIL import Image
+import pandas as pd
+import matplotlib.pyplot as plt
+from board_game_project.Data import DataSet
+from board_game_project.Data_Visualization import DataVisualization
 
+df = pd.read_csv('bgg.csv')
+full_table, average_table, bayesian_table = DataSet(df).calculate_game_statistics()
 
-st.title('BGG Project')
-st.text(
-    "Name and surname: Linh Chi Hoang \n"
-    "Matriculation number: "
+st.title('Board Games ranking')
+st.markdown("#### Game list:\n "
+            "* There are 23,264 different Board Games")
+
+full_table.rename(columns={'title': 'Game'}, inplace=True)
+full_table.index += 1
+st.dataframe(full_table['Game'], width=2000)
+
+viz = DataVisualization(x=full_table['Number of votes'], y=full_table['Average rating score'],
+                        z=full_table['Bayesian Average rating score'], title=full_table['Game'])
+
+title = full_table['Game']
+x = full_table['Number of votes']
+y = full_table['Average rating score']
+z = full_table['Bayesian Average rating score']
+
+bayesian_table.rename(columns={'title': 'Game'}, inplace=True)
+bayesian_table.index += 1
+
+st.set_option('deprecation.showPyplotGlobalUse', False)
+st.pyplot(viz.plot_bayesian_ranking())
+
+search_game = st.text_input(
+    label="Search for your game's ranking",
+    value='',
+    placeholder="Search for your game's ranking ...",
+    label_visibility="collapsed"
 )
-st.markdown('##### Introduction to the project\n'
-            '- The project aims to propose a different method in sorting various types of board games besides '
-            'focusing on the comparison between their Average scores.\n'
-            '- The project is going to use the data provided on The Board Game Geek (BGG) website, in which players '
-            'are going to give comments and rates those games on the scale from 0 to 10.\n')
-original_data = pd.read_csv('bgg.csv')
-st.write(original_data)
-st.markdown('##### The idea on the project\n'
-            '- Instead of creating a ranking table based on the Average scores of the games, the project is using the '
-            'Bayesian Average to make comparisons.\n'
-            '- In real life, there are lots of cases in which people use Bayesian Average in costume ranking, '
-            'for example on movies or a specific product.')
+search_game = search_game.lower()
 
-st.latex(r'''
-Bayesian Average = \frac{(Prior weight * Prior mean) + (Average score * Number of votes)}
-{Prior weight + Number of votes}
-''')
-st.markdown('##### Brief description about the steps:\n'
-            '- Cleaning the data\n  '
-            '+ The goal is to sort the data which is necessary for calculating The Bayesian Average score of each '
-            'game. In order to apply the formula, we need to calculate:\n   '
-            '   + Prior mean - The average of average scores of every game\n  '
-            '   + Prior weight - The average of voting number of every game\n   '
-            '   + Average rating score of each game\n   '
-            '   + Number of votes of each game\n'
-            '- Visualizing the data\n   '
-            '+ The goal is to graphically spot the difference between using Average scores and Bayesian Average '
-            'scores in sorting the ranking.')
+bayesian_score_result = bayesian_table[bayesian_table['Game'].str.lower().str.contains(search_game)]
 
-st.markdown('##### The Game ranking table based on Average scores')
-average_table = pd.read_csv('average_table.csv')
-st.write(average_table)
 
-st.markdown('##### The Game ranking table based on Bayesian Average scores')
-bayesian_table = pd.read_csv('bayesian_table.csv')
-st.write(bayesian_table)
+def display_data(search_game, bayesian_table, bayesian_score_result):
+    st.subheader("Bayesian Average score ranking")
+    if search_game != '':
+        st.write(f"**The game's ranking based on the Bayesian Average rating score:**")
+        st.dataframe(bayesian_score_result[['Game', 'Number of votes', 'Bayesian Average rating score']], width=2000)
+    else:
+        st.warning(f"No data found for {search_game}")
 
-st.markdown('##### Scatter plot "Game ratings based on Average scores"')
-image1 = Image.open('Visualization1.png')
-st.image(image1)
+    fig_bayesian, ax_bayesian = plt.subplots()
+    ax_bayesian.scatter(bayesian_table['Number of votes'], bayesian_table['Bayesian Average rating score'],
+                        label='All Games', alpha=0.5)
+    if not bayesian_score_result.empty:
+        bayesian_score_result = bayesian_score_result.head()
+        ax_bayesian.scatter(bayesian_score_result['Number of votes'],
+                            bayesian_score_result['Bayesian Average rating score'],
+                            color='red', label=f'Searched Game: {search_game}', marker='o')
+    ax_bayesian.set_xlabel('Number of votes')
+    ax_bayesian.set_ylabel('Bayesian Average rating score')
+    ax_bayesian.legend()
+    st.pyplot(fig_bayesian)
 
-st.markdown('##### Scatter plot "Game ratings based on Bayesian Average scores"')
-image2 = Image.open('Visualization2.png')
-st.image(image2)
+
+display_data(search_game, bayesian_table, bayesian_score_result)
+
