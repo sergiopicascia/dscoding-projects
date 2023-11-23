@@ -29,8 +29,10 @@ class Visualize:
 
     Parameters
     ----------
-    data : pandas.DataFrame
-        The dataframe containing the climate data
+    label : str
+        The label of the cities/countries
+    group : list
+        The list of columns to be grouped by
 
     Attributes
     ----------
@@ -144,7 +146,8 @@ class Visualize:
     
 
     """
-    Show a line chart with the average temperature of a selected city/country in each month for a selected year.
+    Show a line chart with the average temperature of a selected city/country in each month for a selected year
+    relative to the average temperature of the country/continent.
 
     Parameters
     ----------
@@ -152,20 +155,22 @@ class Visualize:
         The name of the city/country to be shown
     year : int
         The year to be shown
+    upper : str
+        The label of "Country" or "Continent" to be shown in the chart
 
     Returns
     -------
     fig : plotly.graph_objects.Figure
         The figure with the line chart
     """
-    def line_year(self, selected, year):
+    def line_year(self, selected, year, upper):
         place = self.data[(self.data[self.label] == selected) & (self.data['Year'] == year)]
+        up = self.data[(self.data[upper] == place[upper].iloc[0]) & (self.data['Year'] == year)]
+        up = up.groupby(up['dt'].dt.month)['AverageTemperature'].mean().round(2).reset_index()
         month = place['dt'].dt.month
-        fig = px.line(place, x = month,
-                    y = 'AverageTemperature',
-                    markers = True,
-                    color_discrete_sequence = [self.primaryColor],
-                    )
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x = month, y = up['AverageTemperature'], mode = 'lines+markers', name = place[upper].iloc[0], line = dict(color = self.secondaryBackgroundColor)))
+        fig.add_trace(go.Scatter(x = month, y = place['AverageTemperature'].round(2), mode = 'lines+markers', name = selected, line = dict(color = self.primaryColor)))
         fig.update_xaxes(title_text = 'Month', showgrid = False)
         fig.update_layout(xaxis = {'tickmode': 'array', 
                                 'tickvals':month.unique(), 
@@ -422,6 +427,10 @@ class Visualize:
     ----------
     df : pandas.DataFrame
         The dataframe with the data to be shown
+    min : float
+        The minimum value for the temperature
+    max : float
+        The maximum value for the temperature
 
     Returns
     -------
@@ -443,6 +452,15 @@ This class is used to visualize the data for cities. It inherits from the Visual
 - show_city: a map with the city of choice
 """
 class City(Visualize):
+    """
+    Initialize the class with the data and calculate the yearly average temperature.
+    See the Visualize class for more details.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        The original input data
+    """
     def __init__(self, data):
         self.data = data.copy()
         group = ['City_Country', 'Year', 'Latitude', 'Longitude', 'Country']
@@ -605,11 +623,12 @@ class Country(Visualize):
     Initialize the class with the data and calculate the yearly average temperature.
     Sets the continent for each country and removes countries with no continent.
     For some countries, the continent is not available in the pycountry_convert library, so it is manually set.
+    See the Visualize class for more details.
 
     Parameters
     ----------
-    data : pandas.DataFrame
-        The dataframe containing the climate data
+    path : str
+        Path of the CSV file
 
     Attributes
     ----------

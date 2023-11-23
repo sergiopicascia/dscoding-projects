@@ -186,7 +186,7 @@ def display_heatmap(place, average, label, html = None):
         st.subheader('Average Temperature Heatmap')
         caption = 'average'
         if label.lower()  ==  'city':
-            order = st.radio('Choose the order of the cities', ('Descending (Hottest)', 'Ascending (Coldest)'))
+            order = st.radio('Choose the order of the cities', ('Descending (From the *hottest*)', 'Ascending (From the *coldest*)'))
             high = True if order  ==  'Descending (Hottest)' else False
             caption_number = 'hottest' if high else 'coldest'
     else:
@@ -262,11 +262,13 @@ selected : str
     Selected city or country
 year : int
     Selected year
+upper : str
+    Upper level of the dataset (Country or Continent)
 """
-def display_line_year(place, selected, year):
+def display_line_year(place, selected, year, upper):
     st.subheader(f'Climate Data for {selected} in {year}')
     st.caption(f'This line chart shows the temperatures for {selected} during the months of {year}.')
-    fig = place.line_year(selected, year)
+    fig = place.line_year(selected, year, upper)
     st.plotly_chart(fig)
 _ = """
 Display the general information of the dataset
@@ -321,7 +323,7 @@ def display_specific(place, label):
         display_line_chart(place, selected_place)
         display_prediction(place, selected_place)
         selected_year = st.selectbox('Choose a year', place.data_year[place.data_year[filter] == selected_place]['Year'].unique())
-        display_line_year(place, selected_place, selected_year)
+        display_line_year(place, selected_place, selected_year, upper)
 
 def main():
     st.title('Global Climate Data Analysis')
