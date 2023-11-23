@@ -6,11 +6,11 @@ import seaborn as sns
 class DataVisualization:
     def __init__(self, title, x, y, z, k):
         """
-        :param title: the "title" column of the full_table in Data.py
-        :param x: the "Number of votes" column of the full_table in Data.py
-        :param y: the "Average rating score" column of the full_table in Data.py
-        :param z: the "Bayesian Average rating score" column of the full_table in Data.py
-        :param k: the "Wilson lower bound" column of the full_table in Data.py
+        :parameter title: the "title" column of the full_table in Data.py
+        :parameter x: the "Number of votes" column of the full_table in Data.py
+        :parameter y: the "Average rating score" column of the full_table in Data.py
+        :parameter z: the "Bayesian Average rating score" column of the full_table in Data.py
+        :parameter k: the "Wilson lower bound" column of the full_table in Data.py
         """
         self.title = title
         self.x = x
