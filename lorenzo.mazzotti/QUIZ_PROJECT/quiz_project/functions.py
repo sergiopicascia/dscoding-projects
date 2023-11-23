@@ -33,21 +33,22 @@ def select_questions(df, difficulty):
 
 # Create a line chart of score changes
 def plot_score_changes(quiz_instance):
- # this is done to always display changes from the 0 position
- x_values = [0] + list(range(1, len(quiz_instance.score_changes) + 1))
- y_values = [0] + quiz_instance.score_changes
+   # starting from 00
+   x_values = [0] + list(range(1, len(quiz_instance.score_changes) + 1))
+   y_values = [0] + quiz_instance.score_changes
 
- fig = go.Figure(data=go.Scatter(
-     x=x_values,
-     y=y_values,
-     mode='lines+markers',
-     line_color='purple'
- ))
- fig.update_layout(paper_bgcolor='white') # White background
- fig.update_layout(plot_bgcolor='white') # White plot area background
- fig.update_layout(xaxis=dict(title='Question Number')) # X-axis label
- fig.update_layout(title_text='Score')
- fig.show()
+   fig = go.Figure(data=go.Scatter(
+       x=x_values,
+       y=y_values,
+       mode='lines+markers',
+       line_color='purple'
+   ))
+   fig.update_layout(paper_bgcolor='white') # White background
+   fig.update_layout(plot_bgcolor='white') # White plot area background
+   fig.update_layout(xaxis=dict(title='Question Number', tickmode='linear', dtick=1)) # displaying all question numbers on x
+   fig.update_layout(title_text='Score') 
+   fig.show()
+
 
 
 #asking the user if they want to retake the quiz. also handles "wrong" responses
