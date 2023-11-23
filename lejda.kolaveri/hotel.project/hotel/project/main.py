@@ -7,7 +7,7 @@ from availability_allocation import AvailabilityBasedAllocator
 
 def output(allocation):
     print('customers accomodated: ', allocation['guest_id'].count())
-    print('number of rooms occupied: ', allocation['guest_id'].count())
+    print('number of rooms occupied: ', allocation['room_id'].nunique()) #count of unique rooms occupied
     unique_hotels = allocation['hotel_id'].unique()
     num_unique_hotels = len(unique_hotels)
     print('Number of different hotels occupied:', num_unique_hotels)

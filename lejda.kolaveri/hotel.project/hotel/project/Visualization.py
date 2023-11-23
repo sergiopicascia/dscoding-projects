@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 def visualization(allocation):
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
+    fig, (ax1, ax2) = plt.subplots(2, 2, figsize=(15, 10))
     #calculate total earnings and mean earnings for each hotel
     paid_price_by_hotel_sum = allocation.groupby('hotel_id')['paid_price'].sum()
     paid_price_by_hotel_mean = allocation.groupby('hotel_id')['paid_price'].mean()
@@ -18,9 +18,8 @@ def visualization(allocation):
     ax2.set_ylabel('Paid Price Mean')
     
     #graph 2: boxplot of the mean satisfaction percentage by guest
-    fig, ax = plt.subplots(figsize=(6, 5))
     satisfaction_by_guest = allocation.groupby('guest_id')['satisfaction_percentage'].mean()
-    ax.boxplot(satisfaction_by_guest, vert=False)
+    ax.boxplot(satisfaction_by_guest, vert=False, labels=['Mean Satisfaction'])
     ax.set_title('Boxplot of Mean Satisfaction Percentage by Guest')
     ax.set_xlabel('Satisfaction Percentage')
     ax.set_yticklabels(['Guests']) 
