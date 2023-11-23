@@ -1,10 +1,6 @@
 # QUIZ without Streamlit
 # The following code is almost identical to the one 'with Streamlit' but there are some important differences in the
-# end. I have two different files because, once I have finished the code, I have started to turn the code in Streamlit:
-# the problem was that in the original code(this one) there are many loops and Streamlit doesn't reasonate well with
-# loops.
-# So I have decided to upload also the code without Streamlit to show how different the two are even if in the end the
-# structure of the quiz is the same.
+# end. 
 
 # In this quiz there are 4 more functions that differentiates the 3 quizzes: so we have an easy, medium and difficult
 # function, and they are all called in the choose_quiz function that to the concept is similar to the run_quiz function.
