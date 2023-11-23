@@ -8,7 +8,7 @@ I intend to analyze how the fans of AC Milan reacted on the results of two games
 
 The goal is to answer the following research questions:
 
-1) Were Milan's fans happier when their favourite team wins than are sadder when it loses?
+1) Were Milan's fans happier when their favourite team won than are sadder when it lost?
 2) Who they adressed during and after the games in their comments?
 3) Did they to blamed/praised the team in general or they address individual players + coach?
 
