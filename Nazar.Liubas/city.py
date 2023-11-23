@@ -12,7 +12,10 @@ class City:
         self.neighbors = []
 
     def add_neighbor(self, neighbor, travel_time):
+        # TODO change back. Commented thing is useful for saving data to json
         self.neighbors.append({'city': neighbor, 'travel_time': travel_time})
+
+        # self.neighbors.append({'city': neighbor.id, 'travel_time': travel_time})
 
     def calculate_distance(self, destination_city):
         '''
