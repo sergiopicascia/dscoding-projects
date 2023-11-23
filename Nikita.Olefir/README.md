@@ -8,7 +8,7 @@ I intend to analyze how the fans of AC Milan reacted on the results of two games
 
 The goal is to answer the following research questions:
 
-1) Were Milan's fans happier when their favourite team wins than are sadder when it loses?
+1) Were Milan's fans happier when their favourite team won than are sadder when it lost?
 2) Who they adressed during and after the games in their comments?
 3) Did they to blamed/praised the team in general or they address individual players + coach?
 
@@ -27,25 +27,29 @@ I collect comments from two threads:
 
 ### Libraries
 
-Data Manipulation and Analysis: `numpy`, `pandas`
-Natural Language Processing: `nltk`, `gensim`, `spacy`, `textblob`
-Data Visualization: `matplotlib`
-Text Vizualization: `wordcloud`
-Web Scrapping:`praw`
-Image processing: `Pillow`
-Web Application Development: `streamlit`
+Data Manipulation and Analysis: `numpy`, `pandas`. 
+Natural Language Processing: `nltk`, `gensim`, `spacy`, `textblob`. 
+Data Visualization: `matplotlib`. 
+Text Vizualization: `wordcloud`. 
+Web Scrapping:`praw`. 
+Image processing: `Pillow`. 
+Web Application Development: `streamlit`. 
 
 ### Topics covered
 
-`Git`, `OOP`, `Miodularization`, `Data Manipulation`, `Data Analysis`, `Data Visualization`, `Text Preprocessing`, `Web Application Development`, `API`, `Sentiment Analysis`, `WordCloud`, `Word Embedding`, `Natural Language Processing`.
+`Git`, `OOP`, `Modularization`, `Data Manipulation`, `Data Analysis`, `Data Visualization`, `Text Preprocessing`, `Web Application Development`, `API`, `Sentiment Analysis`, `WordCloud`, `Word Embedding`, `Natural Language Processing`.
 
 All the requirments are met.
 
 ## Guidlines
 
 All the code is executed in `Main.ipynb`. So, while looking at the actual results, search them there.
-There are three folders that contains code.
+There are three folders that contain code.
 
-1) `API_Reddit`: how to use Reddit API + function to extract comments from a thread in a subreddit. There is a READMI file inside, so follow it if something is unclear.
-2) `TextAnalysis`: contains numerous functions for preprocessing and analyzing text data. It does not has a README file, but the usage of functions is described in the `Main.ipynb`. Anyway, for each module and function there is documentation written.
+1) `API_Reddit`: how to use Reddit API + function to extract comments from a thread in a subreddit. There is a README file inside, so follow it if something is unclear.
+2) `TextAnalysis`: contains numerous functions for preprocessing and analyzing text data. It does not have a separate README file, but the usage of functions is described in the `Main.ipynb`. Anyway, for each module and function there is documentation written.
 3) `Streamlit`: contains the script for streamlit app for analyzing sentiment of the text data and for generating wordclouds. README file describes everything.
+
+## Note
+
+I have not added the csv files of the comments that I get after using Reddit API here in the repository as during classes it was said not to do so. However, if they are needed, I can provide them by email. Tell me if you need them.
