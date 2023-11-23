@@ -16,10 +16,12 @@ df_jokes = pd.read_csv('jokes.csv')
 print(df_jokes.head())
 
 # Check for missing values
-print("There are no missing values." if not df_jokes.isnull().any().any() else "There are missing values in the dataframe.")
+print("There are no missing values." if not df_jokes.isnull().any().any()\
+      else "There are missing values in the dataframe.")
 
 # Check for data types
-print("Data types of columns in the dataframe:\n" + "\n".join([f"{column}: {dtype}" for column, dtype in df_jokes.dtypes.items()]))
+print("Data types of columns in the dataframe:\n" +\
+      "\n".join([f"{column}: {dtype}" for column, dtype in df_jokes.dtypes.items()]))
 
 # Check the number of observations
 print(f"The dataframe contains {df_jokes.shape[0]} observations.")
@@ -78,7 +80,7 @@ X_test_count_vectorized = count_vectorizer.transform(X_test)
 X_train_tfidf_vectorized = tfidf_vectorizer.fit_transform(X_train)
 X_test_tfidf_vectorized = tfidf_vectorizer.transform(X_test)
 
-# Saving the trained vectorizers
+# Save the trained vectorizers
 #joblib.dump(count_vectorizer, 'count_vectorizer.joblib')
 #joblib.dump(tfidf_vectorizer, 'tfidf_vectorizer.joblib')
 
@@ -97,6 +99,12 @@ mnb_classifier_count_vectorized.fit(X_train_count_vectorized, y_train)
 # Multinomial Naive Bayes (MNB) training using TF-IDF Vectorizer
 mnb_classifier_tfidf_vectorized = MultinomialNB()
 mnb_classifier_tfidf_vectorized.fit(X_train_tfidf_vectorized, y_train)
+
+# Save the trained classifiers
+#joblib.dump(lr_classifier_count_vectorized, 'lr_classifier_count_vectorized.joblib')
+#joblib.dump(lr_classifier_tfidf_vectorized, 'lr_classifier_tfidf_vectorized.joblib')
+#joblib.dump(mnb_classifier_count_vectorized, 'mnb_classifier_count_vectorized.joblib')
+#joblib.dump(mnb_classifier_tfidf_vectorized, 'mnb_classifier_tfidf_vectorized.joblib')
 
 # Predictions for Logistic Regression with CountVectorizer
 y_pred_lr_count = lr_classifier_count_vectorized.predict(X_test_count_vectorized)
@@ -119,9 +127,3 @@ print(f"Accuracy for Logistic Regression with CountVectorizer: {accuracy_lr_coun
       \nAccuracy for Logistic Regression with TF-IDF Vectorizer: {accuracy_lr_tfidf:.4f}\
       \nAccuracy for Multinomial Naive Bayes with CountVectorizer: {accuracy_mnb_count:.4f}\
       \nAccuracy for Multinomial Naive Bayes with TF-IDF Vectorizer: {accuracy_mnb_tfidf:.4f}")
-
-# Saving the trained classifiers
-#joblib.dump(lr_classifier_count_vectorized, 'lr_classifier_count_vectorized.joblib')
-#joblib.dump(lr_classifier_tfidf_vectorized, 'lr_classifier_tfidf_vectorized.joblib')
-#joblib.dump(mnb_classifier_count_vectorized, 'mnb_classifier_count_vectorized.joblib')
-#joblib.dump(mnb_classifier_tfidf_vectorized, 'mnb_classifier_tfidf_vectorized.joblib')
