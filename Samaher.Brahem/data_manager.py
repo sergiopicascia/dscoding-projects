@@ -1,6 +1,7 @@
 import psycopg2
 import pandas as pd
 
+# defining the methods that deal with the database connection
 class DataManager:
     def __init__(self, dbname, user, password, host, port):
         try:

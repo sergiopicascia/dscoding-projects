@@ -4,11 +4,30 @@ import string
 import matplotlib.pyplot as plt
 import time
 
-class play_quiz:
-    def __init__(self, movies):
-        self.movies = movies
-        self.score_history = [0]
+"""
+A class for a movie quiz game, which allows users to play a movie quiz game. The game involves answering questions
+related to movie characteristics, such as release year, director, actors, country, and genre. The quiz has also a time
+limit, and the user's score is displayed at the end.
+"""
 
+class play_quiz:
+    """
+    Constructor method to initialize the play_quiz object with the import and data cleaning (Performing tasks such as
+    converting genres to lowercase, formatting genre entries, removing NaN values, and transforming the 'year' column
+    into numeric format) functions.
+    """
+    def __init__(self, movies_file_path):
+        self.ID = ['A', 'B', 'C', 'D']
+        self.score_history = [0]
+        self.movies = pd.read_excel(movies_file_path)
+        self.movies['genres'] = self.movies['genres'].str.lower()
+        self.movies['genres'] = self.movies['genres'].apply(self.format_genres)
+        self.movies.dropna(inplace=True)
+        self.movies['year'] = pd.to_numeric(self.movies['year'], errors='coerce').fillna(0).astype(int)
+
+    """
+    Formats movie genres for display.
+    """
     def format_genres(self, genres):
         genres = genres.split('|')
         if len(genres) > 1:
@@ -17,12 +36,10 @@ class play_quiz:
             genres = genres[0]
         return genres
 
-    def data_cleaning(self):
-        self.movies['genres'] = self.movies['genres'].str.lower()
-        self.movies['genres'] = self.movies['genres'].apply(self.format_genres)
-        self.movies.dropna(inplace=True)
-        self.movies['year'] = pd.to_numeric(self.movies['year'], errors='coerce').fillna(0).astype(int)
-
+    """
+    It gives the player a choice between easy and difficult difficulty. There will be have a difficulty filter and a 
+    time limit.
+    """
     def choose_difficulty(self):
         difficulty = input("Choose your difficulty level (Easy/Difficult): ").lower()
         if difficulty == 'easy':
@@ -33,11 +50,19 @@ class play_quiz:
             print("Invalid choice, defaulting to Easy")
             return self.movies['year'] > 1990, 5 * 60
 
+
+    """
+    It is the function for generating the demand by providing the correct attributes of an individual film.
+    """
     def generate_question(self, difficulty_filter):
         correct_movie = self.movies[difficulty_filter].sample(1)
         question = f"What is the title of the film released in {correct_movie['year'].values[0]} directed by {correct_movie['director_name'].values[0]}, starring {correct_movie['actor_name'].values[0]}, produced in {correct_movie['country'].values[0]} and belonging to the genre {correct_movie['genres'].values[0]}?"
         return question, correct_movie
 
+    """
+    It is the function for generating three wrong answers and one correct answer. The player will see the answers 
+    arranged randomly.
+    """
     def generate_answers(self, correct_movie):
         incorrect_movies = self.movies.drop(correct_movie.index.values.tolist())
         incorrect_answers = incorrect_movies.sample(3)['movie_title'].values
@@ -46,8 +71,11 @@ class play_quiz:
         random.shuffle(answers)
         return answers
 
-    def run_quiz(self):
-        self.data_cleaning()
+    """
+    It is the function to run the quiz, showing the question, the four answers and giving the player the chance to 
+    choose the correct one. The function will show the result at the end.
+    """
+    def play_quiz(self):
         difficulty_filter, time_limit = self.choose_difficulty()
         start_time = time.time()
         score = 0
@@ -61,11 +89,11 @@ class play_quiz:
             answers = self.generate_answers(correct_movie)
             print(f"Question {i}. {question}")
 
-            for j, answer in zip(string.ascii_uppercase, answers):
+            for j, answer in zip(self.ID, answers):
                 print(f"{j}. {answer}")
 
             user_answer = input("Your answer: ").upper()
-            while user_answer not in string.ascii_uppercase:
+            while user_answer not in self.ID:
                 print("You have another chance, try again!")
                 user_answer = input("Your answer: ").upper()
 
@@ -93,7 +121,7 @@ class play_quiz:
         plt.show()
         retry = input("Do you want to retry? (yes/no): ").lower()
         if retry != 'no':
-            self.run_quiz()
+            self.play_quiz()
         else:
             print("\nThanks for trying!")
 

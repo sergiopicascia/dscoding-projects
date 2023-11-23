@@ -1,14 +1,11 @@
 def convert_to_decimal(coord):
     if isinstance(coord, (float, int)):
         return coord
-    elif isinstance(coord, str):
-        if 'W' in coord:
-            return -float(coord.replace('W', ''))
-        elif 'E' in coord:
-            return float(coord.replace('E', ''))
-        elif 'S' in coord:
-            return -float(coord.replace('S', ''))
-        elif 'N' in coord:
-            return float(coord.replace('N', ''))
-        else:
-            return float(coord)
+
+    direction_multipliers = {'N': 1, 'S': -1, 'E': 1, 'W': -1}
+    for direction, multiplier in direction_multipliers.items():
+        if direction in coord:
+            return float(coord.strip(direction)) * multiplier
+
+    return float(coord)
+
