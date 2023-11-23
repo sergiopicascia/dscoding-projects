@@ -1,49 +1,74 @@
-# app.py
 import streamlit as st
-import pandas as pd
 import os
+import pandas as pd
+import plotly.express as px
 
-# Funzione per caricare i dati dal file CSV selezionato
-def load_data(folder, filename):
-    file_path = os.path.join('Data', folder, filename)
-    data = pd.read_csv(file_path)
-    # Converti la colonna 'Date' in tipo datetime
-    data['Date'] = pd.to_datetime(data['Date'])
+# Funzione per caricare i dati in base ai file selezionati e al periodo selezionato
+def load_data(selected_files, selected_folder_path, selected_year):
+    data = pd.DataFrame()
+
+    for file in selected_files:
+        file_path = os.path.join(selected_folder_path, file)
+        df = pd.read_csv(file_path)
+        df['Date'] = pd.to_datetime(df['Date'])
+        df = df.set_index('Date')
+        df['File'] = file  # Aggiungi la colonna 'File' con il nome del file
+        df = df.loc[f'{selected_year[0]}-01-01':f'{selected_year[1]}-12-31']
+
+        data = pd.concat([data, df])
+
     return data
 
-# Funzione per generare e mostrare il grafico in base alla selezione
-def generate_chart(data, chart_type):
-    if chart_type == 'performance':
-        # Grafico a linee spezzate (line plot) sui valori di 'monthly_mean'
-        st.line_chart(data[['Date', 'monthly_mean']].set_index('Date'))
+# Funzione per calcolare la media mensile per ogni colonna e file
+def calculate_monthly_mean(data):
+    return data.groupby(['File', pd.Grouper(freq='M')]).mean().reset_index()
 
-    elif chart_type == 'RMSE':
-        # Istogramma basato sui valori di 'RMSE'
-        st.bar_chart(data[['Date', 'RMSE']].set_index('Date'))
+# Percorso della cartella "Data"
+data_folder = "Data"
 
-    elif chart_type == 'performance and RMSE':
-        # Scatter plot basato su 'RMSE' e 'monthly_mean'
-        st.scatter_chart(data[['RMSE', 'monthly_mean']])
+# Lista delle cartelle all'interno di "Data"
+subfolders = [f.name for f in os.scandir(data_folder) if f.is_dir()]
 
-# Pagina principale Streamlit
-def main():
-    st.title('Visualizzazione dati interattiva con Streamlit')
+# Selezione della cartella
+selected_folder = st.radio("Seleziona una cartella", subfolders)
 
-    # Selettore per la cartella (etfs o stocks)
-    folder = st.sidebar.selectbox('Seleziona la cartella', ['etfs', 'stocks'])
-    # Lista dei file nella cartella selezionata
-    file_list = os.listdir(os.path.join('Data', folder))
+# Percorso completo della cartella selezionata
+selected_folder_path = os.path.join(data_folder, selected_folder)
 
-    # Selettore per il file
-    filename = st.sidebar.selectbox('Seleziona il file', file_list)
-    # Carica i dati dal file selezionato
-    data = load_data(folder, filename)
+# Lista dei file nella cartella selezionata
+files = [f.name for f in os.scandir(selected_folder_path) if f.is_file()]
 
-    # Selettore per il tipo di grafico
-    chart_type = st.sidebar.selectbox('Seleziona il tipo di grafico', ['performance', 'RMSE', 'performance and RMSE'])
+# Selezione multipla dei file
+selected_files = st.multiselect("Seleziona i file", files)
 
-    # Chiamare la funzione generate_chart per mostrare il grafico
-    generate_chart(data, chart_type)
+# Selezionatore per il tipo di grafico
+chart_type = st.selectbox("Seleziona il tipo di grafico", ["Performance", "Performance and Volatility", "Volume", "Volatility"])
 
-if __name__ == '__main__':
-    main()
+# Selezionatore per l'arco temporale annuale
+start_year = 2013
+end_year = 2023
+selected_year = st.slider("Seleziona l'anno", start_year, end_year, (start_year, end_year), step=1)
+
+# Carica i dati
+data = load_data(selected_files, selected_folder_path, selected_year)
+
+# Calcola la media mensile
+monthly_data = calculate_monthly_mean(data)
+
+# Genera e visualizza il grafico in base alla selezione
+if chart_type == "Performance":
+    fig = px.line(monthly_data, x='Date', y='monthly_mean', color='File', title='Performance')
+    st.plotly_chart(fig)
+
+elif chart_type == "Performance and Volatility":
+    fig = px.scatter(monthly_data, x='monthly_mean', y='RMSE', color='File', title='Performance and Volatility')
+    st.plotly_chart(fig)
+
+elif chart_type == "Volatility":
+    fig = px.area(monthly_data, x='Date', y='RMSE', color='File', title='Volatility')
+    st.plotly_chart(fig)
+
+elif chart_type == "Volume":
+    fig = px.bar(monthly_data, x='Date', y='Vol_month_mean', color='File', title='Volume')
+    st.plotly_chart(fig)
+
