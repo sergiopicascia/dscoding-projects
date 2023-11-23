@@ -1,4 +1,4 @@
-# The Results of the Streamlit APP Usage
+# The Results of the Streamlit App Usage
 
 Here I just paste screenshots of the streamlit app to show you how it generally works.
 
