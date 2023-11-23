@@ -3,6 +3,8 @@ Methods for plotting data using Plotly Express.
 """
 
 import plotly.express as px
+import pandas as pd
+import plotly.graph_objects as go
 
 
 class Plotting:
@@ -53,16 +55,22 @@ class Plotting:
         fig = px.bar(population_by_continent, x='continent', y='population', title='Population per continent',
                      labels={'population': 'Population', 'continent': 'Continent'},
                      template='plotly_dark')
-        fig.show()
+        return fig
 
-    def create_density_map(self):
+    def plot_density_map(self):
         """
         Creates a density map using Plotly Express with a color scale.
-        """
-        df_cleaned = self.df.dropna(subset=['city_ascii', 'lat', 'lng', 'population'])
 
-        fig = px.scatter_mapbox(df_cleaned,
-                                text={'city_ascii': 'city name'},
+        Returns
+        -------
+        fig
+            Plotly Express figure representing the density map.
+        """
+
+        self.df['text_info'] = self.df['city_ascii'] + '<br>Population: ' + self.df['population'].astype(str)
+
+        fig = px.scatter_mapbox(self.df,
+                                text='text_info',  # Use the new 'text_info' column
                                 lat='lat',
                                 lon='lng',
                                 size='population',
@@ -75,7 +83,7 @@ class Plotting:
                                 template='plotly_dark')
 
         fig.update_layout(mapbox_style="carto-darkmatter")
-        fig.show()
+        return fig
 
     def plot_top_countries(self, n=10):
         """
@@ -85,6 +93,11 @@ class Plotting:
         ----------
         n : int, optional
             Number of top countries to plot, by default 10.
+
+        Returns
+        -------
+        fig
+            Plotly Express figure representing the bar chart.
         """
         if 'country' not in self.df.columns:
             raise ValueError("The DataFrame must contain the 'country' column.")
@@ -97,43 +110,68 @@ class Plotting:
         fig = px.bar(top_countries, x='country', y='city_count', title=f'Top {n} Countries with the Most Cities',
                      labels={'city_count': 'Number of Cities', 'country': 'Country'},
                      template='plotly_dark')
-        fig.show()
+        return fig
 
-    def plot_shortest_path_map(self, shortest_path):
+    def map_3d(self, cities_path):
         """
-        Create a map using Plotly Express with markers for each city in the shortest path.
+        Generates a 3D globe map showing a path of cities.
 
         Parameters
         ----------
-        shortest_path : list
-            List of city names representing the shortest path.
+        cities_path : list
+            List of city IDs representing the visit order.
 
         Returns
         -------
-        None
+        fig
+            Plotly figure representing the 3D globe map with the specified path.
         """
-        if 'lat' not in self.df.columns or 'lng' not in self.df.columns or 'city_ascii' not in self.df.columns:
-            raise ValueError("The DataFrame must contain the 'lat', 'lng', and 'city_ascii' columns.")
+        if cities_path is None:
+            raise ValueError("The visit list is empty.")
+        else:
+            coordinates = [self.df.loc[self.df['city_ascii'] == city_id, ['lat', 'lng', 'city_ascii']].iloc[0] for
+                           city_id in cities_path]
 
-        locations = self.df[self.df['city_ascii'].isin(shortest_path)][['lat', 'lng', 'city_ascii']]
+            path = go.Scattergeo(
+                lon=[coord['lng'] for coord in coordinates],
+                lat=[coord['lat'] for coord in coordinates],
+                mode="lines+markers",
+                line=dict(width=2, color="black"),
+                marker=dict(
+                    size=15,
+                    color=["black" if i == 0 else "red" if i == len(coordinates) - 1 else "orange" for i in
+                           range(len(coordinates))]
+                ),
+                text=[f"City: {coord['city_ascii']}" for coord in coordinates]
+            )
 
-        fig = px.scatter_mapbox(locations,
-                                lat='lat',
-                                lon='lng',
-                                text='city_ascii',
-                                title='Shortest Path Map',
-                                mapbox_style='carto-darkmatter',
-                                zoom=3)  # Adjust the zoom level
+            layout = go.Layout(
+                geo=dict(
+                    showframe=False,
+                    showcoastlines=False,
+                    showcountries=True,
+                    showland=True,
+                    showocean=True,
+                    landcolor="forestgreen",
+                    countrycolor="rgb(204, 204, 204)",
+                    countrywidth=0.5,
+                    oceancolor="lightblue",
+                    projection=dict(
+                        type="orthographic",
+                        scale=2
+                    )
+                )
+            )
 
-        if not locations.empty:
-            line_trace = px.line_mapbox(locations,
-                                        lat='lat',
-                                        lon='lng',
-                                        line_group='city_ascii',
-                                        color_discrete_sequence=['rgba(0, 0, 255, 0.7)']).update_traces(
-                showlegend=False)
+            fig = go.Figure(data=[path], layout=layout)
 
-            for trace in line_trace.data:
-                fig.add_trace(trace)
+            fig.update_layout(
+                title_text='The shortest path on the 3D globe',
+                title_x=0.5,
+                title_font=dict(size=20),
+                title_xanchor='center'
+            )
 
-        fig.show()
+            fig.update_layout(height=900, margin={"r": 0, "t": 0, "l": 0, "b": 0})
+
+            return fig
