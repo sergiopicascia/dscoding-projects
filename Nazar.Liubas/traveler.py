@@ -105,8 +105,9 @@ class Traveler:
         :param total_distance: int
         :return:
         '''
-        if hours_left < 0:
-            return None
+        # Stop if we made a circle over the earth
+        if current_city.longitude >= -0.1275 and current_city.longitude < 0.6 and hours_left < 500 * 24 - 400:
+            return path, total_distance
         if current_city == self.start_city and len(path) > 1:
             # Return to start
             return path, total_distance
@@ -120,6 +121,9 @@ class Traveler:
                 result = self.travel_around_world(next_city, hours_left - distance, new_path, new_distance)
                 if result and (min_path is None or result[1] < min_path[1]):
                     min_path = result
+                # Returning the first good enough result. Can be connected if need really best result
+                if result:
+                    break
         return min_path
 
     def start_travel(self, start_city):
@@ -131,7 +135,8 @@ class Traveler:
         self.start_city = start_city
         initial_path = [start_city]
         initial_distance = 0
-        result = self.travel_around_world(start_city, 80 * 24, initial_path, initial_distance)
+        # Give enough time for travel
+        result = self.travel_around_world(start_city, 500 * 24, initial_path, initial_distance)
         if result:
             return result
         else:
