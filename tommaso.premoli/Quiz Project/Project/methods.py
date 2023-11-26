@@ -11,13 +11,19 @@ limit, and the user's score is displayed at the end.
 """
 
 class play_quiz:
-
     """
-    Constructor method to initialize the play_quiz object.
+    Constructor method to initialize the play_quiz object with the import and data cleaning (Performing tasks such as
+    converting genres to lowercase, formatting genre entries, removing NaN values, and transforming the 'year' column
+    into numeric format) functions.
     """
-    def __init__(self, movies):
-        self.movies = movies
+    def __init__(self, movies_file_path):
+        self.ID = ['A', 'B', 'C', 'D']
         self.score_history = [0]
+        self.movies = pd.read_excel(movies_file_path)
+        self.movies['genres'] = self.movies['genres'].str.lower()
+        self.movies['genres'] = self.movies['genres'].apply(self.format_genres)
+        self.movies.dropna(inplace=True)
+        self.movies['year'] = pd.to_numeric(self.movies['year'], errors='coerce').fillna(0).astype(int)
 
     """
     Formats movie genres for display.
@@ -29,16 +35,6 @@ class play_quiz:
         else:
             genres = genres[0]
         return genres
-
-    """
-    Performs data cleaning on the dataset called "movies", Performing tasks such as converting genres to lowercase, 
-    formatting genre entries, removing NaN values, and transforming the 'year' column into numeric format.
-    """
-    def data_cleaning(self):
-        self.movies['genres'] = self.movies['genres'].str.lower()
-        self.movies['genres'] = self.movies['genres'].apply(self.format_genres)
-        self.movies.dropna(inplace=True)
-        self.movies['year'] = pd.to_numeric(self.movies['year'], errors='coerce').fillna(0).astype(int)
 
     """
     It gives the player a choice between easy and difficult difficulty. There will be have a difficulty filter and a 
@@ -79,8 +75,7 @@ class play_quiz:
     It is the function to run the quiz, showing the question, the four answers and giving the player the chance to 
     choose the correct one. The function will show the result at the end.
     """
-    def run_quiz(self):
-        self.data_cleaning()
+    def play_quiz(self):
         difficulty_filter, time_limit = self.choose_difficulty()
         start_time = time.time()
         score = 0
@@ -94,11 +89,11 @@ class play_quiz:
             answers = self.generate_answers(correct_movie)
             print(f"Question {i}. {question}")
 
-            for j, answer in zip(string.ascii_uppercase, answers):
+            for j, answer in zip(self.ID, answers):
                 print(f"{j}. {answer}")
 
             user_answer = input("Your answer: ").upper()
-            while user_answer not in string.ascii_uppercase:
+            while user_answer not in self.ID:
                 print("You have another chance, try again!")
                 user_answer = input("Your answer: ").upper()
 
@@ -126,7 +121,7 @@ class play_quiz:
         plt.show()
         retry = input("Do you want to retry? (yes/no): ").lower()
         if retry != 'no':
-            self.run_quiz()
+            self.play_quiz()
         else:
             print("\nThanks for trying!")
 

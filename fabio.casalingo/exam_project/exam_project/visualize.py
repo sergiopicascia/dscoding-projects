@@ -97,8 +97,16 @@ class MapHandler:
         fig.update_layout(height=800, margin={"r": 0, "t": 0, "l": 0, "b": 0})
         return fig
 
-    def population(self,dataset):
-        df = dataset.groupby('iso3')['population'].sum().reset_index()
+    def population(self):
+        """
+        Generate a 3D choropleth map illustrating the population distribution of visited cities.
+
+        Returns
+        -------
+        fig: plotly.graph_objs.Figure
+            A 3D choropleth map displaying the population distribution of visited cities.
+        """
+        df = self.dataset.groupby('iso3')['population'].sum().reset_index()
         fig = px.choropleth(df,
                             locations='iso3',
                             color='population',

@@ -2,7 +2,18 @@ import numpy as np
 
 
 class City:
+    '''
+    A class that represents a city.
+    '''
     def __init__(self, name, latitude, longitude, country, population, city_id):
+        '''
+        :param name: str
+        :param latitude: int
+        :param longitude: int
+        :param country: str
+        :param population: int
+        :param city_id: int
+        '''
         self.name = name
         self.latitude = latitude
         self.longitude = longitude
@@ -12,10 +23,20 @@ class City:
         self.neighbors = []
 
     def add_neighbor(self, neighbor, travel_time):
+        '''
+        Adds city and time to travel to list of neighbours of a city
+        :param neighbor: City
+        :param travel_time: int, hours to travel
+        :return:
+        '''
+        # TODO change back. Commented thing is useful for saving data to json
         self.neighbors.append({'city': neighbor, 'travel_time': travel_time})
+        # this is used for saving to json
+        # self.neighbors.append({'city': neighbor.id, 'travel_time': travel_time})
 
     def calculate_distance(self, destination_city):
         '''
+        Calculates distance between 2 cities based on Euclidian distance
         :param destination_city: City, destination point
         :return: Euclidian distance between two cities
         '''

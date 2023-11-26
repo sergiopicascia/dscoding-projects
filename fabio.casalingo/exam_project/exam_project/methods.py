@@ -18,6 +18,21 @@ class Travel:
         self.dataset = pd.read_excel(dataset_path)
 
     def __haversine_distance(self, coords1, coords2):
+        """
+        Calculate the Haversine distance between two sets of geographic coordinates.
+
+        Parameters
+        ----------
+        coords1: list[]
+            The geographic coordinates [latitude, longitude] of the first location.
+        coords2: list[]
+            The geographic coordinates [latitude, longitude] of the second location.
+
+        Returns
+        -------
+        distance: float
+            The Haversine distance between the two locations in kilometers.
+        """
         lat1, lon1 = map(radians, coords1)
         lat2, lon2 = map(radians, coords2)
 
@@ -33,6 +48,21 @@ class Travel:
         return distance
 
     def n_close_city(self, input_city_id, n):
+        """
+        Calculate the n cities closest to the one given in input.
+
+        Parameters
+        ----------
+        input_city_id: int
+            The ID associated to the starting city.
+        n: int
+            The number of closest cities to select.
+
+        Returns
+        -------
+        closest_cities: list[]
+            A list containaining all the IDs of the n closest cities.
+        """
         city_coords = (self.dataset.loc[self.dataset['id'] == input_city_id, 'lat'].values[0],
                        self.dataset.loc[self.dataset['id'] == input_city_id, 'lng'].values[0])
 
@@ -43,35 +73,6 @@ class Travel:
 
         closest_cities = sorted_dataset.iloc[1:n]
         return closest_cities
-
-    '''def n_close_city(self, input_city_id, n):
-        """
-        Calculate the n cities closest to the one given in input.
-
-        Parameters
-        ----------
-        input_city_id: int
-            The ID associated to the starting city.
-        n: int
-            The numbrer of closest cities to select.
-
-        Returns
-        -------
-        closest_cities: list[]
-            A list containaining all the IDs of the n closest cities.
-        """
-        city = self.dataset[self.dataset['id'] == input_city_id]
-        id_city = int(city['id'].iloc[0])
-        city_coords = (self.dataset.loc[self.dataset['id'] == id_city, 'lat'].values[0],
-                       self.dataset.loc[self.dataset['id'] == id_city, 'lng'].values[0])
-
-        self.dataset['Distance from start'] = self.dataset.apply(
-            lambda row: gc(city_coords, (row['lat'], row['lng'])).kilometers, axis=1)
-
-        sorted_dataset = self.dataset.sort_values(by='Distance from start')
-
-        closest_cities = sorted_dataset.iloc[1:n]
-        return closest_cities'''
 
     def distance_between_two_cities(self, start_city, end_city, n):
         """
