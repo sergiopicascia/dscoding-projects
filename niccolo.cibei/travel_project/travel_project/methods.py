@@ -227,6 +227,9 @@ class TravelGraphBidirectional(TravelGraphRight):
         return G
 
     def add_edges(self):
+        """
+        Add edges to the graph based on the Haversine distance between cities.
+        """
         for i in range(len(self.hav_matrix)):
             close_city = pd.DataFrame(self.hav_matrix.iloc[i].sort_values())
 
@@ -273,6 +276,9 @@ class TravelGraphBidirectional(TravelGraphRight):
 class TravelGraphLeft(TravelGraphRight):
 
     def add_edges(self):
+        """
+        Add edges to the graph based on the Haversine distance between cities.
+        """
         for i in range(len(self.hav_matrix)):
             close_city = pd.DataFrame(self.hav_matrix.iloc[i].sort_values())
 

@@ -1,0 +1,14 @@
+Files Description
+Class and Main Folder :
+    HotelAllocation.py - This is the core class file containing the logic for hotel room allocation. It includes the implementation of different allocation strategies.
+
+    main.py - A Python script to run the HotelAllocation class. It serves as the entry point to the program.
+
+    Test Main.ipynb - A Jupyter notebook that demonstrates the execution of main.py, used for testing and verification purposes.
+In Main :
+    Project-Full.py - This file consolidates all the code from the project for a comprehensive view of the implementation.
+
+   
+Project-Full TEST.ipynb - A Jupyter notebook version of Project-Full.py, showcasing the entire project execution.
+In Streamlit Folder : 
+    Streamlit.py as application can execute all the functions together 
