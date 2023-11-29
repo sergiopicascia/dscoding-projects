@@ -95,6 +95,8 @@ af.fit(X_numeric)
 
 #Get the Cluster Centers
 cluster_centers = af.cluster_centers_
+#print(X_numeric)
+#print(cluster_centers)
 
 #Get labels for each data point
 af_labels = af.labels_
@@ -115,7 +117,7 @@ plt.legend()
 plt.show(block=False)
 
 #Labelling the Clusters
-unique_af_labels = np.unique(af_labels)
+unique_af_labels = np.unique(af_labels) #returns sorted unique elements of an array. af_labels could be a list or array of labels by AFP algorithm.
 print(f"{num_clusters} Clusters Created by Affinity Propagation: ")
 for label in unique_af_labels:
     cluster_size = np.sum(af_labels == label)
@@ -151,7 +153,7 @@ kmeans = KMeans(n_clusters=num_cluster_kmeans, random_state=30, n_init=10)
 
 animal_kmean_labels = kmeans.fit_predict(X_numeric)
 
-animal_kmeans_silhouette = silhouette_score(X_numeric, animal_kmean_labels)
+# animal_kmeans_silhouette = silhouette_score(X_numeric, animal_kmean_labels)
 
 # Pairwise distances between the points for KMeans algo.
 
@@ -166,12 +168,12 @@ kmeans.fit(X_numeric)
 kmeans_labels = kmeans.labels_
 
 
-# Printing the clusters and the number of elements in each cluster
+# Printing the clusters and the number of elements in each cluster # can also use numpy for count  ---->>  np.unique(kmeans_labels, return_counts=True)
 
-cluster_counter = Counter(kmeans_labels).items()
-sorted_cluster = sorted(cluster_counter)
+cluster_counter = Counter(kmeans_labels).items() # Creates a  dictionary with cluster labels as keys and coutns as values
+sorted_cluster = sorted(cluster_counter) # Sorts the dictionary
 print(f"{num_cluster_kmeans} Clusters Created by K-Means Algorithm: ")
-for cluster, count in sorted_cluster:
+for cluster, count in sorted_cluster: # Cluster traverses Keys and count traverses Values
     print(f"Cluster {cluster}: {count} data points")
 
 

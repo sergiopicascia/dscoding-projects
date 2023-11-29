@@ -78,14 +78,15 @@ def main():
         st.pyplot(fig)
 
         # Plot for Count of Animals in Initial Categories
-        plt.figure(figsize=(10,10))
-        sns.countplot(x='class_type', data=result)
+        fig2, ax = plt.subplots(figsize=(10,10))
+        sns.countplot(x='class_type', data=result, ax=ax)
         plt.title("Count of Animals in Initial CAtegories")
 
         for p in ax.patches:
             ax.annotate(f'{p.get_height()}', (p.get_x() + p.get_width() / 2., p.get_height()),
                         ha='center', va='center', fontsize=8, color='black', xytext=(0, 5),
                         textcoords='offset points')
+        st.pyplot(fig2)
         
         # Comparison of the CLusters with Initial Categories with animal names
         comparison_df = result.groupby(['animal_name', 'class_type', 'cluster_label']).size().reset_index(name='count')
